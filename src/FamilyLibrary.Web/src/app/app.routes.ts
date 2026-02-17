@@ -42,6 +42,13 @@ export const routes: Routes = [
           import('./features/drafts/drafts.routes').then(m => m.DRAFTS_ROUTES),
       },
       {
+        path: 'recognition-rules',
+        loadChildren: () =>
+          import('./features/recognition-rules/recognition-rules.routes').then(
+            m => m.RECOGNITION_RULES_ROUTES,
+          ),
+      },
+      {
         path: 'settings',
         loadComponent: () =>
           import('./features/settings/settings.component').then(m => m.SettingsComponent),

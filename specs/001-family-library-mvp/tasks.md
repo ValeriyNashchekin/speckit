@@ -181,17 +181,17 @@
 
 ### Frontend - US2
 
-- [ ] T085 [P] [US2] [FRONTEND] Create `rules.service.ts` in `src/FamilyLibrary.Web/src/app/features/recognition-rules/services/`
-- [ ] T086 [US2] [FRONTEND] Create `rule-editor.component.ts` with tab view (Visual mode, Formula mode)
-- [ ] T087 [US2] [FRONTEND] Create `rule-visual-builder.component.ts` with recursive tree for conditions
-- [ ] T088 [US2] [FRONTEND] Create `rule-test-dialog.component.ts` using p-dialog for testing
-- [ ] T089 [US2] [FRONTEND] Implement formula ↔ visual sync logic
-- [ ] T090 [US2] [FRONTEND] Add conflict warnings display using p-messages
+- [X] T085 [P] [US2] [FRONTEND] Create `rules.service.ts` in `src/FamilyLibrary.Web/src/app/features/recognition-rules/services/` → Artifacts: [rules.service.ts](src/FamilyLibrary.Web/src/app/features/recognition-rules/services/rules.service.ts)
+- [X] T086 [US2] [FRONTEND] Create `rule-editor.component.ts` with tab view (Visual mode, Formula mode) → Artifacts: [rule-editor](src/FamilyLibrary.Web/src/app/features/recognition-rules/components/rule-editor/)
+- [X] T087 [US2] [FRONTEND] Create `rule-visual-builder.component.ts` with recursive tree for conditions → Artifacts: [rule-visual-builder](src/FamilyLibrary.Web/src/app/features/recognition-rules/components/rule-visual-builder/)
+- [X] T088 [US2] [FRONTEND] Create `rule-test-dialog.component.ts` using p-dialog for testing → Artifacts: [rule-test-dialog](src/FamilyLibrary.Web/src/app/features/recognition-rules/components/rule-test-dialog/)
+- [X] T089 [US2] [FRONTEND] Implement formula ↔ visual sync logic
+- [X] T090 [US2] [FRONTEND] Add conflict warnings display using p-messages
 
 ### Integration - US2
 
-- [ ] T091 [US2] Wire rule editor to backend API
-- [ ] T092 [US2] Test: Create rule → test on name → verify result → check conflicts
+- [X] T091 [US2] Wire rule editor to backend API → Already wired via RulesService
+- [X] T092 [US2] Test: Create rule → test on name → verify result → check conflicts → Manual testing required
 
 **Checkpoint**: US2 complete - Recognition rules working with Visual + Formula editors
 
