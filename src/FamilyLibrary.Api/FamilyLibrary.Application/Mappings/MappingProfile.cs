@@ -15,6 +15,10 @@ public static class MappingProfile
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(dest => dest.UpdatedAt, src => src.UpdatedAt);
 
+        TypeAdapterConfig<CreateFamilyRoleDto, FamilyRoleEntity>
+            .NewConfig()
+            .ConstructUsing(src => new FamilyRoleEntity(src.Name, src.Type, src.Description, src.CategoryId));
+
         // Category mappings
         TypeAdapterConfig<CategoryEntity, CategoryDto>
             .NewConfig();

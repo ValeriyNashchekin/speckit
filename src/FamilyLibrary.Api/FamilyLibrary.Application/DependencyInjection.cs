@@ -1,5 +1,7 @@
 using System.Reflection;
 using FluentValidation;
+using FamilyLibrary.Application.Interfaces;
+using FamilyLibrary.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FamilyLibrary.Application;
@@ -19,9 +21,8 @@ public static class DependencyInjection
         // Register all validators from the Application assembly
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-        // Register Application services here (to be added later)
-        // services.AddScoped<IFamilyRoleService, FamilyRoleService>();
-        // services.AddScoped<ICategoryService, CategoryService>();
+        // Register Application services
+        services.AddScoped<IFamilyRoleService, FamilyRoleService>();
 
         return services;
     }

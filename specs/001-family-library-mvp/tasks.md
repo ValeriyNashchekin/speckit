@@ -136,8 +136,8 @@
 
 ### Backend - US1
 
-- [ ] T062 [P] [US1] [BACKEND] Create `FamilyRoleService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/`
-- [ ] T063 [P] [US1] [BACKEND] Create `FamilyRoleValidator.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/`
+- [X] T062 [P] [US1] [BACKEND] Create `FamilyRoleService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/` → Artifacts: [FamilyRoleService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Services/FamilyRoleService.cs), [IFamilyRoleService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Interfaces/IFamilyRoleService.cs)
+- [X] T063 [P] [US1] [BACKEND] Create `FamilyRoleValidator.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/` → Artifacts: [FamilyRoleValidator.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/FamilyRoleValidator.cs)
 - [ ] T064 [US1] [BACKEND] Create `FamilyRoleController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/`
 - [ ] T065 [US1] [BACKEND] Implement CRUD endpoints: GET /roles, POST /roles, PUT /roles/{id}, DELETE /roles/{id}
 - [ ] T066 [US1] [BACKEND] Implement POST /roles/import for Excel upload and preview
