@@ -19,34 +19,41 @@
 
 **Purpose**: Initialize all three components (Plugin, Backend, Frontend)
 
-### Backend Setup
+### Backend Setup (Clean Architecture - 4 Projects)
 
-- [ ] T001 Create solution file `FreeAxez.FamilyLibrary.sln` at repository root
-- [ ] T002 Create Backend project `src/FreeAxez.FamilyLibrary.Api/FreeAxez.FamilyLibrary.Api.csproj` with .NET 10
-- [ ] T003 [P] Add NuGet packages to Backend: `Microsoft.EntityFrameworkCore.SqlServer`, `Azure.Storage.Blobs`, `Swashbuckle.AspNetCore`
-- [ ] T004 [P] Configure `Program.cs` with DI, Swagger, CORS in `src/FreeAxez.FamilyLibrary.Api/`
-- [ ] T005 [P] Create `appsettings.json` and `appsettings.Development.json` with connection strings
+- [ ] T001 Create solution file `FamilyLibrary.sln` at repository root
+- [ ] T002 Create Domain project `src/FamilyLibrary.Domain/FamilyLibrary.Domain.csproj` (.NET 10, NO external dependencies)
+- [ ] T003 [P] Create Application project `src/FamilyLibrary.Application/FamilyLibrary.Application.csproj` (.NET 10, references Domain)
+- [ ] T004 [P] Create Infrastructure project `src/FamilyLibrary.Infrastructure/FamilyLibrary.Infrastructure.csproj` (.NET 10, references Application)
+- [ ] T005 [P] Create Api project `src/FamilyLibrary.Api/FamilyLibrary.Api.csproj` (.NET 10, references Application, Infrastructure)
+- [ ] T006 Add NuGet packages to Domain: `MediatR` (optional for CQRS)
+- [ ] T007 [P] Add NuGet packages to Application: `MediatR`, `FluentValidation`, `AutoMapper` or Mapster
+- [ ] T008 [P] Add NuGet packages to Infrastructure: `Microsoft.EntityFrameworkCore.SqlServer`, `Azure.Storage.Blobs`
+- [ ] T009 [P] Add NuGet packages to Api: `Swashbuckle.AspNetCore`
+- [ ] T010 [P] Configure `Program.cs` with DI, Swagger, CORS in `src/FamilyLibrary.Api/`
+- [ ] T011 [P] Create `appsettings.json` and `appsettings.Development.json` with connection strings in Api project
 
 ### Frontend Setup
 
-- [ ] T006 Create Angular project at `src/FreeAxez.FamilyLibrary.Web/` with Angular 21 CLI
-- [ ] T007 [P] Add npm packages: `primeng@19`, `primeicons`, `tailwindcss@4`, `@tanstack/virtual`
-- [ ] T008 [P] Configure `tailwind.config.js` at `src/FreeAxez.FamilyLibrary.Web/`
-- [ ] T009 [P] Update `src/styles.css` with Tailwind directives only (no custom CSS)
-- [ ] T010 [P] Configure `src/app/app.config.ts` with standalone components, provideHttpClient
+- [ ] T012 Create Angular project at `src/FamilyLibrary.Web/` with Angular 21 CLI
+- [ ] T013 [P] Add npm packages: `primeng@19`, `primeicons`, `tailwindcss@4`, `@tanstack/virtual`
+- [ ] T014 [P] Configure `tailwind.config.js` at `src/FamilyLibrary.Web/`
+- [ ] T015 [P] Update `src/styles.css` with Tailwind directives only (NO custom CSS)
+- [ ] T016 [P] Configure `src/app/app.config.ts` with standalone components, provideHttpClient
+- [ ] T017 [P] Create feature-based folder structure: `core/`, `shared/`, `features/`, `layout/`
 
 ### Plugin Setup
 
-- [ ] T011 Create Plugin project `src/FreeAxez.FamilyLibrary.Plugin/FreeAxez.FamilyLibrary.Plugin.csproj` (multi-target: net48;net8.0-windows)
-- [ ] T012 [P] Add NuGet packages: `Microsoft.Web.WebView2`, `Newtonsoft.Json`, `Azure.Storage.Blobs`
-- [ ] T013 [P] Create `.addin` manifest files for Revit 2024 and 2026
-- [ ] T014 Create Plugin entry point `PluginApplication.cs` implementing IExternalApplication
+- [ ] T018 Create Plugin project `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin.csproj` (multi-target: net48;net8.0-windows)
+- [ ] T019 [P] Add NuGet packages: `Microsoft.Web.WebView2`, `Newtonsoft.Json`, `Azure.Storage.Blobs`
+- [ ] T020 [P] Create `.addin` manifest files for Revit 2024 and 2026
+- [ ] T021 Create Plugin entry point `PluginApplication.cs` implementing IExternalApplication
 
 ### Infrastructure Setup
 
-- [ ] T015 Create `docker-compose.yml` at repository root with Azurite + SQL Server services
-- [ ] T016 [P] Create `.github/workflows/ci.yml` for build and test automation
-- [ ] T017 [P] Create `.editorconfig` for code style consistency
+- [ ] T022 Create `docker-compose.yml` at repository root with Azurite + SQL Server services
+- [ ] T023 [P] Create `.github/workflows/ci.yml` for build and test automation
+- [ ] T024 [P] Create `.editorconfig` for code style consistency
 
 **Checkpoint**: All projects created and build successfully
 
@@ -58,34 +65,53 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-### Backend Foundation
+### Backend Foundation - Domain Layer
 
-- [ ] T018 Create `src/FreeAxez.FamilyLibrary.Api/Data/AppDbContext.cs` with DbContext configuration
-- [ ] T019 [P] Create all Entity classes in `src/FreeAxez.FamilyLibrary.Api/Models/Entities/` per data-model.md
-- [ ] T020 [P] Create all DTOs in `src/FreeAxez.FamilyLibrary.Api/Models/DTOs/` for API contracts
-- [ ] T021 Create initial EF Core migration: `dotnet ef migrations add InitialCreate`
-- [ ] T022 [P] Create `src/FreeAxez.FamilyLibrary.Api/Repositories/Interfaces/` with all repository interfaces
-- [ ] T023 [P] Create `src/FreeAxez.FamilyLibrary.Api/Repositories/` with repository implementations
-- [ ] T024 Create `src/FreeAxez.FamilyLibrary.Api/Services/Interfaces/` with all service interfaces
-- [ ] T025 Configure BlobStorageService in `src/FreeAxez.FamilyLibrary.Api/Services/BlobStorageService.cs`
-- [ ] T026 Create base `BaseController.cs` with common error handling in `src/FreeAxez.FamilyLibrary.Api/Controllers/`
+- [ ] T025 Create all Entity classes in `src/FamilyLibrary.Domain/Entities/` per data-model.md (FamilyRole, Category, Tag, Family, FamilyVersion, SystemType, Draft, FamilyNameMapping)
+- [ ] T026 [P] Create all Enums in `src/FamilyLibrary.Domain/Enums/` (RoleType, DraftStatus, SystemFamilyGroup, RecognitionOperator, LogicalOperator)
+- [ ] T027 [P] Create Domain Exceptions in `src/FamilyLibrary.Domain/Exceptions/` (EntityNotFoundException, BusinessRuleException)
+- [ ] T028 [P] Create Repository Interfaces in `src/FamilyLibrary.Domain/Interfaces/` (IFamilyRoleRepository, IFamilyRepository, etc.)
+
+### Backend Foundation - Application Layer
+
+- [ ] T029 Create all DTOs in `src/FamilyLibrary.Application/DTOs/` for API contracts
+- [ ] T030 [P] Create Mapper profiles in `src/FamilyLibrary.Application/Mappings/` (AutoMapper or Mapster)
+- [ ] T031 [P] Create Validators in `src/FamilyLibrary.Application/Validators/` using FluentValidation
+- [ ] T032 Create Service Interfaces in `src/FamilyLibrary.Application/Interfaces/` (IFamilyRoleService, IFamilyService, etc.)
+- [ ] T033 [P] Create Common Behaviors in `src/FamilyLibrary.Application/Common/` (PagedResult, Result pattern)
+
+### Backend Foundation - Infrastructure Layer
+
+- [ ] T034 Create `src/FamilyLibrary.Infrastructure/Data/AppDbContext.cs` with DbContext configuration
+- [ ] T035 [P] Create Entity Configurations in `src/FamilyLibrary.Infrastructure/Data/Configurations/`
+- [ ] T036 Create all Repository implementations in `src/FamilyLibrary.Infrastructure/Repositories/`
+- [ ] T037 Create `src/FamilyLibrary.Infrastructure/Services/BlobStorageService.cs`
+- [ ] T038 Create initial EF Core migration: `dotnet ef migrations add InitialCreate --project src/FamilyLibrary.Infrastructure --startup-project src/FamilyLibrary.Api`
+- [ ] T039 [P] Create DependencyInjection.cs in Infrastructure for service registration
+
+### Backend Foundation - Api Layer
+
+- [ ] T040 Create base `BaseController.cs` with common error handling in `src/FamilyLibrary.Api/Controllers/`
+- [ ] T041 [P] Create Global Exception Handler Middleware in `src/FamilyLibrary.Api/Middleware/`
+- [ ] T042 Configure Dependency Injection in `Program.cs` (Layered: Domain → Application → Infrastructure)
 
 ### Frontend Foundation
 
-- [ ] T027 Create `src/FreeAxez.FamilyLibrary.Web/src/app/core/api/api.service.ts` for HTTP client wrapper
-- [ ] T028 [P] Create `src/FreeAxez.FamilyLibrary.Web/src/app/core/interceptors/` with auth and error interceptors
-- [ ] T029 [P] Generate TypeScript models from OpenAPI using openapi-generator-cli
-- [ ] T030 Create `src/FreeAxez.FamilyLibrary.Web/src/app/core/models/` with all interfaces matching DTOs
-- [ ] T031 Create `src/FreeAxez.FamilyLibrary.Web/src/app/shared/layout/` with app shell (header, sidebar)
+- [ ] T043 Create `src/FamilyLibrary.Web/src/app/core/api/api.service.ts` for HTTP client wrapper
+- [ ] T044 [P] Create `src/FamilyLibrary.Web/src/app/core/interceptors/` with auth and error interceptors
+- [ ] T045 [P] Generate TypeScript models from OpenAPI using openapi-generator-cli
+- [ ] T046 Create `src/FamilyLibrary.Web/src/app/core/models/` with all interfaces matching DTOs
+- [ ] T047 Create `src/FamilyLibrary.Web/src/app/layout/main-layout/` with app shell (header, sidebar)
+- [ ] T048 [P] Create `src/FamilyLibrary.Web/src/app/shared/components/` for reusable PrimeNG wrappers
 
 ### Plugin Foundation
 
-- [ ] T032 Create `src/FreeAxez.FamilyLibrary.Plugin/Core/Entities/` with shared domain entities (no Revit API)
-- [ ] T033 [P] Create `src/FreeAxez.FamilyLibrary.Plugin/Core/Interfaces/` with service contracts
-- [ ] T034 Create `src/FreeAxez.FamilyLibrary.Plugin/Infrastructure/ExtensibleStorage/EsSchema.cs` with GUID definition
-- [ ] T035 [P] Create `src/FreeAxez.FamilyLibrary.Plugin/Infrastructure/ExtensibleStorage/EsService.cs` for ES read/write
-- [ ] T036 Create `src/FreeAxez.FamilyLibrary.Plugin/Infrastructure/Hashing/ContentHashService.cs` per research.md R1-R2
-- [ ] T037 Create `src/FreeAxez.FamilyLibrary.Plugin/Infrastructure/WebView2/WebViewHost.cs` for embedded browser
+- [ ] T049 Create `src/FamilyLibrary.Plugin/Core/Entities/` with shared domain entities (no Revit API)
+- [ ] T050 [P] Create `src/FamilyLibrary.Plugin/Core/Interfaces/` with service contracts
+- [ ] T051 Create `src/FamilyLibrary.Plugin/Infrastructure/ExtensibleStorage/EsSchema.cs` with GUID definition
+- [ ] T052 [P] Create `src/FamilyLibrary.Plugin/Infrastructure/ExtensibleStorage/EsService.cs` for ES read/write
+- [ ] T053 Create `src/FamilyLibrary.Plugin/Infrastructure/Hashing/ContentHashService.cs` per research.md R1-R2
+- [ ] T054 Create `src/FamilyLibrary.Plugin/Infrastructure/WebView2/WebViewHost.cs` for embedded browser
 
 **Checkpoint**: Foundation ready - user story implementation can begin
 
@@ -99,26 +125,28 @@
 
 ### Backend - US1
 
-- [ ] T038 [P] [US1] Create `FamilyRoleController.cs` in `src/FreeAxez.FamilyLibrary.Api/Controllers/`
-- [ ] T039 [P] [US1] Create `FamilyRoleService.cs` in `src/FreeAxez.FamilyLibrary.Api/Services/`
-- [ ] T040 [US1] Implement CRUD endpoints: GET /roles, POST /roles, PUT /roles/{id}, DELETE /roles/{id}
-- [ ] T041 [US1] Implement POST /roles/import for Excel upload and preview
-- [ ] T042 [US1] Implement batch create logic with duplicate skip in `FamilyRoleService.cs`
-- [ ] T043 [P] [US1] Create `CategoryController.cs` and `TagController.cs` in `src/FreeAxez.FamilyLibrary.Api/Controllers/`
+- [ ] T055 [P] [US1] Create `FamilyRoleService.cs` in `src/FamilyLibrary.Application/Services/`
+- [ ] T056 [P] [US1] Create `FamilyRoleValidator.cs` in `src/FamilyLibrary.Application/Validators/`
+- [ ] T057 [US1] Create `FamilyRoleController.cs` in `src/FamilyLibrary.Api/Controllers/`
+- [ ] T058 [US1] Implement CRUD endpoints: GET /roles, POST /roles, PUT /roles/{id}, DELETE /roles/{id}
+- [ ] T059 [US1] Implement POST /roles/import for Excel upload and preview
+- [ ] T060 [US1] Implement batch create logic with duplicate skip in `FamilyRoleService.cs`
+- [ ] T061 [P] [US1] Create `CategoryService.cs` and `TagService.cs` in `src/FamilyLibrary.Application/Services/`
+- [ ] T062 [P] [US1] Create `CategoryController.cs` and `TagController.cs` in `src/FamilyLibrary.Api/Controllers/`
 
 ### Frontend - US1
 
-- [ ] T044 [P] [US1] Create `roles.service.ts` in `src/FreeAxez.FamilyLibrary.Web/src/app/features/roles/services/`
-- [ ] T045 [P] [US1] Create `role-list.component.ts` using p-table in `src/FreeAxez.FamilyLibrary.Web/src/app/features/roles/components/`
-- [ ] T046 [US1] Create `role-editor.component.ts` using p-dialog for create/edit
-- [ ] T047 [US1] Create `role-import.component.ts` with p-fileUpload for Excel import
-- [ ] T048 [US1] Add roles routes to `src/FreeAxez.FamilyLibrary.Web/src/app/app.routes.ts`
-- [ ] T049 [US1] Create roles state management using Signals in `roles.store.ts`
+- [ ] T063 [P] [US1] Create `roles.service.ts` in `src/FamilyLibrary.Web/src/app/features/roles/services/`
+- [ ] T064 [P] [US1] Create `role-list.component.ts` using p-table in `src/FamilyLibrary.Web/src/app/features/roles/components/`
+- [ ] T065 [US1] Create `role-editor.component.ts` using p-dialog for create/edit
+- [ ] T066 [US1] Create `role-import.component.ts` with p-fileUpload for Excel import
+- [ ] T067 [US1] Add roles routes to `src/FamilyLibrary.Web/src/app/app.routes.ts`
+- [ ] T068 [US1] Create roles state management using Signals in `roles.store.ts`
 
 ### Integration - US1
 
-- [ ] T050 [US1] Wire frontend role-list to backend API
-- [ ] T051 [US1] Test: Create role → verify read-only Name → delete role with families attached (should fail)
+- [ ] T069 [US1] Wire frontend role-list to backend API
+- [ ] T070 [US1] Test: Create role → verify read-only Name → delete role with families attached (should fail)
 
 **Checkpoint**: US1 complete - Roles CRUD + Excel import working
 
@@ -132,26 +160,27 @@
 
 ### Backend - US2
 
-- [ ] T052 [P] [US2] Create `RecognitionRuleController.cs` in `src/FreeAxez.FamilyLibrary.Api/Controllers/`
-- [ ] T053 [P] [US2] Create `RecognitionRuleService.cs` with formula parser in `src/FreeAxez.FamilyLibrary.Api/Services/`
-- [ ] T054 [US2] Implement CRUD endpoints: GET/POST/PUT/DELETE /recognition-rules
-- [ ] T055 [US2] Implement POST /recognition-rules/validate for syntax validation
-- [ ] T056 [US2] Implement POST /recognition-rules/test for testing rule against family name
-- [ ] T057 [US2] Implement POST /recognition-rules/check-conflicts for conflict detection
+- [ ] T071 [P] [US2] Create `RecognitionRuleService.cs` with formula parser in `src/FamilyLibrary.Application/Services/`
+- [ ] T072 [P] [US2] Create `RecognitionRuleValidator.cs` in `src/FamilyLibrary.Application/Validators/`
+- [ ] T073 [US2] Create `RecognitionRuleController.cs` in `src/FamilyLibrary.Api/Controllers/`
+- [ ] T074 [US2] Implement CRUD endpoints: GET/POST/PUT/DELETE /recognition-rules
+- [ ] T075 [US2] Implement POST /recognition-rules/validate for syntax validation
+- [ ] T076 [US2] Implement POST /recognition-rules/test for testing rule against family name
+- [ ] T077 [US2] Implement POST /recognition-rules/check-conflicts for conflict detection
 
 ### Frontend - US2
 
-- [ ] T058 [P] [US2] Create `rules.service.ts` in `src/FreeAxez.FamilyLibrary.Web/src/app/features/roles/services/`
-- [ ] T059 [US2] Create `rule-editor.component.ts` with tab view (Visual mode, Formula mode)
-- [ ] T060 [US2] Create `rule-visual-builder.component.ts` with recursive tree for conditions
-- [ ] T061 [US2] Create `rule-test-dialog.component.ts` using p-dialog for testing
-- [ ] T062 [US2] Implement formula ↔ visual sync logic
-- [ ] T063 [US2] Add conflict warnings display using p-messages
+- [ ] T078 [P] [US2] Create `rules.service.ts` in `src/FamilyLibrary.Web/src/app/features/recognition-rules/services/`
+- [ ] T079 [US2] Create `rule-editor.component.ts` with tab view (Visual mode, Formula mode)
+- [ ] T080 [US2] Create `rule-visual-builder.component.ts` with recursive tree for conditions
+- [ ] T081 [US2] Create `rule-test-dialog.component.ts` using p-dialog for testing
+- [ ] T082 [US2] Implement formula ↔ visual sync logic
+- [ ] T083 [US2] Add conflict warnings display using p-messages
 
 ### Integration - US2
 
-- [ ] T064 [US2] Wire rule editor to backend API
-- [ ] T065 [US2] Test: Create rule → test on name → verify result → check conflicts
+- [ ] T084 [US2] Wire rule editor to backend API
+- [ ] T085 [US2] Test: Create rule → test on name → verify result → check conflicts
 
 **Checkpoint**: US2 complete - Recognition rules working with Visual + Formula editors
 
@@ -165,40 +194,42 @@
 
 ### Plugin - US3 (Core)
 
-- [ ] T066 [P] [US3] Create `StampFamilyCommand/` structure in `src/FreeAxez.FamilyLibrary.Plugin/Commands/`
-- [ ] T067 [US3] Create `FamilyScannerService.cs` in `src/FreeAxez.FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/`
-- [ ] T068 [US3] Create `StampService.cs` implementing ES write logic
-- [ ] T069 [US3] Create `PublishService.cs` with Blob upload + API integration
-- [ ] T070 [US3] Create `LibraryQueueViewModel.cs` for Tab 2 state management
-- [ ] T071 [US3] Create `LibraryQueueView.xaml` with 3 tabs (All Families, Queue, Status)
+- [ ] T086 [P] [US3] Create `StampFamilyCommand/` structure in `src/FamilyLibrary.Plugin/Commands/`
+- [ ] T087 [US3] Create `FamilyScannerService.cs` in `src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/`
+- [ ] T088 [US3] Create `StampService.cs` implementing ES write logic
+- [ ] T089 [US3] Create `PublishService.cs` with Blob upload + API integration
+- [ ] T090 [US3] Create `LibraryQueueViewModel.cs` for Tab 2 state management
+- [ ] T091 [US3] Create `LibraryQueueView.xaml` with 3 tabs (All Families, Queue, Status)
 
 ### Backend - US3
 
-- [ ] T072 [P] [US3] Create `FamilyController.cs` in `src/FreeAxez.FamilyLibrary.Api/Controllers/`
-- [ ] T073 [P] [US3] Create `FamilyService.cs` in `src/FreeAxez.FamilyLibrary.Api/Services/`
-- [ ] T074 [US3] Implement POST /families/publish with file upload
-- [ ] T075 [US3] Implement POST /families/validate-hash for duplicate detection
-- [ ] T076 [US3] Implement POST /families/batch-check for status checking
-- [ ] T077 [P] [US3] Create `DraftController.cs` in `src/FreeAxez.FamilyLibrary.Api/Controllers/`
-- [ ] T078 [US3] Implement Draft CRUD: GET/POST/PUT/DELETE /drafts
+- [ ] T092 [P] [US3] Create `FamilyService.cs` in `src/FamilyLibrary.Application/Services/`
+- [ ] T093 [P] [US3] Create `FamilyValidator.cs` in `src/FamilyLibrary.Application/Validators/`
+- [ ] T094 [US3] Create `FamilyController.cs` in `src/FamilyLibrary.Api/Controllers/`
+- [ ] T095 [US3] Implement POST /families/publish with file upload
+- [ ] T096 [US3] Implement POST /families/validate-hash for duplicate detection
+- [ ] T097 [US3] Implement POST /families/batch-check for status checking
+- [ ] T098 [P] [US3] Create `DraftService.cs` in `src/FamilyLibrary.Application/Services/`
+- [ ] T099 [US3] Create `DraftController.cs` in `src/FamilyLibrary.Api/Controllers/`
+- [ ] T100 [US3] Implement Draft CRUD: GET/POST/PUT/DELETE /drafts
 
 ### Frontend - US3
 
-- [ ] T079 [P] [US3] Create `queue.service.ts` in `src/FreeAxez.FamilyLibrary.Web/src/app/features/queue/services/`
-- [ ] T080 [US3] Create `queue.component.ts` with p-tabView for 3 tabs
-- [ ] T081 [US3] Create `family-list.component.ts` using p-table with virtual scroll for Tab 1
-- [ ] T082 [US3] Create `draft-list.component.ts` with status badges for Tab 2
-- [ ] T083 [US3] Create `library-status.component.ts` for Tab 3
+- [ ] T101 [P] [US3] Create `queue.service.ts` in `src/FamilyLibrary.Web/src/app/features/queue/services/`
+- [ ] T102 [US3] Create `queue.component.ts` with p-tabView for 3 tabs
+- [ ] T103 [US3] Create `family-list.component.ts` using p-table with virtual scroll for Tab 1
+- [ ] T104 [US3] Create `draft-list.component.ts` with status badges for Tab 2
+- [ ] T105 [US3] Create `library-status.component.ts` for Tab 3
 
 ### WebView2 Integration - US3
 
-- [ ] T084 [US3] Implement event handlers: `revit:ready`, `revit:families:list` in Plugin
-- [ ] T085 [US3] Implement event handlers: `ui:stamp`, `ui:publish` in Plugin
-- [ ] T086 [US3] Create `RevitBridgeService` in Frontend for WebView2 communication
+- [ ] T106 [US3] Implement event handlers: `revit:ready`, `revit:families:list` in Plugin
+- [ ] T107 [US3] Implement event handlers: `ui:stamp`, `ui:publish` in Plugin
+- [ ] T108 [US3] Create `RevitBridgeService` in Frontend for WebView2 communication
 
 ### Integration - US3
 
-- [ ] T087 [US3] Test: Open template → scan families → select → stamp → publish → verify in library
+- [ ] T109 [US3] Test: Open template → scan families → select → stamp → publish → verify in library
 
 **Checkpoint**: US3 complete - Loadable families Stamp and Publish working
 
@@ -212,28 +243,29 @@
 
 ### Backend - US4
 
-- [ ] T088 [P] [US4] Create `SystemTypeController.cs` in `src/FreeAxez.FamilyLibrary.Api/Controllers/`
-- [ ] T089 [P] [US4] Create `SystemTypeService.cs` in `src/FreeAxez.FamilyLibrary.Api/Services/`
-- [ ] T090 [US4] Implement CRUD: GET/POST /system-types with JSON storage
-- [ ] T091 [US4] Implement CompoundStructure JSON serialization for Group A
-- [ ] T092 [US4] Implement simple parameter JSON serialization for Group E
+- [ ] T110 [P] [US4] Create `SystemTypeService.cs` in `src/FamilyLibrary.Application/Services/`
+- [ ] T111 [P] [US4] Create `SystemTypeValidator.cs` in `src/FamilyLibrary.Application/Validators/`
+- [ ] T112 [US4] Create `SystemTypeController.cs` in `src/FamilyLibrary.Api/Controllers/`
+- [ ] T113 [US4] Implement CRUD: GET/POST /system-types with JSON storage
+- [ ] T114 [US4] Implement CompoundStructure JSON serialization for Group A
+- [ ] T115 [US4] Implement simple parameter JSON serialization for Group E
 
 ### Plugin - US4
 
-- [ ] T093 [P] [US4] Create `SystemTypeScannerService.cs` in `src/FreeAxez.FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/`
-- [ ] T094 [US4] Create `CompoundStructureSerializer.cs` for WallType/FloorType/RoofType
-- [ ] T095 [US4] Create `SystemTypePublisher.cs` for JSON upload
-- [ ] T096 [US4] Implement material mapping warning dialog in UI
+- [ ] T116 [P] [US4] Create `SystemTypeScannerService.cs` in `src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/`
+- [ ] T117 [US4] Create `CompoundStructureSerializer.cs` for WallType/FloorType/RoofType
+- [ ] T118 [US4] Create `SystemTypePublisher.cs` for JSON upload
+- [ ] T119 [US4] Implement material mapping warning dialog in UI
 
 ### Frontend - US4
 
-- [ ] T097 [P] [US4] Add System Types tab to queue component
-- [ ] T098 [US4] Create `system-type-detail.component.ts` showing JSON structure
-- [ ] T099 [US4] Create `material-warning-dialog.component.ts` for missing materials
+- [ ] T120 [P] [US4] Add System Types tab to queue component
+- [ ] T121 [US4] Create `system-type-detail.component.ts` showing JSON structure
+- [ ] T122 [US4] Create `material-warning-dialog.component.ts` for missing materials
 
 ### Integration - US4
 
-- [ ] T100 [US4] Test: Stamp WallType → Publish → Pull Update → verify structure applied
+- [ ] T123 [US4] Test: Stamp WallType → Publish → Pull Update → verify structure applied
 
 **Checkpoint**: US4 complete - System Families Groups A, E working
 
@@ -247,28 +279,28 @@
 
 ### Backend - US5
 
-- [ ] T101 [US5] Implement GET /families with search, filters, pagination
-- [ ] T102 [P] [US5] Implement GET /families/{id} with versions and types
-- [ ] T103 [P] [US5] Implement GET /families/{id}/versions for history
+- [ ] T124 [US5] Implement GET /families with search, filters, pagination in FamilyController
+- [ ] T125 [P] [US5] Implement GET /families/{id} with versions and types
+- [ ] T126 [P] [US5] Implement GET /families/{id}/versions for history
 
 ### Frontend - US5
 
-- [ ] T104 [P] [US5] Create `library.service.ts` in `src/FreeAxez.FamilyLibrary.Web/src/app/features/library/services/`
-- [ ] T105 [US5] Create `library.component.ts` with view toggle (cards/table)
-- [ ] T106 [US5] Create `family-card.component.ts` using p-card for grid view
-- [ ] T107 [US5] Create `family-table.component.ts` using p-table with virtual scroll
-- [ ] T108 [US5] Create `library-filters.component.ts` with p-dropdown, p-multiSelect
-- [ ] T109 [US5] Create `family-detail.component.ts` with version table
-- [ ] T110 [US5] Add library routes and navigation
+- [ ] T127 [P] [US5] Create `library.service.ts` in `src/FamilyLibrary.Web/src/app/features/library/services/`
+- [ ] T128 [US5] Create `library.component.ts` with view toggle (cards/table)
+- [ ] T129 [US5] Create `family-card.component.ts` using p-card for grid view
+- [ ] T130 [US5] Create `family-table.component.ts` using p-table with virtual scroll
+- [ ] T131 [US5] Create `library-filters.component.ts` with p-dropdown, p-multiSelect
+- [ ] T132 [US5] Create `family-detail.component.ts` with version table
+- [ ] T133 [US5] Add library routes and navigation
 
 ### Plugin - US5
 
-- [ ] T111 [US5] Create `OpenLibraryCommand.cs` in `src/FreeAxez.FamilyLibrary.Plugin/Commands/`
-- [ ] T112 [US5] Wire OpenLibraryCommand to WebView2 host with library URL
+- [ ] T134 [US5] Create `OpenLibraryCommand.cs` in `src/FamilyLibrary.Plugin/Commands/`
+- [ ] T135 [US5] Wire OpenLibraryCommand to WebView2 host with library URL
 
 ### Integration - US5
 
-- [ ] T113 [US5] Test: Open library in Revit → search → filter → view details
+- [ ] T136 [US5] Test: Open library in Revit → search → filter → view details
 
 **Checkpoint**: US5 complete - Library browsing working inside Revit
 
@@ -282,24 +314,24 @@
 
 ### Backend - US6
 
-- [ ] T114 [US6] Implement GET /families/{id}/download/{version} returning SAS token or file
-- [ ] T115 [P] [US6] Implement status check integration with batch-check endpoint
+- [ ] T137 [US6] Implement GET /families/{id}/download/{version} returning SAS token or file in FamilyController
+- [ ] T138 [P] [US6] Implement status check integration with batch-check endpoint
 
 ### Plugin - US6
 
-- [ ] T116 [P] [US6] Create `LoadFamilyCommand/` structure in `src/FreeAxez.FamilyLibrary.Plugin/Commands/`
-- [ ] T117 [US6] Create `FamilyDownloader.cs` in `src/FreeAxez.FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/`
-- [ ] T118 [US6] Create `FamilyLoader.cs` wrapping Revit LoadFamily() API
-- [ ] T119 [US6] Implement file rename to OriginalFileName logic
+- [ ] T139 [P] [US6] Create `LoadFamilyCommand/` structure in `src/FamilyLibrary.Plugin/Commands/`
+- [ ] T140 [US6] Create `FamilyDownloader.cs` in `src/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/`
+- [ ] T141 [US6] Create `FamilyLoader.cs` wrapping Revit LoadFamily() API
+- [ ] T142 [US6] Implement file rename to OriginalFileName logic
 
 ### Frontend - US6
 
-- [ ] T120 [US6] Add "Load to Project" button to family-detail component
-- [ ] T121 [US6] Wire button to `ui:load-family` WebView2 event
+- [ ] T143 [US6] Add "Load to Project" button to family-detail component
+- [ ] T144 [US6] Wire button to `ui:load-family` WebView2 event
 
 ### Integration - US6
 
-- [ ] T122 [US6] Test: Select family → Load → verify loaded with correct name
+- [ ] T145 [US6] Test: Select family → Load → verify loaded with correct name
 
 **Checkpoint**: US6 complete - Family loading working
 
@@ -313,13 +345,13 @@
 
 ### Plugin - US7
 
-- [ ] T123 [US7] Create `PublishFromEditorCommand.cs` detecting Document.Kind == FamilyDocument
-- [ ] T124 [US7] Modify LibraryQueueView to hide Tab 1 and Tab 3 in Family Editor mode
-- [ ] T125 [US7] Auto-add current family to Queue when in Family Editor
+- [ ] T146 [US7] Create `PublishFromEditorCommand.cs` detecting Document.Kind == FamilyDocument
+- [ ] T147 [US7] Modify LibraryQueueView to hide Tab 1 and Tab 3 in Family Editor mode
+- [ ] T148 [US7] Auto-add current family to Queue when in Family Editor
 
 ### Integration - US7
 
-- [ ] T126 [US7] Test: Open family in editor → run command → publish → verify in library
+- [ ] T149 [US7] Test: Open family in editor → run command → publish → verify in library
 
 **Checkpoint**: US7 complete - Publish from Family Editor working
 
@@ -333,24 +365,24 @@
 
 ### Backend - US8
 
-- [ ] T127 [US8] Modify /families/publish to accept optional txtFile parameter
-- [ ] T128 [US8] Implement TXT hash calculation for version tracking
+- [ ] T150 [US8] Modify /families/publish to accept optional txtFile parameter in FamilyController
+- [ ] T151 [US8] Implement TXT hash calculation for version tracking
 
 ### Plugin - US8
 
-- [ ] T129 [P] [US8] Create `TypeCatalogParser.cs` in `src/FreeAxez.FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/`
-- [ ] T130 [US8] Create `TypeSelectionWindow.xaml` with dynamic columns from TXT headers
-- [ ] T131 [US8] Create `TypeSelectionViewModel.cs` with search, filter, multi-select
-- [ ] T132 [US8] Implement LoadFamilySymbol for each selected type
+- [ ] T152 [P] [US8] Create `TypeCatalogParser.cs` in `src/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/`
+- [ ] T153 [US8] Create `TypeSelectionWindow.xaml` with dynamic columns from TXT headers
+- [ ] T154 [US8] Create `TypeSelectionViewModel.cs` with search, filter, multi-select
+- [ ] T155 [US8] Implement LoadFamilySymbol for each selected type
 
 ### Frontend - US8
 
-- [ ] T133 [US8] Add type table to family-detail component when catalog exists
-- [ ] T134 [US8] Show type selection preview in load dialog
+- [ ] T156 [US8] Add type table to family-detail component when catalog exists
+- [ ] T157 [US8] Show type selection preview in load dialog
 
 ### Integration - US8
 
-- [ ] T135 [US8] Test: Publish with TXT → Load → select 3 types → verify only 3 loaded
+- [ ] T158 [US8] Test: Publish with TXT → Load → select 3 types → verify only 3 loaded
 
 **Checkpoint**: US8 complete - Type Catalogs working
 
@@ -362,34 +394,34 @@
 
 ### Documentation
 
-- [ ] T136 [P] Update quickstart.md with docker-compose instructions
-- [ ] T137 [P] Add OpenAPI codegen instructions to quickstart.md
-- [ ] T138 [P] Create API usage examples in `docs/api-examples.md`
+- [ ] T159 [P] Update quickstart.md with docker-compose instructions
+- [ ] T160 [P] Add OpenAPI codegen instructions to quickstart.md
+- [ ] T161 [P] Create API usage examples in `docs/api-examples.md`
 
 ### Performance
 
-- [ ] T139 Optimize batch-check endpoint for 500+ families
-- [ ] T140 [P] Add database indexes per data-model.md specifications
-- [ ] T141 Test virtual scroll performance with 5000+ rows
+- [ ] T162 Optimize batch-check endpoint for 500+ families
+- [ ] T163 [P] Add database indexes per data-model.md specifications
+- [ ] T164 Test virtual scroll performance with 5000+ rows
 
 ### Security
 
-- [ ] T142 [P] Add input validation on all endpoints
-- [ ] T143 [P] Configure CORS for production domains
-- [ ] T144 Add rate limiting middleware
+- [ ] T165 [P] Add input validation on all endpoints (Validators)
+- [ ] T166 [P] Configure CORS for production domains
+- [ ] T167 Add rate limiting middleware
 
 ### Error Handling
 
-- [ ] T145 [P] Implement global exception handler in Backend
-- [ ] T146 [P] Add user-friendly error messages in Frontend (p-toast)
-- [ ] T147 Implement retry logic with exponential backoff in Plugin
+- [ ] T168 [P] Implement global exception handler in Api layer
+- [ ] T169 [P] Add user-friendly error messages in Frontend (p-toast)
+- [ ] T170 Implement retry logic with exponential backoff in Plugin
 
 ### Testing
 
-- [ ] T148 [P] Add Backend unit tests for FamilyRoleService
-- [ ] T149 [P] Add Backend unit tests for RecognitionRuleService
-- [ ] T150 [P] Add Frontend tests for roles feature
-- [ ] T151 Run quickstart.md validation end-to-end
+- [ ] T171 [P] Add Application layer unit tests for FamilyRoleService
+- [ ] T172 [P] Add Application layer unit tests for RecognitionRuleService
+- [ ] T173 [P] Add Frontend tests for roles feature
+- [ ] T174 Run quickstart.md validation end-to-end
 
 ---
 
@@ -435,20 +467,36 @@ Setup → Foundational → US1 → US2 → US3 → US5 → US6 = MVP
 
 ### Within Setup Phase
 ```bash
-# Can run in parallel:
-T003 + T004 + T005  # Backend NuGet, Program.cs, appsettings
-T007 + T008 + T009 + T010  # Frontend packages, Tailwind, config
-T012 + T013  # Plugin NuGet, manifest
-T016 + T017  # CI, editorconfig
+# Can run in parallel (Backend):
+T003 + T004 + T005  # Application, Infrastructure, Api projects
+T007 + T008 + T009  # NuGet packages per layer
+
+# Can run in parallel (Frontend):
+T013 + T014 + T015 + T016 + T017  # Frontend packages, Tailwind, config, structure
+
+# Can run in parallel (Plugin):
+T019 + T020  # Plugin NuGet, manifest
+
+# Can run in parallel (Infrastructure):
+T023 + T024  # CI, editorconfig
 ```
 
 ### Within Foundational Phase
 ```bash
-# Can run in parallel:
-T019 + T020  # All entities + all DTOs
-T022 + T023  # Repository interfaces + implementations
-T028 + T029  # Interceptors + TypeScript generation
-T033 + T035  # Plugin interfaces + ES service
+# Can run in parallel (Domain):
+T026 + T027 + T028  # Enums, Exceptions, Repository Interfaces
+
+# Can run in parallel (Application):
+T030 + T031 + T033  # Mappers, Validators, Common
+
+# Can run in parallel (Infrastructure):
+T035 + T039  # Entity Configurations, DI registration
+
+# Can run in parallel (Frontend):
+T044 + T045 + T048  # Interceptors, TypeScript generation, Shared components
+
+# Can run in parallel (Plugin):
+T050 + T052  # Plugin interfaces + ES service
 ```
 
 ### User Stories Parallel Groups
@@ -494,18 +542,45 @@ US7 + US8  # Family Editor, Type Catalogs
 
 | Phase | Task Count | Parallelizable |
 |-------|------------|----------------|
-| Phase 1: Setup | 17 | 12 tasks |
-| Phase 2: Foundational | 20 | 10 tasks |
-| Phase 3: US1 Roles | 14 | 5 tasks |
-| Phase 4: US2 Rules | 14 | 4 tasks |
-| Phase 5: US3 Loadable | 22 | 6 tasks |
-| Phase 6: US4 System | 13 | 4 tasks |
+| Phase 1: Setup | 24 | 18 tasks |
+| Phase 2: Foundational | 30 | 15 tasks |
+| Phase 3: US1 Roles | 16 | 7 tasks |
+| Phase 4: US2 Rules | 15 | 4 tasks |
+| Phase 5: US3 Loadable | 24 | 7 tasks |
+| Phase 6: US4 System | 14 | 4 tasks |
 | Phase 7: US5 Library | 13 | 4 tasks |
 | Phase 8: US6 Load | 9 | 2 tasks |
 | Phase 9: US7 Editor | 4 | 0 tasks |
 | Phase 10: US8 Catalog | 9 | 2 tasks |
 | Phase 11: Polish | 16 | 10 tasks |
-| **TOTAL** | **151** | **59 tasks** |
+| **TOTAL** | **174** | **73 tasks** |
+
+---
+
+## Clean Architecture Dependency Rule
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Api Layer                            │
+│  (Controllers, Middleware, Program.cs)                  │
+└───────────────────────────┬─────────────────────────────┘
+                            │ depends on
+┌───────────────────────────▼─────────────────────────────┐
+│                Infrastructure Layer                     │
+│  (DbContext, Repositories, BlobStorage, External)       │
+└───────────────────────────┬─────────────────────────────┘
+                            │ depends on
+┌───────────────────────────▼─────────────────────────────┐
+│                 Application Layer                       │
+│  (Services, DTOs, Validators, Mappers, Interfaces)      │
+└───────────────────────────┬─────────────────────────────┘
+                            │ depends on
+┌───────────────────────────▼─────────────────────────────┐
+│                   Domain Layer                          │
+│  (Entities, Enums, Value Objects, Domain Interfaces)    │
+│  NO external dependencies                               │
+└─────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -516,3 +591,8 @@ US7 + US8  # Family Editor, Type Catalogs
 - Each user story should be independently testable
 - Commit after each task or logical group
 - Stop at any checkpoint to validate independently
+- **Clean Architecture**: Dependencies flow inward only
+- **Domain Layer**: NO external NuGet packages (except MediatR for CQRS)
+- **Application Layer**: Business logic, DTOs, Validators
+- **Infrastructure Layer**: Data access, external services
+- **Api Layer**: Controllers, HTTP concerns only

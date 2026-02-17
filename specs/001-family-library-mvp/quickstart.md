@@ -12,7 +12,7 @@ Local development setup guide for Family Library system.
 | Node.js | 20+ | Frontend development |
 | .NET SDK | 10 | Backend |
 | .NET Framework | 4.8 SDK | Revit Plugin (2020-2024) |
-| Docker Desktop | Latest | Azurite container |
+| Docker Desktop | Latest | Azurite + SQL Server containers |
 | Revit | 2024 or 2026 | Plugin testing |
 | SQL Server | 2019+ / LocalDB | Database |
 
@@ -52,11 +52,22 @@ docker run -d \
   mcr.microsoft.com/mssql/server:2022-latest
 ```
 
+### Option C: Docker Compose (Recommended)
+
+```bash
+# Start all infrastructure services
+docker-compose up -d
+
+# This starts:
+# - SQL Server on port 1433
+# - Azurite on ports 10000-10002
+```
+
 ### Run Migrations
 
 ```bash
-cd src/FreeAxez.FamilyLibrary.Api
-dotnet ef database update
+# From repository root
+dotnet ef database update --project src/FamilyLibrary.Infrastructure --startup-project src/FamilyLibrary.Api
 ```
 
 ---
@@ -89,10 +100,23 @@ az storage container create --name family-library --connection-string "DefaultEn
 
 ---
 
-## 4. Backend API
+## 4. Backend API (Clean Architecture)
+
+The backend follows **Layered Clean Architecture** with 4 projects:
+
+```
+src/
+├── FamilyLibrary.Domain/         # Entities, Enums, Interfaces (NO dependencies)
+├── FamilyLibrary.Application/    # Services, DTOs, Validators, Mappers
+├── FamilyLibrary.Infrastructure/ # DbContext, Repositories, BlobStorage
+└── FamilyLibrary.Api/            # Controllers, Middleware, Program.cs
+```
+
+### Run Backend
 
 ```bash
-cd src/FreeAxez.FamilyLibrary.Api
+# From repository root
+cd src/FamilyLibrary.Api
 
 # Restore dependencies
 dotnet restore
@@ -126,7 +150,7 @@ dotnet run
 ## 5. Frontend (Angular)
 
 ```bash
-cd src/FreeAxez.FamilyLibrary.Web
+cd src/FamilyLibrary.Web
 
 # Install dependencies
 npm install
@@ -136,6 +160,20 @@ npm start
 
 # App will be available at:
 # http://localhost:4200
+```
+
+### Generate TypeScript Models from OpenAPI
+
+```bash
+# Install openapi-generator-cli (if not installed)
+npm install -g @openapitools/openapi-generator-cli
+
+# Generate models from API spec
+openapi-generator-cli generate \
+  -i specs/001-family-library-mvp/contracts/api.yaml \
+  -g typescript-angular \
+  -o src/FamilyLibrary.Web/src/app/core/api/generated \
+  --additional-properties=npmName=familyLibraryApi,supportsES6=true,withInterfaces=true
 ```
 
 ### Environment (environment.development.ts)
@@ -154,7 +192,7 @@ export const environment = {
 ### Build
 
 ```bash
-cd src/FreeAxez.FamilyLibrary.Plugin
+cd src/FamilyLibrary.Plugin
 
 # Build for Revit 2024
 dotnet build -c Release -f net48
@@ -178,8 +216,8 @@ dotnet build -c Release -f net8.0-windows
 <RevitAddIns>
   <AddIn Type="Application">
     <Name>Family Library</Name>
-    <Assembly>FreeAxez.FamilyLibrary.Plugin.dll</Assembly>
-    <FullClassName>FreeAxez.FamilyLibrary.Plugin.Application</FullClassName>
+    <Assembly>FamilyLibrary.Plugin.dll</Assembly>
+    <FullClassName>FamilyLibrary.Plugin.Application</FullClassName>
     <AddInId>YOUR-GUID-HERE</AddInId>
     <VendorId>FREE</VendorId>
     <VendorDescription>FreeAxez</VendorDescription>
@@ -194,20 +232,21 @@ dotnet build -c Release -f net8.0-windows
 ### Start All Services
 
 ```bash
-# Terminal 1: Database (if using Docker)
-docker start family-library-sql
+# Terminal 1: Infrastructure (Docker Compose)
+docker-compose up -d
 
-# Terminal 2: Azurite
-docker start azurite
+# OR start individually:
+# docker start family-library-sql
+# docker start azurite
 
-# Terminal 3: Backend
-cd src/FreeAxez.FamilyLibrary.Api && dotnet run
+# Terminal 2: Backend
+cd src/FamilyLibrary.Api && dotnet run
 
-# Terminal 4: Frontend
-cd src/FreeAxez.FamilyLibrary.Web && npm start
+# Terminal 3: Frontend
+cd src/FamilyLibrary.Web && npm start
 
-# Terminal 5: Plugin (build)
-cd src/FreeAxez.FamilyLibrary.Plugin && dotnet build -c Debug
+# Terminal 4: Plugin (build)
+cd src/FamilyLibrary.Plugin && dotnet build -c Debug
 ```
 
 ### Test Revit Integration
@@ -224,21 +263,26 @@ cd src/FreeAxez.FamilyLibrary.Plugin && dotnet build -c Debug
 ### Backend Unit Tests
 
 ```bash
-cd tests/FreeAxez.FamilyLibrary.Api.Tests
+# Test Application layer
+cd tests/FamilyLibrary.Application.Tests
+dotnet test
+
+# Test Infrastructure layer
+cd tests/FamilyLibrary.Infrastructure.Tests
 dotnet test
 ```
 
 ### Frontend Unit Tests
 
 ```bash
-cd src/FreeAxez.FamilyLibrary.Web
+cd src/FamilyLibrary.Web
 npm test
 ```
 
 ### Integration Tests
 
 ```bash
-cd tests/FreeAxez.FamilyLibrary.Api.Tests
+cd tests/FamilyLibrary.Api.Tests
 dotnet test --filter "Category=Integration"
 ```
 
@@ -248,13 +292,13 @@ dotnet test --filter "Category=Integration"
 
 ### Backend (Visual Studio)
 
-1. Open `FreeAxez.FamilyLibrary.sln`
-2. Set `FreeAxez.FamilyLibrary.Api` as startup project
+1. Open `FamilyLibrary.sln`
+2. Set `FamilyLibrary.Api` as startup project
 3. F5 to debug
 
 ### Frontend (VS Code)
 
-1. Open `src/FreeAxez.FamilyLibrary.Web`
+1. Open `src/FamilyLibrary.Web`
 2. Launch configuration included
 3. F5 to debug
 
@@ -273,22 +317,24 @@ dotnet test --filter "Category=Integration"
 | Issue | Solution |
 |-------|----------|
 | Azurite connection failed | Check Docker is running, port 10000 available |
-| Database migration fails | Delete Migrations folder, run `dotnet ef migrations add Initial` |
+| Database migration fails | Run migration with correct project paths |
 | WebView2 blank in Revit | Check WebView2 Runtime installed, clear cache |
 | Plugin not loading | Check .addin file path, verify Revit version matches build |
 | CORS errors | Ensure backend CORS allows `http://localhost:4200` |
+| EF Core migration error | Use `--project` and `--startup-project` flags |
 
 ### Reset Environment
 
 ```bash
 # Reset database
-dotnet ef database drop --force
-dotnet ef database update
+dotnet ef database drop --force --project src/FamilyLibrary.Infrastructure --startup-project src/FamilyLibrary.Api
+dotnet ef database update --project src/FamilyLibrary.Infrastructure --startup-project src/FamilyLibrary.Api
 
 # Reset Azurite
 docker restart azurite
 
 # Clear npm cache
+cd src/FamilyLibrary.Web
 npm cache clean --force
 rm -rf node_modules
 npm install
@@ -298,25 +344,81 @@ npm install
 
 ## Useful Commands
 
+### EF Core Migrations
+
 ```bash
-# Generate EF migration
-dotnet ef migrations add MigrationName
+# Generate migration
+dotnet ef migrations add MigrationName --project src/FamilyLibrary.Infrastructure --startup-project src/FamilyLibrary.Api
 
 # Apply migrations
-dotnet ef database update
+dotnet ef database update --project src/FamilyLibrary.Infrastructure --startup-project src/FamilyLibrary.Api
 
 # Rollback migration
-dotnet ef database update PreviousMigrationName
+dotnet ef database update PreviousMigrationName --project src/FamilyLibrary.Infrastructure --startup-project src/FamilyLibrary.Api
 
+# Remove last migration (not applied)
+dotnet ef migrations remove --project src/FamilyLibrary.Infrastructure --startup-project src/FamilyLibrary.Api
+```
+
+### Build & Test
+
+```bash
 # Build all projects
-dotnet build
+dotnet build FamilyLibrary.sln
 
-# Run all tests
+# Run all backend tests
 dotnet test
 
 # Frontend lint
-npm run lint
+cd src/FamilyLibrary.Web && npm run lint
 
 # Frontend build for production
-npm run build
+cd src/FamilyLibrary.Web && npm run build
+```
+
+### OpenAPI Code Generation
+
+```bash
+# Generate TypeScript client
+openapi-generator-cli generate \
+  -i specs/001-family-library-mvp/contracts/api.yaml \
+  -g typescript-angular \
+  -o src/FamilyLibrary.Web/src/app/core/api/generated
+
+# Generate C# client (for Plugin if needed)
+openapi-generator-cli generate \
+  -i specs/001-family-library-mvp/contracts/api.yaml \
+  -g csharp-netcore \
+  -o src/FamilyLibrary.Plugin/ApiClients/generated
+```
+
+---
+
+## Architecture Reference
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Api Layer                            │
+│  src/FamilyLibrary.Api/                                │
+│  (Controllers, Middleware, Program.cs)                  │
+└───────────────────────────┬─────────────────────────────┘
+                            │ depends on
+┌───────────────────────────▼─────────────────────────────┐
+│                Infrastructure Layer                     │
+│  src/FamilyLibrary.Infrastructure/                     │
+│  (DbContext, Repositories, BlobStorage, External)       │
+└───────────────────────────┬─────────────────────────────┘
+                            │ depends on
+┌───────────────────────────▼─────────────────────────────┐
+│                 Application Layer                       │
+│  src/FamilyLibrary.Application/                        │
+│  (Services, DTOs, Validators, Mappers, Interfaces)      │
+└───────────────────────────┬─────────────────────────────┘
+                            │ depends on
+┌───────────────────────────▼─────────────────────────────┐
+│                   Domain Layer                          │
+│  src/FamilyLibrary.Domain/                             │
+│  (Entities, Enums, Value Objects, Domain Interfaces)    │
+│  NO external dependencies                               │
+└─────────────────────────────────────────────────────────┘
 ```

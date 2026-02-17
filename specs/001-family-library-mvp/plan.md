@@ -85,72 +85,339 @@ specs/001-family-library-mvp/
 
 ```text
 src/
-├── FreeAxez.FamilyLibrary.Plugin/       # Revit Plugin
-│   ├── Commands/
+├── # ============================================================
+├── # BACKEND: Clean Architecture (Layered) - 4 Projects
+├── # ============================================================
+│
+├── FamilyLibrary.Domain/                     # Core Layer (NO external dependencies)
+│   ├── Entities/                             # Business entities
+│   │   ├── FamilyRole.cs
+│   │   ├── Category.cs
+│   │   ├── Tag.cs
+│   │   ├── Family.cs
+│   │   ├── FamilyVersion.cs
+│   │   ├── SystemType.cs
+│   │   ├── Draft.cs
+│   │   └── RecognitionRule.cs
+│   ├── ValueObjects/                         # Immutable value objects
+│   │   └── ContentHash.cs
+│   ├── Enums/                                # Domain enumerations
+│   │   ├── RoleType.cs
+│   │   ├── DraftStatus.cs
+│   │   ├── SystemFamilyGroup.cs
+│   │   └── RecognitionOperator.cs
+│   ├── Events/                               # Domain events
+│   │   ├── FamilyPublishedEvent.cs
+│   │   └── RoleCreatedEvent.cs
+│   ├── Exceptions/                           # Domain exceptions
+│   │   ├── EntityNotFoundException.cs
+│   │   └── BusinessRuleViolationException.cs
+│   ├── Interfaces/                           # Repository interfaces
+│   │   ├── IFamilyRoleRepository.cs
+│   │   ├── IFamilyRepository.cs
+│   │   ├── ISystemTypeRepository.cs
+│   │   └── IDraftRepository.cs
+│   └── FamilyLibrary.Domain.csproj           # ONLY System dependencies
+│
+├── FamilyLibrary.Application/               # Application Layer
+│   ├── DTOs/                                 # Data Transfer Objects
+│   │   ├── FamilyRoles/
+│   │   │   ├── FamilyRoleDto.cs
+│   │   │   ├── CreateRoleRequest.cs
+│   │   │   └── UpdateRoleRequest.cs
+│   │   ├── Families/
+│   │   │   ├── FamilyDto.cs
+│   │   │   ├── FamilyDetailDto.cs
+│   │   │   └── FamilyVersionDto.cs
+│   │   └── Common/
+│   │       └── PagedResult.cs
+│   ├── Interfaces/                           # Service interfaces
+│   │   ├── IFamilyRoleService.cs
+│   │   ├── IFamilyService.cs
+│   │   ├── IRecognitionService.cs
+│   │   ├── IBlobStorageService.cs
+│   │   └── IHashService.cs
+│   ├── Services/                             # Application services
+│   │   ├── FamilyRoleService.cs
+│   │   ├── FamilyService.cs
+│   │   ├── RecognitionRuleService.cs
+│   │   └── ExcelImportService.cs
+│   ├── Validators/                           # FluentValidation validators
+│   │   ├── CreateRoleValidator.cs
+│   │   └── RecognitionRuleValidator.cs
+│   ├── Mappers/                              # AutoMapper profiles
+│   │   └── MappingProfile.cs
+│   ├── Specifications/                       # Query specifications
+│   │   └── FamilyRoleSpecification.cs
+│   ├── DependencyInjection.cs                # DI registration
+│   └── FamilyLibrary.Application.csproj
+│
+├── FamilyLibrary.Infrastructure/            # Infrastructure Layer
+│   ├── Data/
+│   │   ├── AppDbContext.cs                   # EF Core DbContext
+│   │   ├── Configurations/                   # EF Core configurations
+│   │   │   ├── FamilyRoleConfiguration.cs
+│   │   │   ├── FamilyConfiguration.cs
+│   │   │   └── SystemTypeConfiguration.cs
+│   │   └── Migrations/                       # EF Core migrations
+│   ├── Repositories/                         # Repository implementations
+│   │   ├── FamilyRoleRepository.cs
+│   │   ├── FamilyRepository.cs
+│   │   ├── SystemTypeRepository.cs
+│   │   └── DraftRepository.cs
+│   ├── Services/                             # External services
+│   │   ├── BlobStorageService.cs             # Azure Blob implementation
+│   │   └── HashService.cs                    # Content hash implementation
+│   ├── DependencyInjection.cs                # DI registration
+│   └── FamilyLibrary.Infrastructure.csproj
+│
+├── FamilyLibrary.Api/                       # Presentation Layer
+│   ├── Controllers/                          # API endpoints
+│   │   ├── FamilyRolesController.cs
+│   │   ├── CategoriesController.cs
+│   │   ├── TagsController.cs
+│   │   ├── RecognitionRulesController.cs
+│   │   ├── FamiliesController.cs
+│   │   ├── SystemTypesController.cs
+│   │   └── DraftsController.cs
+│   ├── Filters/                              # Action filters
+│   │   └── ValidationFilter.cs
+│   ├── Middleware/                           # Custom middleware
+│   │   ├── ExceptionHandlingMiddleware.cs
+│   │   └── RequestLoggingMiddleware.cs
+│   ├── Program.cs                            # Composition root
+│   ├── appsettings.json
+│   ├── appsettings.Development.json
+│   └── FamilyLibrary.Api.csproj
+│
+├── # ============================================================
+├── # PLUGIN: Revit Plugin (Flat Command Structure)
+├── # ============================================================
+│
+├── FamilyLibrary.Plugin/                    # Revit Plugin
+│   ├── Commands/                             # Flat command structure
+│   │   ├── OpenLibraryCommand/
+│   │   │   ├── OpenLibraryCommand.cs         # IExternalCommand
+│   │   │   └── OpenLibraryAvailability.cs
 │   │   ├── StampFamilyCommand/
 │   │   │   ├── ViewModels/
+│   │   │   │   └── QueueViewModel.cs
 │   │   │   ├── Views/
+│   │   │   │   └── QueueWindow.xaml
 │   │   │   ├── Models/
+│   │   │   │   └── QueueItemModel.cs        # Clean C#, no Revit API
 │   │   │   ├── Services/
-│   │   │   └── Enums/
-│   │   ├── PublishFamilyCommand/
+│   │   │   │   ├── FamilyScannerService.cs   # Revit API here
+│   │   │   │   ├── StampService.cs
+│   │   │   │   └── PublishService.cs
+│   │   │   ├── Enums/
+│   │   │   │   └── QueueStatus.cs
+│   │   │   └── StampFamilyCommand.cs
 │   │   ├── LoadFamilyCommand/
-│   │   ├── OpenLibraryCommand/
-│   │   └── ManageRolesCommand/
-│   ├── Core/
-│   │   ├── Entities/          # Clean C#, no Revit API
-│   │   ├── UseCases/          # Business logic
-│   │   └── Interfaces/        # Contracts
+│   │   │   ├── Services/
+│   │   │   │   ├── FamilyDownloader.cs
+│   │   │   │   └── TypeCatalogParser.cs
+│   │   │   ├── Views/
+│   │   │   │   └── TypeSelectionWindow.xaml
+│   │   │   └── LoadFamilyCommand.cs
+│   │   └── PublishFromEditorCommand/
+│   │       └── PublishFromEditorCommand.cs
+│   ├── Core/                                 # Shared plugin core
+│   │   ├── Entities/                         # Clean C#, no Revit API
+│   │   ├── Interfaces/
+│   │   └── Events/
 │   ├── Infrastructure/
 │   │   ├── ExtensibleStorage/
+│   │   │   ├── EsSchema.cs
+│   │   │   └── EsService.cs
 │   │   ├── Hashing/
+│   │   │   ├── PartAtomNormalizer.cs
+│   │   │   └── ContentHashService.cs
 │   │   └── WebView2/
-│   └── FreeAxez.FamilyLibrary.Plugin.csproj (multi-target)
+│   │       ├── WebViewHost.cs
+│   │       └── RevitBridge.cs
+│   ├── PluginApplication.cs                  # IExternalApplication
+│   ├── FamilyLibrary.Plugin.csproj          # Multi-target: net48;net8.0-windows
+│   └── FamilyLibrary.Plugin.addin
 │
-├── FreeAxez.FamilyLibrary.Api/          # Backend API
-│   ├── Controllers/
-│   ├── Services/
-│   ├── Repositories/
-│   ├── Models/
-│   │   ├── Entities/
-│   │   └── DTOs/
-│   ├── Data/
-│   │   └── Migrations/
-│   └── FreeAxez.FamilyLibrary.Api.csproj
+├── # ============================================================
+├── # FRONTEND: Angular 21 (Feature-Based with Core/Shared)
+├── # ============================================================
 │
-└── FreeAxez.FamilyLibrary.Web/          # Angular Frontend
-    ├── src/
-    │   ├── app/
-    │   │   ├── features/
-    │   │   │   ├── library/
-    │   │   │   │   ├── components/
-    │   │   │   │   ├── services/
-    │   │   │   │   └── models/
-    │   │   │   ├── roles/
-    │   │   │   ├── queue/
-    │   │   │   └── scanner/
-    │   │   ├── shared/
-    │   │   └── core/
-    │   │       ├── api/
-    │   │       └── interceptors/
-    │   ├── tailwind.config.js
-    │   └── styles.css
-    └── angular.json
-
-tests/
-├── FreeAxez.FamilyLibrary.Api.Tests/
-│   ├── Unit/
-│   └── Integration/
-├── FreeAxez.FamilyLibrary.Plugin.Tests/
-│   └── Unit/
-└── FreeAxez.FamilyLibrary.Web.Tests/
-    └── Unit/
+├── FamilyLibrary.Web/                       # Angular Frontend
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── core/                         # App-wide concerns
+│   │   │   │   ├── services/
+│   │   │   │   │   ├── api.service.ts
+│   │   │   │   │   ├── auth.service.ts
+│   │   │   │   │   └── revit-bridge.service.ts
+│   │   │   │   ├── interceptors/
+│   │   │   │   │   ├── auth.interceptor.ts
+│   │   │   │   │   ├── error.interceptor.ts
+│   │   │   │   │   └── loading.interceptor.ts
+│   │   │   │   ├── guards/
+│   │   │   │   │   └── auth.guard.ts
+│   │   │   │   ├── models/
+│   │   │   │   │   ├── api-response.model.ts
+│   │   │   │   │   └── pagination.model.ts
+│   │   │   │   └── index.ts                  # Barrel export
+│   │   │   │
+│   │   │   ├── shared/                       # Reusable across features
+│   │   │   │   ├── components/
+│   │   │   │   │   ├── loading-spinner/
+│   │   │   │   │   ├── empty-state/
+│   │   │   │   │   ├── error-message/
+│   │   │   │   │   └── confirmation-dialog/
+│   │   │   │   ├── directives/
+│   │   │   │   │   └── permission.directive.ts
+│   │   │   │   ├── pipes/
+│   │   │   │   │   ├── truncate.pipe.ts
+│   │   │   │   │   └── safe-url.pipe.ts
+│   │   │   │   ├── utils/
+│   │   │   │   │   └── form.utils.ts
+│   │   │   │   └── index.ts
+│   │   │   │
+│   │   │   ├── features/                     # Business features
+│   │   │   │   ├── roles/                    # US1: Family Roles
+│   │   │   │   │   ├── components/
+│   │   │   │   │   │   ├── role-list/
+│   │   │   │   │   │   │   ├── role-list.component.ts
+│   │   │   │   │   │   │   └── role-list.component.html
+│   │   │   │   │   │   ├── role-editor/
+│   │   │   │   │   │   └── role-import/
+│   │   │   │   │   ├── services/
+│   │   │   │   │   │   └── roles.service.ts
+│   │   │   │   │   ├── models/
+│   │   │   │   │   │   └── role.model.ts
+│   │   │   │   │   ├── pages/
+│   │   │   │   │   │   └── roles.page.ts
+│   │   │   │   │   ├── roles.routes.ts
+│   │   │   │   │   └── index.ts
+│   │   │   │   │
+│   │   │   │   ├── recognition-rules/       # US2: Recognition Rules
+│   │   │   │   │   ├── components/
+│   │   │   │   │   │   ├── rule-editor/
+│   │   │   │   │   │   ├── rule-visual-builder/
+│   │   │   │   │   │   └── rule-test-dialog/
+│   │   │   │   │   ├── services/
+│   │   │   │   │   │   └── rules.service.ts
+│   │   │   │   │   ├── models/
+│   │   │   │   │   │   └── rule.model.ts
+│   │   │   │   │   ├── rules.routes.ts
+│   │   │   │   │   └── index.ts
+│   │   │   │   │
+│   │   │   │   ├── queue/                   # US3: Library Queue
+│   │   │   │   │   ├── components/
+│   │   │   │   │   │   ├── queue-tabs/
+│   │   │   │   │   │   ├── family-list/
+│   │   │   │   │   │   ├── draft-list/
+│   │   │   │   │   │   └── library-status/
+│   │   │   │   │   ├── services/
+│   │   │   │   │   │   └── queue.service.ts
+│   │   │   │   │   ├── models/
+│   │   │   │   │   │   └── draft.model.ts
+│   │   │   │   │   ├── queue.routes.ts
+│   │   │   │   │   └── index.ts
+│   │   │   │   │
+│   │   │   │   ├── library/                 # US5: Library Browser
+│   │   │   │   │   ├── components/
+│   │   │   │   │   │   ├── library-grid/
+│   │   │   │   │   │   ├── library-table/
+│   │   │   │   │   │   ├── family-card/
+│   │   │   │   │   │   ├── family-detail/
+│   │   │   │   │   │   └── library-filters/
+│   │   │   │   │   ├── services/
+│   │   │   │   │   │   └── library.service.ts
+│   │   │   │   │   ├── models/
+│   │   │   │   │   │   └── family.model.ts
+│   │   │   │   │   ├── pages/
+│   │   │   │   │   │   └── library.page.ts
+│   │   │   │   │   ├── library.routes.ts
+│   │   │   │   │   └── index.ts
+│   │   │   │   │
+│   │   │   │   └── system-types/            # US4: System Families
+│   │   │   │       ├── components/
+│   │   │   │       ├── services/
+│   │   │   │       ├── models/
+│   │   │   │       └── index.ts
+│   │   │   │
+│   │   │   ├── layout/                      # App layout
+│   │   │   │   ├── main-layout/
+│   │   │   │   │   ├── main-layout.component.ts
+│   │   │   │   │   └── main-layout.component.html
+│   │   │   │   ├── header/
+│   │   │   │   └── sidebar/
+│   │   │   │
+│   │   │   ├── app.component.ts
+│   │   │   ├── app.routes.ts
+│   │   │   └── app.config.ts                # Providers, HTTP, interceptors
+│   │   │
+│   │   ├── assets/
+│   │   │   └── images/
+│   │   ├── environments/
+│   │   │   ├── environment.ts
+│   │   │   └── environment.production.ts
+│   │   ├── styles.css                       # Tailwind directives ONLY
+│   │   ├── tailwind.config.js
+│   │   └── main.ts
+│   │
+│   ├── angular.json
+│   ├── package.json
+│   └── tsconfig.json
+│
+├── # ============================================================
+├── # TESTS
+├── # ============================================================
+│
+├── tests/
+│   ├── FamilyLibrary.Domain.Tests/
+│   │   └── Entities/
+│   ├── FamilyLibrary.Application.Tests/
+│   │   ├── Services/
+│   │   └── Validators/
+│   ├── FamilyLibrary.Infrastructure.Tests/
+│   │   └── Repositories/
+│   ├── FamilyLibrary.Api.Tests/
+│   │   ├── Controllers/
+│   │   └── Integration/
+│   ├── FamilyLibrary.Plugin.Tests/
+│   │   └── Services/
+│   └── FamilyLibrary.Web.Tests/
+│       └── features/
+│
+├── # ============================================================
+├── # INFRASTRUCTURE
+├── # ============================================================
+│
+├── docker-compose.yml                        # Azurite + SQL Server
+├── .github/workflows/ci.yml
+└── FamilyLibrary.sln                        # Solution file
 ```
 
-**Structure Decision**: Multi-component Clean Architecture with:
-- Plugin: Flat command structure per constitution
-- Backend: Controllers/Services/Repositories/Entities
-- Frontend: Feature-based modules (library, roles, queue, scanner)
+**Structure Decision**:
+
+### Backend (.NET)
+- **Layered Clean Architecture** с 4 отдельными проектами
+- **Domain**: только System dependencies, business entities, interfaces
+- **Application**: DTOs, services, validators, mappers
+- **Infrastructure**: EF Core, repositories, external services
+- **Api**: Controllers, middleware, composition root
+- **Dependency flow**: Api → Infrastructure → Application → Domain
+
+### Plugin (Revit)
+- **Flat command structure** per constitution
+- **Models/** = clean C#, NO Revit API
+- **Services/** = ALL Revit API calls
+- **ViewModels/** = NO Revit API in constructors
+
+### Frontend (Angular 21)
+- **Feature-based structure** с core/shared/features
+- **Standalone components** по умолчанию
+- **Signals** для state management
+- **PrimeNG** для всех UI компонентов
+- **Tailwind** для стилизации (NO custom CSS)
+- **Barrel exports** (index.ts) для clean imports
 
 ---
 
