@@ -7,6 +7,26 @@ scripts:
 
 > **ORCHESTRATION REMINDER**: You are the orchestrator, not the implementer. Delegate all complex tasks to subagents with complete context. Gather full context before delegation (read code, search patterns, review docs, check commits). Verify results thoroughly (read files, run type-check). Re-delegate with corrections if validation fails. Execute directly only for trivial tasks (1-2 line fixes, imports, single npm install).
 
+## MCP Selection Rules
+
+При выборе MCP для исследования используй следующую логику:
+
+| Контекст задачи | MCP сервер | Инструменты |
+|-----------------|------------|-------------|
+| **Revit API** | `mcp-docmind` | `mcp__mcp-docmind__search_api`, `mcp__mcp-docmind__get_type_definition` |
+| **NetTopologySuite** | `mcp-docmind` | `mcp__mcp-docmind__search_api` |
+| **Angular** | `angular-cli` | `mcp__angular-cli__search_documentation`, `mcp__angular-cli__get_best_practices` |
+| **PrimeNG** | `primeng` | `mcp__primeng__search_components`, `mcp__primeng__get_component` |
+| **.NET / EF Core / SQL Server / Azure** | `microsoft-learn` | `mcp__microsoft-learn__microsoft_docs_search`, `mcp__microsoft-learn__microsoft_code_sample_search` |
+| **Внешние библиотеки** (Jest, Vitest, React, Knip, etc.) | `context7` | `mcp__context7__resolve-library-id`, `mcp__context7__get-library-docs` |
+| **Общие вопросы / поиск решений** | `web-search-prime` | `mcp__web-search-prime__webSearchPrime` |
+
+**Правила выбора:**
+1. Сначала определи контекст задачи (Revit, Angular, .NET, etc.)
+2. Выбери специализированный MCP для этого контекста
+3. Если специализированный MCP не дал результатов → используй `web-search-prime`
+4. Для внешних библиотек всегда используй `context7`
+
 ## User Input
 
 ```text
@@ -76,7 +96,7 @@ You **MUST** consider the user input before proceeding (if not empty).
      * [EXECUTOR: specific-agent-name] - For all other tasks using existing or newly created agents
      * Annotate all tasks with `[EXECUTOR: name]` and `[SEQUENTIAL]`/`[PARALLEL-GROUP-X]`
    - **Step 4: Research Resolution**:
-     * Simple research: solve with agent tools (Grep, Read, WebSearch, Context7, DocMind docs)
+     * Simple research: solve with agent tools (Grep, Read, web-search-prime, Context7, Microsoft Learn)
      * Complex research: create research prompt in research/, wait for user deepresearch, incorporate results
    - Output: Updated tasks.md with executor annotations
    - **Atomicity Rule (CRITICAL)**: 1 Task = 1 Agent Invocation
@@ -150,7 +170,7 @@ You **MUST** consider the user input before proceeding (if not empty).
       - [EXECUTOR: subagent-name]? → Delegate to specified subagent
    3. GATHER CONTEXT: Read existing code, search patterns, review docs, check commits
    3.5. LIBRARY SEARCH: Before writing >20 lines of new code, search for existing npm/pypi packages
-      - Use WebSearch + Context7 to find and evaluate libraries
+      - Use web-search-prime + Context7 to find and evaluate libraries
       - If suitable library found: install and configure instead of implementing from scratch
       - Check: weekly downloads >1000, recent commits, TypeScript support, no critical vulnerabilities
    3.6. FETCH LIBRARY DOCS (MANDATORY): Before writing code that uses ANY library:
