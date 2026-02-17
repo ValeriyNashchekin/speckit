@@ -1,0 +1,36 @@
+<p-toast />
+<div class="space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Family Queue</h1>
+    <p class="text-sm text-gray-500 mt-1">Manage families, drafts, and library status</p>
+  </div>
+
+  <p-tabs [(value)]="activeTab">
+    <p-tablist>
+      <p-tab value="0">
+        <i class="pi pi-box mr-2"></i>
+        All Families
+      </p-tab>
+      <p-tab value="1">
+        <i class="pi pi-file-edit mr-2"></i>
+        Draft Queue
+      </p-tab>
+      <p-tab value="2">
+        <i class="pi pi-chart-bar mr-2"></i>
+        Library Status
+      </p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+      <p-tabpanel value="0">
+        <app-family-list />
+      </p-tabpanel>
+      <p-tabpanel value="1">
+        <app-draft-list />
+      </p-tabpanel>
+      <p-tabpanel value="2">
+        <app-library-status />
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+</div>

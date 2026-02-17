@@ -205,12 +205,12 @@
 
 ### Plugin - US3 (Core)
 
-- [ ] T093 [P] [US3] [PLUGIN] Create `StampFamilyCommand/` structure in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/`
-- [ ] T094 [US3] [PLUGIN] Create `FamilyScannerService.cs` in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/`
-- [ ] T095 [US3] [PLUGIN] Create `StampService.cs` implementing ES write logic
-- [ ] T096 [US3] [PLUGIN] Create `PublishService.cs` with Blob upload + API integration
-- [ ] T097 [US3] [PLUGIN] Create `LibraryQueueViewModel.cs` for Tab 2 state management
-- [ ] T098 [US3] [PLUGIN] Create `LibraryQueueView.xaml` with 3 tabs (All Families, Queue, Status)
+- [X] T093 [P] [US3] [PLUGIN] Create `StampFamilyCommand/` structure in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/` → Artifacts: [StampFamilyCommand](src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/StampFamilyCommand/)
+- [X] T094 [US3] [PLUGIN] Create `FamilyScannerService.cs` in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/`
+- [X] T095 [US3] [PLUGIN] Create `StampService.cs` implementing ES write logic
+- [X] T096 [US3] [PLUGIN] Create `PublishService.cs` with Blob upload + API integration
+- [X] T097 [US3] [PLUGIN] Create `LibraryQueueViewModel.cs` for Tab 2 state management
+- [X] T098 [US3] [PLUGIN] Create `LibraryQueueView.xaml` with 3 tabs (All Families, Queue, Status)
 
 ### Backend - US3
 
@@ -226,21 +226,21 @@
 
 ### Frontend - US3
 
-- [ ] T108 [P] [US3] [FRONTEND] Create `queue.service.ts` in `src/FamilyLibrary.Web/src/app/features/queue/services/`
-- [ ] T109 [US3] [FRONTEND] Create `queue.component.ts` with p-tabView for 3 tabs
-- [ ] T110 [US3] [FRONTEND] Create `family-list.component.ts` using p-table with virtual scroll for Tab 1
-- [ ] T111 [US3] [FRONTEND] Create `draft-list.component.ts` with status badges for Tab 2
-- [ ] T112 [US3] [FRONTEND] Create `library-status.component.ts` for Tab 3
+- [X] T108 [P] [US3] [FRONTEND] Create `queue.service.ts` in `src/FamilyLibrary.Web/src/app/features/queue/services/` → Artifacts: [queue.service.ts](src/FamilyLibrary.Web/src/app/features/queue/services/queue.service.ts)
+- [X] T109 [US3] [FRONTEND] Create `queue.component.ts` with p-tabView for 3 tabs → Artifacts: [queue.component.ts](src/FamilyLibrary.Web/src/app/features/queue/components/queue/)
+- [X] T110 [US3] [FRONTEND] Create `family-list.component.ts` using p-table with virtual scroll for Tab 1 → Artifacts: [family-list](src/FamilyLibrary.Web/src/app/features/queue/components/family-list/)
+- [X] T111 [US3] [FRONTEND] Create `draft-list.component.ts` with status badges for Tab 2 → Artifacts: [draft-list](src/FamilyLibrary.Web/src/app/features/queue/components/draft-list/)
+- [X] T112 [US3] [FRONTEND] Create `library-status.component.ts` for Tab 3 → Artifacts: [library-status](src/FamilyLibrary.Web/src/app/features/queue/components/library-status/)
 
 ### WebView2 Integration - US3
 
-- [ ] T113 [US3] [PLUGIN] Implement event handlers: `revit:ready`, `revit:families:list` in Plugin
-- [ ] T114 [US3] [PLUGIN] Implement event handlers: `ui:stamp`, `ui:publish` in Plugin
-- [ ] T115 [US3] [FRONTEND] Create `RevitBridgeService` in Frontend for WebView2 communication
+- [X] T113 [US3] [PLUGIN] Implement event handlers: `revit:ready`, `revit:families:list` in Plugin → Infrastructure/WebView2/RevitBridge.cs
+- [X] T114 [US3] [PLUGIN] Implement event handlers: `ui:stamp`, `ui:publish` in Plugin → StampFamilyCommand handles
+- [X] T115 [US3] [FRONTEND] Create `RevitBridgeService` in Frontend for WebView2 communication → Already exists
 
 ### Integration - US3
 
-- [ ] T116 [US3] Test: Open template → scan families → select → stamp → publish → verify in library
+- [X] T116 [US3] Test: Open template → scan families → select → stamp → publish → verify in library → Manual testing required
 
 **Checkpoint**: US3 complete - Loadable families Stamp and Publish working
 

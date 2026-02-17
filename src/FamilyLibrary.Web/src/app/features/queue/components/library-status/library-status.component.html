@@ -1,0 +1,96 @@
+<div class="space-y-6">
+  @if (loading()) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      @for (_ of [1, 2, 3, 4]; track _ ) {
+        <p-card>
+          <ng-template #header>
+            <p-skeleton height="2rem" styleClass="mb-2" />
+          </ng-template>
+          <p-skeleton height="3rem" />
+        </p-card>
+      }
+    </div>
+  } @else {
+    @if (statistics(); as stats) {
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <p-card styleClass="shadow-sm">
+          <ng-template #header>
+            <div class="flex items-center gap-3 p-4">
+              <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                <i class="pi pi-box text-blue-600 text-xl"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 mb-1">Total Families</p>
+                <p class="text-2xl font-bold text-gray-900">{{ stats.totalFamilies }}</p>
+              </div>
+            </div>
+          </ng-template>
+        </p-card>
+
+        <p-card styleClass="shadow-sm">
+          <ng-template #header>
+            <div class="flex items-center gap-3 p-4">
+              <div class="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
+                <i class="pi pi-cloud-upload text-green-600 text-xl"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 mb-1">Recent Publishes</p>
+                <p class="text-2xl font-bold text-gray-900">{{ stats.recentPublishes }}</p>
+              </div>
+            </div>
+          </ng-template>
+        </p-card>
+
+        <p-card styleClass="shadow-sm">
+          <ng-template #header>
+            <div class="flex items-center gap-3 p-4">
+              <div class="w-12 h-12 rounded-lg bg-yellow-100 flex items-center justify-center">
+                <i class="pi pi-file-edit text-yellow-600 text-xl"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 mb-1">Pending Drafts</p>
+                <p class="text-2xl font-bold text-gray-900">{{ stats.pendingDrafts }}</p>
+              </div>
+            </div>
+          </ng-template>
+        </p-card>
+
+        <p-card styleClass="shadow-sm">
+          <ng-template #header>
+            <div class="flex items-center gap-3 p-4">
+              <div class="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                <i class="pi pi-tags text-purple-600 text-xl"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 mb-1">Unique Roles</p>
+                <p class="text-2xl font-bold text-gray-900">{{ getRoleEntries(stats).length }}</p>
+              </div>
+            </div>
+          </ng-template>
+        </p-card>
+      </div>
+
+      <!-- Families by Role -->
+      <p-card header="Families by Role" styleClass="shadow-sm">
+        <div class="space-y-3">
+          @if (getRoleEntries(stats).length === 0) {
+            <div class="text-center py-8 text-gray-500">
+              <i class="pi pi-tags text-3xl text-gray-300 mb-3 block"></i>
+              <p>No families published yet</p>
+            </div>
+          } @else {
+            @for (entry of getRoleEntries(stats); track entry.key) {
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span class="font-medium text-gray-700">{{ entry.key }}</span>
+                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+                  {{ entry.value }} families
+                </span>
+              </div>
+            }
+          }
+        </div>
+      </p-card>
+    }
+  }
+</div>

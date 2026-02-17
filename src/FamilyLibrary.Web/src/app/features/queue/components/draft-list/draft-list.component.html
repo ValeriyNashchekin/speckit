@@ -1,0 +1,176 @@
+<p-confirm-dialog />
+<div class="space-y-4">
+  <!-- Search and Filters -->
+  <div class="flex flex-wrap items-center gap-3">
+    <div class="flex-1 min-w-[200px]">
+      <span class="p-input-icon-left w-full">
+        <i class="pi pi-search"></i>
+        <input
+          pInputText
+          type="text"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event); onSearch()"
+          placeholder="Search drafts..."
+          class="w-full"
+        />
+      </span>
+    </div>
+
+    <p-select
+      [ngModel]="selectedStatus()"
+      (ngModelChange)="selectedStatus.set($event); onFilterChange()"
+      [options]="statusOptions"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Filter by status"
+      [showClear]="true"
+      styleClass="min-w-[200px]"
+    />
+
+    <p-button
+      icon="pi pi-filter-slash"
+      label="Clear"
+      severity="secondary"
+      outlined
+      (onClick)="clearFilters()"
+    />
+
+    <div class="ml-auto">
+      <p-button
+        icon="pi pi-cloud-upload"
+        label="Publish Selected"
+        severity="success"
+        (onClick)="batchPublish()"
+        [disabled]="selectedDrafts().length === 0"
+      />
+    </div>
+  </div>
+
+  <!-- Table -->
+  <p-table
+    [value]="drafts()"
+    [lazy]="true"
+    [lazyLoadOnInit]="false"
+    (onLazyLoad)="onLazyLoad($event)"
+    [totalRecords]="totalRecords()"
+    [loading]="loading()"
+    [rows]="rowsPerPage()"
+    [first]="first()"
+    [scrollable]="true"
+    scrollHeight="flex"
+    [virtualScroll]="true"
+    [virtualScrollItemSize]="48"
+    [tableStyle]="{ 'min-width': '70rem' }"
+    dataKey="id"
+    [(selection)]="selectedDrafts"
+    [selectionPageOnly]="true"
+    paginator
+    [rowsPerPageOptions]="[10, 20, 50, 100]"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} drafts"
+  >
+    <ng-template #header>
+      <tr>
+        <th style="width: 3rem">
+          <p-tableHeaderCheckbox />
+        </th>
+        <th pSortableColumn="familyName" style="width: 20%">
+          <div class="flex items-center gap-2">
+            Name
+            <p-sortIcon field="familyName"></p-sortIcon>
+          </div>
+        </th>
+        <th style="width: 18%">Role</th>
+        <th style="width: 12%">Status</th>
+        <th style="width: 12%">Created</th>
+        <th style="width: 38%">Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-draft>
+      <tr>
+        <td>
+          <p-tableCheckbox [value]="draft" />
+        </td>
+        <td>
+          <span class="font-medium text-gray-900">{{ draft.familyName }}</span>
+        </td>
+        <td>
+          <p-select
+            [ngModel]="draft.selectedRoleId"
+            (ngModelChange)="onRoleSelect(draft, $event)"
+            [options]="roles()"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Select role"
+            [showClear]="true"
+            styleClass="w-full"
+            size="small"
+          />
+        </td>
+        <td>
+          <p-tag
+            [value]="getStatusLabel(draft.status)"
+            [severity]="getStatusSeverity(draft.status)"
+            [rounded]="true"
+          />
+        </td>
+        <td>
+          <span class="text-gray-500 text-sm">
+            {{ draft.createdAt | date: 'mediumDate' }}
+          </span>
+        </td>
+        <td>
+          <div class="flex items-center gap-2">
+            <p-button
+              icon="pi pi-pencil"
+              severity="secondary"
+              outlined
+              size="small"
+              pTooltip="Stamp"
+              (onClick)="stampDraft(draft)"
+            />
+            <p-button
+              icon="pi pi-cloud-upload"
+              severity="success"
+              outlined
+              size="small"
+              pTooltip="Publish"
+              (onClick)="publishDraft(draft)"
+              [disabled]="!draft.selectedRoleId"
+            />
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              outlined
+              size="small"
+              pTooltip="Delete"
+              (onClick)="deleteDraft(draft)"
+            />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="6" class="text-center py-8">
+          <div class="flex flex-col items-center">
+            <i class="pi pi-file-edit text-4xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500">No drafts found</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #loadingbody>
+      <tr>
+        <td colspan="6">
+          <div class="flex items-center justify-center py-8">
+            <i class="pi pi-spinner pi-spin text-2xl text-primary"></i>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
