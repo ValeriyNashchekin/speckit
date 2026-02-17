@@ -411,7 +411,7 @@
 
 ### Performance
 
-- [ ] T169 [BACKEND] Optimize batch-check endpoint for 500+ families
+- [X] T169 [BACKEND] Optimize batch-check endpoint for 500+ families → Artifacts: [FamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Services/FamilyService.cs)
 - [X] T170 [P] [BACKEND] Add database indexes per data-model.md specifications → Artifacts: [Migration](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Migrations/)
 - [ ] T171 [FRONTEND] Test virtual scroll performance with 5000+ rows
 
@@ -419,7 +419,7 @@
 
 - [X] T172 [P] [BACKEND] Add input validation on all endpoints (Validators)
 - [X] T173 [P] [BACKEND] Configure CORS for production domains
-- [ ] T174 [BACKEND] Add rate limiting middleware
+- [X] T174 [BACKEND] Add rate limiting middleware → Artifacts: [RateLimitingMiddleware.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Middleware/RateLimitingMiddleware.cs)
 
 ### Error Handling
 
@@ -429,8 +429,8 @@
 
 ### Testing
 
-- [ ] T178 [P] [BACKEND] Add Application layer unit tests for FamilyRoleService
-- [ ] T179 [P] [BACKEND] Add Application layer unit tests for RecognitionRuleService
+- [X] T178 [P] [BACKEND] Add Application layer unit tests for FamilyRoleService → Artifacts: [FamilyRoleServiceTests.cs](tests/FamilyLibrary.Application.Tests/Services/)
+- [X] T179 [P] [BACKEND] Add Application layer unit tests for RecognitionRuleService → Artifacts: [RecognitionRuleServiceTests.cs](tests/FamilyLibrary.Application.Tests/Services/)
 - [ ] T180 [P] [FRONTEND] Add Frontend tests for roles feature
 - [ ] T181 Run quickstart.md validation end-to-end
 

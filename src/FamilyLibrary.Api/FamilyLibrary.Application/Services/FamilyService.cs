@@ -218,20 +218,49 @@ public class FamilyService : IFamilyService
         List<string> hashes,
         CancellationToken cancellationToken = default)
     {
-        var results = new List<FamilyStatusDto>();
+        if (hashes == null || hashes.Count == 0)
+            return [];
 
+        // Single query to get all families with versions (hash is stored in versions)
+        var allFamilies = await _familyRepository.GetWithVersionsAsync(cancellationToken);
+
+        // Build a lookup dictionary from hash to family using the latest version's hash
+        var hashToFamily = new Dictionary<string, FamilyEntity>(StringComparer.OrdinalIgnoreCase);
+        foreach (var family in allFamilies)
+        {
+            var latestVersion = family.Versions.OrderByDescending(v => v.Version).FirstOrDefault();
+            if (latestVersion != null && !string.IsNullOrEmpty(latestVersion.Hash))
+            {
+                hashToFamily[latestVersion.Hash] = family;
+            }
+        }
+
+        // Build results preserving original order and handling duplicates
+        var results = new List<FamilyStatusDto>(hashes.Count);
         foreach (var hash in hashes)
         {
-            var family = await _familyRepository.GetByHashAsync(hash, cancellationToken);
-
-            results.Add(new FamilyStatusDto
+            if (hashToFamily.TryGetValue(hash, out var family))
             {
-                Hash = hash,
-                Exists = family != null,
-                FamilyId = family?.Id,
-                FamilyName = family?.FamilyName,
-                CurrentVersion = family?.CurrentVersion
-            });
+                results.Add(new FamilyStatusDto
+                {
+                    Hash = hash,
+                    Exists = true,
+                    FamilyId = family.Id,
+                    FamilyName = family.FamilyName,
+                    CurrentVersion = family.CurrentVersion
+                });
+            }
+            else
+            {
+                results.Add(new FamilyStatusDto
+                {
+                    Hash = hash,
+                    Exists = false,
+                    FamilyId = null,
+                    FamilyName = null,
+                    CurrentVersion = null
+                });
+            }
         }
 
         return results;

@@ -46,6 +46,14 @@ public class FamilyRepository : Repository<FamilyEntity>, IFamilyRepository
             .FirstOrDefaultAsync(f => f.Id == id, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<FamilyEntity>> GetWithVersionsAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(f => f.Versions.OrderByDescending(v => v.Version).Take(1))
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<FamilyEntity>> GetByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default)
     {
         return await DbSet

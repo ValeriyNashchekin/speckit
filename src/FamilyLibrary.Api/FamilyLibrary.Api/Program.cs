@@ -38,6 +38,9 @@ var app = builder.Build();
 // Global exception handling middleware - must be first in the pipeline
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+// Rate limiting middleware - limits requests per IP address
+app.UseMiddleware<RateLimitingMiddleware>();
+
 // Configure HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
