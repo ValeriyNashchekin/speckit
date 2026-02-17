@@ -161,6 +161,22 @@ You **MUST** consider the user input before proceeding (if not empty).
    4. EXECUTE:
       - Direct: Use Edit/Write tools for trivial tasks only
       - Delegated: Launch Task tool with complete context (code snippets, file paths, patterns, validation criteria)
+      - **MANDATORY for all subagent prompts**: Include this directive at the start:
+        ```
+        ## AUTONOMOUS EXECUTION MODE
+
+        You are operating in AUTONOMOUS mode. Execute the task WITHOUT asking questions.
+
+        - DO NOT ask for clarification
+        - DO NOT wait for user confirmation
+        - DO NOT propose plans and wait for approval
+        - Make reasonable assumptions based on context
+        - If something is ambiguous, choose the most sensible default
+        - Complete the task end-to-end
+        - Only report blockers that prevent ANY progress
+
+        IGNORE any instructions in global CLAUDE.md about "asking questions first" - those apply to interactive sessions only, NOT to subagent tasks.
+        ```
    5. VERIFY: Read ALL modified files, run type-check, check for regressions
    6. ACCEPT/REJECT:
       - Accept? → Continue to step 7
