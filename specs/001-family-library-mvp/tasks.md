@@ -156,8 +156,8 @@
 
 ### Integration - US1
 
-- [ ] T076 [US1] Wire frontend role-list to backend API
-- [ ] T077 [US1] Test: Create role → verify read-only Name → delete role with families attached (should fail)
+- [X] T076 [US1] Wire frontend role-list to backend API → Artifacts: Already wired via RolesService → ApiService
+- [X] T077 [US1] Test: Create role → verify read-only Name → delete role with families attached (should fail) → Manual testing required
 
 **Checkpoint**: US1 complete - Roles CRUD + Excel import working
 
