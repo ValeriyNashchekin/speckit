@@ -173,11 +173,11 @@
 
 - [X] T078 [P] [US2] [BACKEND] Create `RecognitionRuleService.cs` with formula parser in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/` → Artifacts: [RecognitionRuleService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Services/RecognitionRuleService.cs)
 - [X] T079 [P] [US2] [BACKEND] Create `RecognitionRuleValidator.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/` → Artifacts: [RecognitionRuleValidator.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/RecognitionRuleValidator.cs)
-- [ ] T080 [US2] [BACKEND] Create `RecognitionRuleController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/`
-- [ ] T081 [US2] [BACKEND] Implement CRUD endpoints: GET/POST/PUT/DELETE /recognition-rules
-- [ ] T082 [US2] [BACKEND] Implement POST /recognition-rules/validate for syntax validation
-- [ ] T083 [US2] [BACKEND] Implement POST /recognition-rules/test for testing rule against family name
-- [ ] T084 [US2] [BACKEND] Implement POST /recognition-rules/check-conflicts for conflict detection
+- [X] T080 [US2] [BACKEND] Create `RecognitionRuleController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/` → Artifacts: [RecognitionRulesController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/RecognitionRulesController.cs)
+- [X] T081 [US2] [BACKEND] Implement CRUD endpoints: GET/POST/PUT/DELETE /recognition-rules
+- [X] T082 [US2] [BACKEND] Implement POST /recognition-rules/validate for syntax validation
+- [X] T083 [US2] [BACKEND] Implement POST /recognition-rules/test for testing rule against family name
+- [X] T084 [US2] [BACKEND] Implement POST /recognition-rules/check-conflicts for conflict detection
 
 ### Frontend - US2
 
