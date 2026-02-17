@@ -47,7 +47,7 @@ public class DraftsController(IDraftService service) : BaseController
         var result = await service.GetByIdAsync(id, ct);
         if (result == null)
         {
-            return NotFound(new { Entity = nameof(DraftDto), Key = id, Message = $"Draft with key '{id}' was not found." });
+            return NotFound();
         }
         return Ok(result);
     }

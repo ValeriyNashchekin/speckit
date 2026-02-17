@@ -15,10 +15,12 @@ namespace FamilyLibrary.Application.Services;
 public class SystemTypeService : ISystemTypeService
 {
     private readonly ISystemTypeRepository _repository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public SystemTypeService(ISystemTypeRepository repository)
+    public SystemTypeService(ISystemTypeRepository repository, IUnitOfWork unitOfWork)
     {
         _repository = repository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<PagedResult<SystemTypeDto>> GetAllAsync(
@@ -85,6 +87,7 @@ public class SystemTypeService : ISystemTypeService
             dto.Hash);
 
         await _repository.AddAsync(entity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }
@@ -96,6 +99,7 @@ public class SystemTypeService : ISystemTypeService
 
         entity.Update(dto.Json, dto.Hash);
         await _repository.UpdateAsync(entity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -107,6 +111,7 @@ public class SystemTypeService : ISystemTypeService
         }
 
         await _repository.DeleteAsync(id, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyList<SystemTypeDto>> GetByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default)

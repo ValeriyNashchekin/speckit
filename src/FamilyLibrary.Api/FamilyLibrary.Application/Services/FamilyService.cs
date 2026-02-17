@@ -18,6 +18,7 @@ public class FamilyService : IFamilyService
     private readonly IFamilyVersionRepository _versionRepository;
     private readonly IFamilyRoleRepository _roleRepository;
     private readonly IBlobStorageService _blobStorageService;
+    private readonly IUnitOfWork _unitOfWork;
 
     private const string FamiliesContainer = "families";
 
@@ -25,12 +26,14 @@ public class FamilyService : IFamilyService
         IFamilyRepository familyRepository,
         IFamilyVersionRepository versionRepository,
         IFamilyRoleRepository roleRepository,
-        IBlobStorageService blobStorageService)
+        IBlobStorageService blobStorageService,
+        IUnitOfWork unitOfWork)
     {
         _familyRepository = familyRepository;
         _versionRepository = versionRepository;
         _roleRepository = roleRepository;
         _blobStorageService = blobStorageService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<PagedResult<FamilyDto>> GetAllAsync(
@@ -124,6 +127,7 @@ public class FamilyService : IFamilyService
             cancellationToken);
 
         // Upload type catalog if provided
+        string? catalogBlobName = null;
         string? catalogBlobPath = null;
         string? catalogHash = null;
         if (typeCatalogStream != null && !string.IsNullOrEmpty(typeCatalogFileName))
@@ -131,7 +135,7 @@ public class FamilyService : IFamilyService
             catalogHash = await CalculateHashAsync(typeCatalogStream, cancellationToken);
             typeCatalogStream.Position = 0;
 
-            var catalogBlobName = $"{family.Id}/v{newVersion}/{typeCatalogFileName}";
+            catalogBlobName = $"{family.Id}/v{newVersion}/{typeCatalogFileName}";
             catalogBlobPath = await _blobStorageService.UploadAsync(
                 FamiliesContainer,
                 catalogBlobName,
@@ -140,8 +144,7 @@ public class FamilyService : IFamilyService
         }
 
         // ============================================================
-        // PHASE 3: Database writes (MINIMAL time in transaction)
-        // All I/O is done, now persist to DB atomically
+        // PHASE 3: Database writes (atomic transaction with compensating action)
         // ============================================================
 
         var version = new FamilyVersionEntity(
@@ -157,19 +160,34 @@ public class FamilyService : IFamilyService
             catalogHash: catalogHash,
             originalCatalogName: typeCatalogFileName);
 
-        if (existingFamily == null)
+        try
         {
-            // New family - save entity first
-            await _familyRepository.AddAsync(family, cancellationToken);
-        }
-        else
-        {
-            // Existing family - increment version
-            family.IncrementVersion();
-            await _familyRepository.UpdateAsync(family, cancellationToken);
-        }
+            if (existingFamily == null)
+            {
+                await _familyRepository.AddAsync(family, cancellationToken);
+            }
+            else
+            {
+                family.IncrementVersion();
+                await _familyRepository.UpdateAsync(family, cancellationToken);
+            }
 
-        await _versionRepository.AddAsync(version, cancellationToken);
+            await _versionRepository.AddAsync(version, cancellationToken);
+
+            // SINGLE atomic commit for all changes
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch
+        {
+            // COMPENSATING ACTION: Delete uploaded blobs if DB transaction failed
+            // This prevents orphaned files in blob storage
+            await SafeDeleteBlobAsync(blobName, cancellationToken);
+            if (catalogBlobName != null)
+            {
+                await SafeDeleteBlobAsync(catalogBlobName, cancellationToken);
+            }
+            throw;
+        }
 
         // Fetch updated family with role
         var updatedFamily = await _familyRepository.GetByIdAsync(family.Id, cancellationToken);
@@ -284,5 +302,21 @@ public class FamilyService : IFamilyService
         using var sha256 = SHA256.Create();
         var hashBytes = await sha256.ComputeHashAsync(stream, cancellationToken);
         return Convert.ToHexString(hashBytes).ToLowerInvariant();
+    }
+
+    /// <summary>
+    /// Safely deletes a blob, ignoring any errors (best-effort cleanup).
+    /// </summary>
+    private async Task SafeDeleteBlobAsync(string blobName, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _blobStorageService.DeleteAsync(FamiliesContainer, blobName, cancellationToken);
+        }
+        catch
+        {
+            // Ignore deletion errors during cleanup
+            // The blob may be cleaned up later by a background process
+        }
     }
 }

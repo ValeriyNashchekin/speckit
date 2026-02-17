@@ -13,13 +13,16 @@ public class RecognitionRuleService : IRecognitionRuleService
 {
     private readonly IRecognitionRuleRepository _repository;
     private readonly IFamilyRoleRepository _roleRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
     public RecognitionRuleService(
         IRecognitionRuleRepository repository,
-        IFamilyRoleRepository roleRepository)
+        IFamilyRoleRepository roleRepository,
+        IUnitOfWork unitOfWork)
     {
         _repository = repository;
         _roleRepository = roleRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<PagedResult<RecognitionRuleDto>> GetAllAsync(
@@ -56,6 +59,7 @@ public class RecognitionRuleService : IRecognitionRuleService
 
         var entity = new RecognitionRuleEntity(dto.RoleId, dto.RootNode, dto.Formula);
         await _repository.AddAsync(entity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         return entity.Id;
     }
 
@@ -82,6 +86,7 @@ public class RecognitionRuleService : IRecognitionRuleService
         var newFormula = dto.Formula ?? entity.Formula;
         entity.Update(newRootNode, newFormula);
         await _repository.UpdateAsync(entity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -90,6 +95,7 @@ public class RecognitionRuleService : IRecognitionRuleService
         if (!exists)
             throw new NotFoundException(nameof(RecognitionRuleEntity), id);
         await _repository.DeleteAsync(id, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     public Task<bool> ValidateFormulaAsync(string formula, CancellationToken cancellationToken = default)

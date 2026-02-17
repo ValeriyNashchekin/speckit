@@ -1,16 +1,22 @@
 using System.Net;
 using System.Text.Json;
 using FamilyLibrary.Domain.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FamilyLibrary.Api.Middleware;
 
 /// <summary>
-/// Global exception handling middleware.
+/// Global exception handling middleware using ProblemDetails (RFC 7807).
 /// </summary>
 public class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = false
+    };
 
     public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
     {
@@ -34,64 +40,94 @@ public class ExceptionHandlingMiddleware
     {
         _logger.LogError(exception, "An unhandled exception occurred.");
 
-        var response = context.Response;
-        response.ContentType = "application/json";
-
-        var errorResponse = exception switch
+        var (statusCode, problemDetails) = exception switch
         {
-            NotFoundException notFoundEx => new ErrorResponse
-            {
-                Status = (int)HttpStatusCode.NotFound,
-                Title = "Not Found",
-                Detail = notFoundEx.Message,
-                EntityName = notFoundEx.EntityName,
-                Key = notFoundEx.Key?.ToString()
-            },
-            ValidationException validationEx => new ErrorResponse
-            {
-                Status = (int)HttpStatusCode.BadRequest,
-                Title = "Validation Failed",
-                Detail = validationEx.Message,
-                Property = validationEx.PropertyName
-            },
-            BusinessRuleException businessEx => new ErrorResponse
-            {
-                Status = (int)HttpStatusCode.UnprocessableEntity,
-                Title = "Business Rule Violation",
-                Detail = businessEx.Message
-            },
-            ArgumentException argEx => new ErrorResponse
-            {
-                Status = (int)HttpStatusCode.BadRequest,
-                Title = "Invalid Argument",
-                Detail = argEx.Message,
-                Property = argEx.ParamName
-            },
-            _ => new ErrorResponse
-            {
-                Status = (int)HttpStatusCode.InternalServerError,
-                Title = "Internal Server Error",
-                Detail = "An unexpected error occurred."
-            }
+            NotFoundException notFoundEx => (
+                StatusCodes.Status404NotFound,
+                CreateProblemDetails(
+                    StatusCodes.Status404NotFound,
+                    "Not Found",
+                    notFoundEx.Message,
+                    new Dictionary<string, object?>
+                    {
+                        ["entityName"] = notFoundEx.EntityName,
+                        ["key"] = notFoundEx.Key?.ToString()
+                    })),
+
+            ValidationException validationEx => (
+                StatusCodes.Status400BadRequest,
+                CreateProblemDetails(
+                    StatusCodes.Status400BadRequest,
+                    "Validation Failed",
+                    validationEx.Message,
+                    new Dictionary<string, object?>
+                    {
+                        ["property"] = validationEx.PropertyName
+                    })),
+
+            BusinessRuleException businessEx => (
+                StatusCodes.Status422UnprocessableEntity,
+                CreateProblemDetails(
+                    StatusCodes.Status422UnprocessableEntity,
+                    "Business Rule Violation",
+                    businessEx.Message)),
+
+            ArgumentException argEx => (
+                StatusCodes.Status400BadRequest,
+                CreateProblemDetails(
+                    StatusCodes.Status400BadRequest,
+                    "Invalid Argument",
+                    argEx.Message,
+                    new Dictionary<string, object?>
+                    {
+                        ["property"] = argEx.ParamName
+                    })),
+
+            _ => (
+                StatusCodes.Status500InternalServerError,
+                CreateProblemDetails(
+                    StatusCodes.Status500InternalServerError,
+                    "Internal Server Error",
+                    "An unexpected error occurred. Please try again later."))
         };
 
-        response.StatusCode = errorResponse.Status;
+        context.Response.StatusCode = statusCode;
+        context.Response.ContentType = "application/problem+json";
 
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-
-        await response.WriteAsync(JsonSerializer.Serialize(errorResponse, options));
+        await context.Response.WriteAsync(JsonSerializer.Serialize(problemDetails, JsonOptions));
     }
 
-    private class ErrorResponse
+    private static ProblemDetails CreateProblemDetails(
+        int status,
+        string title,
+        string detail,
+        IDictionary<string, object?>? extensions = null)
     {
-        public int Status { get; set; }
-        public string Title { get; set; } = string.Empty;
-        public string Detail { get; set; } = string.Empty;
-        public string? Property { get; set; }
-        public string? EntityName { get; set; }
-        public string? Key { get; set; }
+        var problem = new ProblemDetails
+        {
+            Status = status,
+            Title = title,
+            Detail = detail,
+            Type = GetProblemType(status)
+        };
+
+        if (extensions != null)
+        {
+            foreach (var (key, value) in extensions)
+            {
+                problem.Extensions[key] = value;
+            }
+        }
+
+        return problem;
     }
+
+    private static string GetProblemType(int statusCode) => statusCode switch
+    {
+        StatusCodes.Status400BadRequest => "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+        StatusCodes.Status404NotFound => "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+        StatusCodes.Status422UnprocessableEntity => "https://tools.ietf.org/html/rfc4918#section-11.2",
+        StatusCodes.Status500InternalServerError => "https://tools.ietf.org/html/rfc7231#section-6.6.1",
+        _ => "about:blank"
+    };
 }

@@ -7,6 +7,8 @@ namespace FamilyLibrary.Infrastructure.Repositories;
 
 /// <summary>
 /// Generic repository implementation using EF Core.
+/// NOTE: AddAsync/UpdateAsync/DeleteAsync do NOT save changes.
+/// Use IUnitOfWork.SaveChangesAsync() to commit changes atomically.
 /// </summary>
 public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEntity
 {
@@ -36,13 +38,14 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
     public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         await DbSet.AddAsync(entity, cancellationToken);
-        await Context.SaveChangesAsync(cancellationToken);
+        // NOTE: Does NOT save changes. Use IUnitOfWork.SaveChangesAsync() to commit.
     }
 
     public virtual async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         DbSet.Update(entity);
-        await Context.SaveChangesAsync(cancellationToken);
+        // NOTE: Does NOT save changes. Use IUnitOfWork.SaveChangesAsync() to commit.
+        await Task.CompletedTask;
     }
 
     public virtual async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -51,7 +54,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
         if (entity != null)
         {
             DbSet.Remove(entity);
-            await Context.SaveChangesAsync(cancellationToken);
+            // NOTE: Does NOT save changes. Use IUnitOfWork.SaveChangesAsync() to commit.
         }
     }
 

@@ -13,10 +13,12 @@ namespace FamilyLibrary.Application.Services;
 public class CategoryService : ICategoryService
 {
     private readonly ICategoryRepository _repository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CategoryService(ICategoryRepository repository)
+    public CategoryService(ICategoryRepository repository, IUnitOfWork unitOfWork)
     {
         _repository = repository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<List<CategoryDto>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -44,6 +46,7 @@ public class CategoryService : ICategoryService
 
         var entity = new CategoryEntity(dto.Name, dto.Description, dto.SortOrder);
         await _repository.AddAsync(entity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }
@@ -65,6 +68,7 @@ public class CategoryService : ICategoryService
 
         entity.Update(dto.Name, dto.Description, dto.SortOrder);
         await _repository.UpdateAsync(entity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -76,5 +80,6 @@ public class CategoryService : ICategoryService
         }
 
         await _repository.DeleteAsync(id, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

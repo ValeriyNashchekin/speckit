@@ -15,10 +15,12 @@ namespace FamilyLibrary.Application.Services;
 public class DraftService : IDraftService
 {
     private readonly IDraftRepository _repository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public DraftService(IDraftRepository repository)
+    public DraftService(IDraftRepository repository, IUnitOfWork unitOfWork)
     {
         _repository = repository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<PagedResult<DraftDto>> GetAllAsync(
@@ -70,6 +72,7 @@ public class DraftService : IDraftService
 
         var entity = new DraftEntity(dto.FamilyName, dto.FamilyUniqueId, dto.TemplateId);
         await _repository.AddAsync(entity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }
@@ -84,6 +87,7 @@ public class DraftService : IDraftService
         {
             entity.SetSelectedRole(dto.SelectedRoleId);
             await _repository.UpdateAsync(entity, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 
@@ -96,6 +100,7 @@ public class DraftService : IDraftService
         }
 
         await _repository.DeleteAsync(id, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     public async Task UpdateStatusAsync(Guid id, DraftStatus status, CancellationToken cancellationToken = default)
@@ -136,6 +141,7 @@ public class DraftService : IDraftService
         }
 
         await _repository.UpdateAsync(entity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     public async Task BatchCreateOrUpdateAsync(
@@ -159,5 +165,8 @@ public class DraftService : IDraftService
                 await _repository.AddAsync(entity, cancellationToken);
             }
         }
+
+        // Save all changes atomically at the end of batch operation
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

@@ -15,10 +15,12 @@ namespace FamilyLibrary.Application.Services;
 public class FamilyRoleService : IFamilyRoleService
 {
     private readonly IFamilyRoleRepository _repository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public FamilyRoleService(IFamilyRoleRepository repository)
+    public FamilyRoleService(IFamilyRoleRepository repository, IUnitOfWork unitOfWork)
     {
         _repository = repository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<PagedResult<FamilyRoleDto>> GetAllAsync(
@@ -75,6 +77,7 @@ public class FamilyRoleService : IFamilyRoleService
 
         var entity = new FamilyRoleEntity(dto.Name, dto.Type, dto.Description, dto.CategoryId);
         await _repository.AddAsync(entity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }
@@ -89,6 +92,7 @@ public class FamilyRoleService : IFamilyRoleService
         // The repository should handle this, but let's use the entity we have
         entity.Update(dto.Description, dto.CategoryId);
         await _repository.UpdateAsync(entity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -109,6 +113,7 @@ public class FamilyRoleService : IFamilyRoleService
         }
 
         await _repository.DeleteAsync(id, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<BatchCreateResult> ImportAsync(
@@ -130,6 +135,12 @@ public class FamilyRoleService : IFamilyRoleService
             var entity = new FamilyRoleEntity(dto.Name, dto.Type, dto.Description, dto.CategoryId);
             await _repository.AddAsync(entity, cancellationToken);
             createdIds.Add(entity.Id);
+        }
+
+        // Save all changes atomically at the end of batch operation
+        if (createdIds.Count > 0)
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
         return new BatchCreateResult(createdIds, skippedNames, dtos.Count);

@@ -9,28 +9,14 @@ namespace FamilyLibrary.Api.Controllers;
 [Route("api/[controller]")]
 public abstract class BaseController : ControllerBase
 {
-    protected IActionResult Success<T>(T data)
-    {
-        return Ok(data);
-    }
-
-    protected IActionResult Success()
-    {
-        return Ok();
-    }
-
-    protected IActionResult CreatedResult<T>(string actionName, object routeValues, T data)
-    {
-        return CreatedAtAction(actionName, routeValues, data);
-    }
-
-    protected IActionResult NotFoundResult(string entityName, object key)
-    {
-        return NotFound(new { Entity = entityName, Key = key, Message = $"{entityName} with key '{key}' was not found." });
-    }
-
-    protected IActionResult ValidationError(string message, string? property = null)
-    {
-        return BadRequest(new { Property = property, Message = message });
-    }
+    // Standard ControllerBase methods are used directly:
+    // - Ok(result) for successful responses with data
+    // - NotFound() for 404 responses
+    // - BadRequest(ModelState) for validation errors
+    // - CreatedAtAction(...) for 201 Created responses
+    // - NoContent() for 204 responses
+    // - Conflict() for 409 responses
+    //
+    // All unhandled exceptions are caught by ExceptionHandlingMiddleware
+    // and returned as ProblemDetails (RFC 7807).
 }

@@ -70,7 +70,7 @@ public class FamiliesController(IFamilyService service) : BaseController
 
         if (result is null)
         {
-            return NotFoundResult(nameof(FamilyDetailDto), id);
+            return NotFound();
         }
 
         return Ok(result);
@@ -112,7 +112,8 @@ public class FamiliesController(IFamilyService service) : BaseController
     {
         if (file is null || file.Length == 0)
         {
-            return ValidationError("File is required.", nameof(file));
+            ModelState.AddModelError(nameof(file), "File is required.");
+            return BadRequest(ModelState);
         }
 
         await using var stream = file.OpenReadStream();

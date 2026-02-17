@@ -13,10 +13,12 @@ namespace FamilyLibrary.Application.Services;
 public class TagService : ITagService
 {
     private readonly ITagRepository _repository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public TagService(ITagRepository repository)
+    public TagService(ITagRepository repository, IUnitOfWork unitOfWork)
     {
         _repository = repository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<List<TagDto>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -44,6 +46,7 @@ public class TagService : ITagService
 
         var entity = new TagEntity(dto.Name, dto.Color);
         await _repository.AddAsync(entity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }
@@ -65,6 +68,7 @@ public class TagService : ITagService
 
         entity.Update(dto.Name, dto.Color);
         await _repository.UpdateAsync(entity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -76,5 +80,6 @@ public class TagService : ITagService
         }
 
         await _repository.DeleteAsync(id, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }
