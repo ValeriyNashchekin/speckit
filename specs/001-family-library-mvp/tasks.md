@@ -142,8 +142,8 @@
 - [X] T065 [US1] [BACKEND] Implement CRUD endpoints: GET /roles, POST /roles, PUT /roles/{id}, DELETE /roles/{id}
 - [X] T066 [US1] [BACKEND] Implement POST /roles/import for Excel upload and preview
 - [X] T067 [US1] [BACKEND] Implement batch create logic with duplicate skip in `FamilyRoleService.cs`
-- [ ] T068 [P] [US1] [BACKEND] Create `CategoryService.cs` and `TagService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/`
-- [ ] T069 [P] [US1] [BACKEND] Create `CategoryController.cs` and `TagController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/`
+- [X] T068 [P] [US1] [BACKEND] Create `CategoryService.cs` and `TagService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/` → Artifacts: [CategoryService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Services/CategoryService.cs), [TagService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Services/TagService.cs)
+- [X] T069 [P] [US1] [BACKEND] Create `CategoryController.cs` and `TagController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/` → Artifacts: [CategoriesController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/CategoriesController.cs), [TagsController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/TagsController.cs)
 
 ### Frontend - US1
 

@@ -23,6 +23,8 @@ public static class DependencyInjection
 
         // Register Application services
         services.AddScoped<IFamilyRoleService, FamilyRoleService>();
+        services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<ITagService, TagService>();
 
         return services;
     }
