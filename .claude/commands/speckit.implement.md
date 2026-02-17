@@ -10,6 +10,50 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## Execution Modes
+
+**Sequential (default)**: Execute tasks one by one in order.
+**Parallel (`--parallel`)**: Group tasks by component and execute in parallel.
+
+### Parallel Execution
+
+When `--parallel` flag is provided:
+
+1. **Parse tasks.md and group by component**:
+   - `[BACKEND]` tasks → Group A
+   - `[FRONTEND]` tasks → Group B
+   - `[PLUGIN]` tasks → Group C
+   - Tasks without component marker → Execute sequentially first
+
+2. **Execution Flow**:
+   ```
+   Phase 1-2: Sequential (Setup + Foundational - shared dependencies)
+
+   Phase 3+ (User Stories):
+     ┌─────────────────────────────────────────────────────────┐
+     │ BACKEND Agent      │ FRONTEND Agent     │ PLUGIN Agent  │
+     │ [BACKEND] tasks    │ [FRONTEND] tasks   │ [PLUGIN] tasks│
+     │ T058, T059, T060...│ T063, T064, T065...│ T089, T090... │
+     └─────────────────────────────────────────────────────────┘
+              ↓                   ↓                   ↓
+     [Launch all agents in single message - maximum parallelism]
+   ```
+
+3. **Agent Assignment**:
+   - `[BACKEND]` → `dotnet-backend-developer` agent
+   - `[FRONTEND]` → `angular-developer` agent
+   - `[PLUGIN]` → `revit-plugin-developer` agent
+
+4. **Synchronization Points**:
+   - After each User Story phase: Wait for all agents to complete
+   - Integration tasks: Execute after all components ready
+   - Validation: Run quality gates before proceeding to next phase
+
+5. **Contracts for Convergence**:
+   - All agents read from `contracts/api.yaml` for REST endpoints
+   - All agents read from `contracts/webview-events.md` for WebView2 events
+   - All agents read from `data-model.md` for shared entities
+
 ## Outline
 
 1. Run `.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
