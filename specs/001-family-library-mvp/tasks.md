@@ -171,8 +171,8 @@
 
 ### Backend - US2
 
-- [ ] T078 [P] [US2] [BACKEND] Create `RecognitionRuleService.cs` with formula parser in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/`
-- [ ] T079 [P] [US2] [BACKEND] Create `RecognitionRuleValidator.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/`
+- [X] T078 [P] [US2] [BACKEND] Create `RecognitionRuleService.cs` with formula parser in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/` → Artifacts: [RecognitionRuleService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Services/RecognitionRuleService.cs)
+- [X] T079 [P] [US2] [BACKEND] Create `RecognitionRuleValidator.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/` → Artifacts: [RecognitionRuleValidator.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/RecognitionRuleValidator.cs)
 - [ ] T080 [US2] [BACKEND] Create `RecognitionRuleController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/`
 - [ ] T081 [US2] [BACKEND] Implement CRUD endpoints: GET/POST/PUT/DELETE /recognition-rules
 - [ ] T082 [US2] [BACKEND] Implement POST /recognition-rules/validate for syntax validation

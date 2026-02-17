@@ -5,31 +5,35 @@ using FamilyLibrary.Application.DTOs;
 namespace FamilyLibrary.Application.Validators;
 
 /// <summary>
-/// Validator for CreateRecognitionRuleDto.
-/// Handles structural validation of recognition rule data.
+/// Validator for UpdateRecognitionRuleDto.
+/// Handles structural validation of recognition rule update data.
 /// </summary>
-public class CreateRecognitionRuleDtoValidator : AbstractValidator<CreateRecognitionRuleDto>
+public class UpdateRecognitionRuleDtoValidator : AbstractValidator<UpdateRecognitionRuleDto>
 {
     private static readonly Regex OperandRegex = new(@"^[A-Za-z][A-Za-z0-9_\-]*$", RegexOptions.Compiled);
 
-    public CreateRecognitionRuleDtoValidator()
+    public UpdateRecognitionRuleDtoValidator()
     {
         RuleFor(x => x.RoleId)
             .NotEqual(Guid.Empty)
-                .WithMessage("RoleId is required and must be a valid GUID");
+                .WithMessage("RoleId must be a valid GUID")
+            .When(x => x.RoleId != Guid.Empty);
 
         RuleFor(x => x.RootNode)
+            .NotEmpty()
+                .WithMessage("RootNode cannot be empty when provided")
             .MaximumLength(100)
                 .WithMessage("RootNode must not exceed 100 characters")
             .When(x => x.RootNode is not null);
 
         RuleFor(x => x.Formula)
             .NotEmpty()
-                .WithMessage("Formula is required")
+                .WithMessage("Formula cannot be empty when provided")
             .MaximumLength(500)
                 .WithMessage("Formula must not exceed 500 characters")
             .Must(BeValidFormula)
-                .WithMessage("Formula contains invalid syntax. Allowed operators: AND, OR, NOT. Example: '(FB OR Desk) AND Wired'");
+                .WithMessage("Formula contains invalid syntax. Allowed operators: AND, OR, NOT. Example: '(FB OR Desk) AND Wired'")
+            .When(x => x.Formula is not null);
     }
 
     /// <summary>

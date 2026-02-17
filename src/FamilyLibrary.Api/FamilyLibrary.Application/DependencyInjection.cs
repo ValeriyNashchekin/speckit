@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddScoped<IFamilyRoleService, FamilyRoleService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<ITagService, TagService>();
+        services.AddScoped<IRecognitionRuleService, RecognitionRuleService>();
 
         return services;
     }
