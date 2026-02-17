@@ -216,13 +216,13 @@
 
 - [X] T099 [P] [US3] [BACKEND] Create `FamilyService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/` → Artifacts: [FamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Services/FamilyService.cs)
 - [X] T100 [P] [US3] [BACKEND] Create `FamilyValidator.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/` → Artifacts: [FamilyValidator.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/FamilyValidator.cs)
-- [ ] T101 [US3] [BACKEND] Create `FamilyController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/`
-- [ ] T102 [US3] [BACKEND] Implement POST /families/publish with file upload
-- [ ] T103 [US3] [BACKEND] Implement POST /families/validate-hash for duplicate detection
-- [ ] T104 [US3] [BACKEND] Implement POST /families/batch-check for status checking
-- [ ] T105 [P] [US3] [BACKEND] Create `DraftService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/`
-- [ ] T106 [US3] [BACKEND] Create `DraftController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/`
-- [ ] T107 [US3] [BACKEND] Implement Draft CRUD: GET/POST/PUT/DELETE /drafts
+- [X] T101 [US3] [BACKEND] Create `FamilyController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/` → Artifacts: [FamiliesController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/FamiliesController.cs)
+- [X] T102 [US3] [BACKEND] Implement POST /families/publish with file upload
+- [X] T103 [US3] [BACKEND] Implement POST /families/validate-hash for duplicate detection
+- [X] T104 [US3] [BACKEND] Implement POST /families/batch-check for status checking
+- [X] T105 [P] [US3] [BACKEND] Create `DraftService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/` → Artifacts: [DraftService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Services/DraftService.cs)
+- [X] T106 [US3] [BACKEND] Create `DraftController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/` → Artifacts: [DraftsController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/DraftsController.cs)
+- [X] T107 [US3] [BACKEND] Implement Draft CRUD: GET/POST/PUT/DELETE /drafts
 
 ### Frontend - US3
 
