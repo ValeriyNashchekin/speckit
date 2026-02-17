@@ -439,7 +439,7 @@
 - [ ] T182 [P] [PLUGIN] Verify all WebView2 events match `contracts/webview-events.md`
 - [ ] T183 [P] [PLUGIN] Test Plugin → Frontend event roundtrips in Revit
 - [ ] T184 [P] [FRONTEND] Test Frontend → Plugin event roundtrips in Revit
-- [ ] T185 [BACKEND] Verify OpenAPI contract matches actual Backend endpoints
+- [X] T185 [BACKEND] Verify OpenAPI contract matches actual Backend endpoints → Artifacts: [openapi-verification.md](docs/openapi-verification.md)
 - [ ] T186 Run full integration test: Scan → Stamp → Publish → Load
 
 ---

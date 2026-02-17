@@ -1,6 +1,8 @@
+using System.Reflection;
 using FamilyLibrary.Api.Middleware;
 using FamilyLibrary.Application;
 using FamilyLibrary.Infrastructure;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +11,24 @@ builder.Services.AddControllers();
 
 // Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    // Configure Swagger document metadata
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Family Library API",
+        Version = "v1",
+        Description = "API for managing Revit family library - roles, categories, tags, families, and recognition rules"
+    });
+
+    // Include XML comments for detailed API documentation
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        options.IncludeXmlComments(xmlPath);
+    }
+});
 
 // CORS for Angular frontend - configured from appsettings.json
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
