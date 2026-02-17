@@ -26,8 +26,18 @@ export interface FamilyVersion {
   publishedBy: string;
 }
 
+export interface TypeCatalogEntry {
+  values: Record<string, string>;
+}
+
+export interface TypeCatalog {
+  fields: string[];
+  types: TypeCatalogEntry[];
+}
+
 export interface FamilyDetail extends Family {
   versions: FamilyVersion[];
+  typeCatalog?: TypeCatalog;
 }
 
 export interface FamilyListRequest {

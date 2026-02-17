@@ -376,20 +376,20 @@
 
 ### Backend - US8
 
-- [ ] T157 [US8] [BACKEND] Modify /families/publish to accept optional txtFile parameter in FamilyController
-- [ ] T158 [US8] [BACKEND] Implement TXT hash calculation for version tracking
+- [X] T157 [US8] [BACKEND] Modify /families/publish to accept optional txtFile parameter in FamilyController → Artifacts: [FamiliesController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/FamiliesController.cs)
+- [X] T158 [US8] [BACKEND] Implement TXT hash calculation for version tracking
 
 ### Plugin - US8
 
-- [ ] T159 [P] [US8] [PLUGIN] Create `TypeCatalogParser.cs` in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/`
-- [ ] T160 [US8] [PLUGIN] Create `TypeSelectionWindow.xaml` with dynamic columns from TXT headers
-- [ ] T161 [US8] [PLUGIN] Create `TypeSelectionViewModel.cs` with search, filter, multi-select
-- [ ] T162 [US8] [PLUGIN] Implement LoadFamilySymbol for each selected type
+- [X] T159 [P] [US8] [PLUGIN] Create `TypeCatalogParser.cs` in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/` → Artifacts: [TypeCatalogParser.cs](src/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/TypeCatalogParser.cs)
+- [X] T160 [US8] [PLUGIN] Create `TypeSelectionWindow.xaml` with dynamic columns from TXT headers → Artifacts: [TypeSelectionWindow.xaml](src/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Views/)
+- [X] T161 [US8] [PLUGIN] Create `TypeSelectionViewModel.cs` with search, filter, multi-select → Artifacts: [TypeSelectionViewModel.cs](src/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/ViewModels/)
+- [X] T162 [US8] [PLUGIN] Implement LoadFamilySymbol for each selected type
 
 ### Frontend - US8
 
-- [ ] T163 [US8] [FRONTEND] Add type table to family-detail component when catalog exists
-- [ ] T164 [US8] [FRONTEND] Show type selection preview in load dialog
+- [X] T163 [US8] [FRONTEND] Add type table to family-detail component when catalog exists
+- [X] T164 [US8] [FRONTEND] Show type selection preview in load dialog
 
 ### Integration - US8
 

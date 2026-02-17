@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using FamilyLibrary.Domain.Entities;
 
 namespace FamilyLibrary.Infrastructure.Data;
@@ -19,5 +20,19 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+    }
+}
+
+/// <summary>
+/// Design-time factory for EF Core migrations.
+/// </summary>
+public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
+{
+    public AppDbContext CreateDbContext(string[] args)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+        optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=FamilyLibrary;Trusted_Connection=True;MultipleActiveResultSets=true");
+
+        return new AppDbContext(optionsBuilder.Options);
     }
 }

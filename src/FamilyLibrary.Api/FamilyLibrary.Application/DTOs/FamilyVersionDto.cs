@@ -12,6 +12,7 @@ public record FamilyVersionDto
     public string? PreviousHash { get; init; }
     public required string BlobPath { get; init; }
     public string? CatalogBlobPath { get; init; }
+    public string? CatalogHash { get; init; }
     public required string OriginalFileName { get; init; }
     public string? OriginalCatalogName { get; init; }
     public string? CommitMessage { get; init; }

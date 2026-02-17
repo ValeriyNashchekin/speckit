@@ -11,6 +11,7 @@ public class FamilyVersionEntity : BaseEntity
     public string? PreviousHash { get; private set; }
     public string BlobPath { get; private set; } = null!;
     public string? CatalogBlobPath { get; private set; }
+    public string? CatalogHash { get; private set; }
     public string OriginalFileName { get; private set; } = null!;
     public string? OriginalCatalogName { get; private set; }
     public string? CommitMessage { get; private set; }
@@ -34,6 +35,7 @@ public class FamilyVersionEntity : BaseEntity
         string publishedBy,
         string? previousHash = null,
         string? catalogBlobPath = null,
+        string? catalogHash = null,
         string? originalCatalogName = null,
         string? commitMessage = null)
     {
@@ -43,6 +45,7 @@ public class FamilyVersionEntity : BaseEntity
         PreviousHash = previousHash;
         BlobPath = blobPath ?? throw new ArgumentNullException(nameof(blobPath));
         CatalogBlobPath = catalogBlobPath;
+        CatalogHash = catalogHash;
         OriginalFileName = originalFileName ?? throw new ArgumentNullException(nameof(originalFileName));
         OriginalCatalogName = originalCatalogName;
         CommitMessage = commitMessage;

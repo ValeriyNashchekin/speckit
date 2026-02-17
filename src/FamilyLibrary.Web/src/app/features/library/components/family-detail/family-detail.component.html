@@ -98,5 +98,81 @@
         </ng-template>
       </p-table>
     </div>
+
+    <!-- Type Catalog section -->
+    @if (hasTypeCatalog()) {
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-gray-900">Type Catalog</h2>
+          <p-button
+            label="Load Selected"
+            icon="pi pi-download"
+            severity="success"
+            [disabled]="selectedTypesCount() === 0"
+            (onClick)="loadSelectedTypes()"
+          />
+        </div>
+
+        <div class="p-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+          <span class="text-sm text-gray-600">
+            {{ selectedTypesCount() }} of {{ typeCatalogTypes().length }} types selected
+          </span>
+          <p-button
+            [label]="selectedTypesCount() === typeCatalogTypes().length ? 'Deselect All' : 'Select All'"
+            [text]="true"
+            severity="secondary"
+            (onClick)="toggleAllTypes()"
+          />
+        </div>
+
+        <p-table
+          [value]="typeCatalogTypes()"
+          dataKey="TypeName"
+          [rowHover]="true"
+          [showGridlines]="false"
+          [stripedRows]="true"
+          tableStyleClass="w-full"
+        >
+          <ng-template #header>
+            <tr>
+              <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 w-12">
+                <span class="sr-only">Select</span>
+              </th>
+              @for (field of typeCatalogFields(); track field) {
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">{{ field }}</th>
+              }
+            </tr>
+          </ng-template>
+          <ng-template #body let-type let-rowIndex="rowIndex">
+            <tr
+              class="border-t border-gray-100 cursor-pointer"
+              [class.bg-blue-50]="isTypeSelected(rowIndex)"
+              (click)="toggleTypeSelection(rowIndex)"
+            >
+              <td class="px-4 py-3">
+                <p-checkbox
+                  [binary]="true"
+                  [ngModel]="isTypeSelected(rowIndex)"
+                  (ngModelChange)="toggleTypeSelection(rowIndex)"
+                  [aria-label]="'Select type ' + (type.values['TypeName'] ?? rowIndex)"
+                />
+              </td>
+              @for (field of typeCatalogFields(); track field) {
+                <td class="px-4 py-3 text-gray-600">
+                  {{ type.values[field] ?? '-' }}
+                </td>
+              }
+            </tr>
+          </ng-template>
+          <ng-template #emptymessage>
+            <tr>
+              <td class="px-4 py-8 text-center text-gray-500" [attr.colspan]="typeCatalogFields().length + 1">
+                No type catalog available
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    }
   }
 </div>

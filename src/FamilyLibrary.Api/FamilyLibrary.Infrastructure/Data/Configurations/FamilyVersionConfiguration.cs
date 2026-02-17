@@ -32,6 +32,9 @@ public class FamilyVersionConfiguration : IEntityTypeConfiguration<FamilyVersion
         builder.Property(v => v.CatalogBlobPath)
             .HasMaxLength(500);
 
+        builder.Property(v => v.CatalogHash)
+            .HasMaxLength(64);
+
         builder.Property(v => v.OriginalFileName)
             .IsRequired()
             .HasMaxLength(255);

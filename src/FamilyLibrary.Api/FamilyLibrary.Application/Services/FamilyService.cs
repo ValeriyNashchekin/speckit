@@ -106,6 +106,8 @@ public class FamilyService : IFamilyService
         CreateFamilyDto dto,
         Stream fileStream,
         string fileName,
+        Stream? typeCatalogStream = null,
+        string? typeCatalogFileName = null,
         CancellationToken cancellationToken = default)
     {
         // Validate role exists
@@ -162,6 +164,23 @@ public class FamilyService : IFamilyService
             fileStream,
             cancellationToken);
 
+        // Handle type catalog (TXT file) if provided
+        string? catalogBlobPath = null;
+        string? catalogHash = null;
+        if (typeCatalogStream != null && !string.IsNullOrEmpty(typeCatalogFileName))
+        {
+            // Calculate hash for type catalog
+            catalogHash = await CalculateHashAsync(typeCatalogStream, cancellationToken);
+            typeCatalogStream.Position = 0;
+
+            var catalogBlobName = $"{family.Id}/v{(existingFamily != null ? family.CurrentVersion + 1 : 1)}/{typeCatalogFileName}";
+            catalogBlobPath = await _blobStorageService.UploadAsync(
+                FamiliesContainer,
+                catalogBlobName,
+                typeCatalogStream,
+                cancellationToken);
+        }
+
         // Create version entity
         var version = new FamilyVersionEntity(
             familyId: family.Id,
@@ -171,7 +190,10 @@ public class FamilyService : IFamilyService
             originalFileName: fileName,
             snapshotJson: "{}", // TODO: Extract actual family snapshot from .rfa file
             publishedBy: "system", // TODO: Use actual user context
-            previousHash: previousHash);
+            previousHash: previousHash,
+            catalogBlobPath: catalogBlobPath,
+            catalogHash: catalogHash,
+            originalCatalogName: typeCatalogFileName);
 
         await _versionRepository.AddAsync(version, cancellationToken);
 

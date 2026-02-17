@@ -30,6 +30,8 @@ public record CreateFamilyDto
     public Guid RoleId { get; init; }
     public required string FamilyName { get; init; }
     public string? OriginalFileName { get; init; }
+    public string? TypeCatalogFileName { get; init; }
+    public string? TypeCatalogHash { get; init; }
 }
 
 /// <summary>

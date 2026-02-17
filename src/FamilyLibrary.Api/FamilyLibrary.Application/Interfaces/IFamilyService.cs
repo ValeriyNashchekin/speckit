@@ -48,6 +48,8 @@ public interface IFamilyService
         CreateFamilyDto dto,
         Stream fileStream,
         string fileName,
+        Stream? typeCatalogStream = null,
+        string? typeCatalogFileName = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

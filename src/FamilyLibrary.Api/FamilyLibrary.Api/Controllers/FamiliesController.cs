@@ -96,6 +96,7 @@ public class FamiliesController(IFamilyService service) : BaseController
     /// </summary>
     /// <param name="dto">The create DTO with family metadata.</param>
     /// <param name="file">The family file (.rfa).</param>
+    /// <param name="txtFile">Optional type catalog file (.txt).</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The created family.</returns>
     [HttpPost("publish")]
@@ -106,6 +107,7 @@ public class FamiliesController(IFamilyService service) : BaseController
     public async Task<IActionResult> Publish(
         [FromForm] CreateFamilyDto dto,
         IFormFile file,
+        IFormFile? txtFile,
         CancellationToken ct)
     {
         if (file is null || file.Length == 0)
@@ -114,9 +116,28 @@ public class FamiliesController(IFamilyService service) : BaseController
         }
 
         await using var stream = file.OpenReadStream();
-        var result = await service.PublishAsync(dto, stream, file.FileName, ct);
 
-        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        Stream? txtStream = null;
+        string? txtFileName = null;
+
+        if (txtFile is not null && txtFile.Length > 0)
+        {
+            txtStream = txtFile.OpenReadStream();
+            txtFileName = txtFile.FileName;
+        }
+
+        try
+        {
+            var result = await service.PublishAsync(dto, stream, file.FileName, txtStream, txtFileName, ct);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        }
+        finally
+        {
+            if (txtStream is not null)
+            {
+                await txtStream.DisposeAsync();
+            }
+        }
     }
 
     /// <summary>

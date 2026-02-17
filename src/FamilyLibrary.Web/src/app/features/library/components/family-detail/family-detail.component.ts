@@ -1,15 +1,17 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TooltipModule } from 'primeng/tooltip';
+import { CheckboxModule } from 'primeng/checkbox';
 import { MessageService } from 'primeng/api';
 import { LibraryService } from '../../services/library.service';
-import { FamilyDetail, FamilyVersion } from '../../../../core/models/family.model';
+import { FamilyDetail, FamilyVersion, TypeCatalogEntry } from '../../../../core/models/family.model';
 
 declare global {
   interface Window {
@@ -43,6 +45,8 @@ interface RevitFamilyLoadedDetail {
     ButtonModule,
     SkeletonModule,
     TooltipModule,
+    CheckboxModule,
+    FormsModule,
     DatePipe,
   ],
   templateUrl: './family-detail.component.html',
@@ -56,6 +60,25 @@ export class FamilyDetailComponent {
   protected readonly family = signal<FamilyDetail | null>(null);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
+
+  // Type Catalog state
+  protected readonly selectedTypes = signal<Set<number>>(new Set());
+
+  // Type Catalog computed properties
+  protected readonly hasTypeCatalog = computed(() => {
+    const familyData = this.family();
+    return familyData?.typeCatalog && familyData.typeCatalog.types.length > 0;
+  });
+
+  protected readonly typeCatalogFields = computed(() => {
+    return this.family()?.typeCatalog?.fields ?? [];
+  });
+
+  protected readonly typeCatalogTypes = computed(() => {
+    return this.family()?.typeCatalog?.types ?? [];
+  });
+
+  protected readonly selectedTypesCount = computed(() => this.selectedTypes().size);
 
   constructor() {
     this.loadFamily();
@@ -150,5 +173,68 @@ export class FamilyDetailComponent {
       return false;
     }
     return version.version === familyData.currentVersion;
+  }
+
+  // Type Catalog methods
+  protected isTypeSelected(index: number): boolean {
+    return this.selectedTypes().has(index);
+  }
+
+  protected toggleTypeSelection(index: number): void {
+    this.selectedTypes.update(selected => {
+      const newSet = new Set(selected);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  }
+
+  protected toggleAllTypes(): void {
+    const types = this.typeCatalogTypes();
+    const currentSelected = this.selectedTypes();
+
+    if (currentSelected.size === types.length) {
+      // Deselect all
+      this.selectedTypes.set(new Set());
+    } else {
+      // Select all
+      const allIndices = new Set(types.map((_, i) => i));
+      this.selectedTypes.set(allIndices);
+    }
+  }
+
+  protected loadSelectedTypes(): void {
+    const familyData = this.family();
+    if (!familyData?.typeCatalog) {
+      return;
+    }
+
+    const selectedIndices = Array.from(this.selectedTypes());
+    const selectedTypeEntries: TypeCatalogEntry[] = selectedIndices.map(
+      i => familyData.typeCatalog!.types[i]
+    );
+
+    const revitBridge = window.revitBridge;
+    if (revitBridge) {
+      revitBridge.postMessage({
+        type: 'ui:load-family-types',
+        payload: {
+          familyId: familyData.id,
+          version: familyData.currentVersion,
+          types: selectedTypeEntries,
+        },
+      });
+
+      this.subscribeToLoadResult();
+    } else {
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Not in Revit',
+        detail: 'Running outside Revit. Cannot load types.',
+      });
+    }
   }
 }
