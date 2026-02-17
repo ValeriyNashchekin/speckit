@@ -138,10 +138,10 @@
 
 - [X] T062 [P] [US1] [BACKEND] Create `FamilyRoleService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/` → Artifacts: [FamilyRoleService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Services/FamilyRoleService.cs), [IFamilyRoleService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Interfaces/IFamilyRoleService.cs)
 - [X] T063 [P] [US1] [BACKEND] Create `FamilyRoleValidator.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/` → Artifacts: [FamilyRoleValidator.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/FamilyRoleValidator.cs)
-- [ ] T064 [US1] [BACKEND] Create `FamilyRoleController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/`
-- [ ] T065 [US1] [BACKEND] Implement CRUD endpoints: GET /roles, POST /roles, PUT /roles/{id}, DELETE /roles/{id}
-- [ ] T066 [US1] [BACKEND] Implement POST /roles/import for Excel upload and preview
-- [ ] T067 [US1] [BACKEND] Implement batch create logic with duplicate skip in `FamilyRoleService.cs`
+- [X] T064 [US1] [BACKEND] Create `FamilyRoleController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/` → Artifacts: [FamilyRolesController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/FamilyRolesController.cs)
+- [X] T065 [US1] [BACKEND] Implement CRUD endpoints: GET /roles, POST /roles, PUT /roles/{id}, DELETE /roles/{id}
+- [X] T066 [US1] [BACKEND] Implement POST /roles/import for Excel upload and preview
+- [X] T067 [US1] [BACKEND] Implement batch create logic with duplicate skip in `FamilyRoleService.cs`
 - [ ] T068 [P] [US1] [BACKEND] Create `CategoryService.cs` and `TagService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/`
 - [ ] T069 [P] [US1] [BACKEND] Create `CategoryController.cs` and `TagController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/`
 
