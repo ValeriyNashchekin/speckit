@@ -4,10 +4,11 @@ import { ToastModule } from 'primeng/toast';
 import { FamilyListComponent } from '../family-list/family-list.component';
 import { DraftListComponent } from '../draft-list/draft-list.component';
 import { LibraryStatusComponent } from '../library-status/library-status.component';
+import { SystemTypeListComponent } from '../system-type-list/system-type-list.component';
 
 @Component({
   selector: 'app-queue',
-  imports: [TabsModule, ToastModule, FamilyListComponent, DraftListComponent, LibraryStatusComponent],
+  imports: [TabsModule, ToastModule, FamilyListComponent, DraftListComponent, LibraryStatusComponent, SystemTypeListComponent],
   templateUrl: './queue.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -254,25 +254,25 @@
 
 ### Backend - US4
 
-- [ ] T117 [P] [US4] [BACKEND] Create `SystemTypeService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/`
-- [ ] T118 [P] [US4] [BACKEND] Create `SystemTypeValidator.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/`
-- [ ] T119 [US4] [BACKEND] Create `SystemTypeController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/`
-- [ ] T120 [US4] [BACKEND] Implement CRUD: GET/POST /system-types with JSON storage
-- [ ] T121 [US4] [BACKEND] Implement CompoundStructure JSON serialization for Group A
-- [ ] T122 [US4] [BACKEND] Implement simple parameter JSON serialization for Group E
+- [X] T117 [P] [US4] [BACKEND] Create `SystemTypeService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/` → Artifacts: [ISystemTypeService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Interfaces/ISystemTypeService.cs), [SystemTypeService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Services/SystemTypeService.cs)
+- [X] T118 [P] [US4] [BACKEND] Create `SystemTypeValidator.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/` → Artifacts: [SystemTypeValidator.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/SystemTypeValidator.cs)
+- [X] T119 [US4] [BACKEND] Create `SystemTypeController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/` → Artifacts: [SystemTypesController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/SystemTypesController.cs)
+- [X] T120 [US4] [BACKEND] Implement CRUD: GET/POST /system-types with JSON storage
+- [X] T121 [US4] [BACKEND] Implement CompoundStructure JSON serialization for Group A → Artifacts: [CompoundStructureJson.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Models/CompoundStructureJson.cs)
+- [X] T122 [US4] [BACKEND] Implement simple parameter JSON serialization for Group E → Artifacts: [SimpleParametersJson.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Models/SimpleParametersJson.cs)
 
 ### Plugin - US4
 
-- [ ] T123 [P] [US4] [PLUGIN] Create `SystemTypeScannerService.cs` in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/`
-- [ ] T124 [US4] [PLUGIN] Create `CompoundStructureSerializer.cs` for WallType/FloorType/RoofType
-- [ ] T125 [US4] [PLUGIN] Create `SystemTypePublisher.cs` for JSON upload
-- [ ] T126 [US4] [PLUGIN] Implement material mapping warning dialog in UI
+- [X] T123 [P] [US4] [PLUGIN] Create `SystemTypeScannerService.cs` in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/` → Artifacts: [SystemTypeScannerService.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/SystemTypeScannerService.cs), [SystemTypeInfo.cs](src/FamilyLibrary.Plugin/Core/Entities/SystemTypeInfo.cs)
+- [X] T124 [US4] [PLUGIN] Create `CompoundStructureSerializer.cs` for WallType/FloorType/RoofType → Artifacts: [CompoundStructureSerializer.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/CompoundStructureSerializer.cs)
+- [X] T125 [US4] [PLUGIN] Create `SystemTypePublisher.cs` for JSON upload → Artifacts: [SystemTypePublisher.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/SystemTypePublisher.cs)
+- [X] T126 [US4] [PLUGIN] Implement material mapping warning dialog in UI → Artifacts: [MaterialWarningDialog.xaml](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Views/MaterialWarningDialog.xaml), [MaterialWarningViewModel.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/ViewModels/MaterialWarningViewModel.cs)
 
 ### Frontend - US4
 
-- [ ] T127 [P] [US4] [FRONTEND] Add System Types tab to queue component
-- [ ] T128 [US4] [FRONTEND] Create `system-type-detail.component.ts` showing JSON structure
-- [ ] T129 [US4] [FRONTEND] Create `material-warning-dialog.component.ts` for missing materials
+- [X] T127 [P] [US4] [FRONTEND] Add System Types tab to queue component → Artifacts: [system-type-list.component.ts](src/FamilyLibrary.Web/src/app/features/queue/components/system-type-list/)
+- [X] T128 [US4] [FRONTEND] Create `system-type-detail.component.ts` showing JSON structure → Artifacts: [system-type-detail.component.ts](src/FamilyLibrary.Web/src/app/features/queue/components/system-type-detail/)
+- [X] T129 [US4] [FRONTEND] Create `material-warning-dialog.component.ts` for missing materials → Artifacts: [material-warning-dialog.component.ts](src/FamilyLibrary.Web/src/app/features/queue/components/material-warning-dialog/)
 
 ### Integration - US4
 

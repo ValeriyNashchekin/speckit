@@ -1,0 +1,243 @@
+using Autodesk.Revit.DB;
+using FamilyLibrary.Plugin.Core.Entities;
+using FamilyLibrary.Plugin.Core.Enums;
+using FamilyLibrary.Plugin.Core.Interfaces;
+using FamilyLibrary.Plugin.Infrastructure.ExtensibleStorage;
+
+namespace FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services;
+
+/// <summary>
+/// Service for scanning system family types (WallType, FloorType, etc.).
+/// Uses FilteredElementCollector with optimized filters.
+/// </summary>
+public class SystemTypeScannerService
+{
+    private readonly IEsService _esService;
+
+    // GroupA categories: CompoundStructure support
+    private static readonly BuiltInCategory[] GroupACategories =
+    {
+        BuiltInCategory.OST_Walls,
+        BuiltInCategory.OST_Floors,
+        BuiltInCategory.OST_Roofs,
+        BuiltInCategory.OST_Ceilings,
+        BuiltInCategory.OST_StructuralFoundation
+    };
+
+    // GroupE categories: Simple parameters only
+    private static readonly BuiltInCategory[] GroupECategories =
+    {
+        BuiltInCategory.OST_Levels,
+        BuiltInCategory.OST_Grids,
+        BuiltInCategory.OST_Ramps,
+        BuiltInCategory.OST_BuildingPad
+    };
+
+    public SystemTypeScannerService() : this(new EsService()) { }
+
+    public SystemTypeScannerService(IEsService esService)
+    {
+        _esService = esService;
+    }
+
+    /// <summary>
+    /// Scans document for system family types of specified categories.
+    /// </summary>
+    public List<SystemTypeInfo> ScanSystemTypes(Document document, params BuiltInCategory[] categories)
+    {
+        if (document == null || categories == null || categories.Length == 0)
+            return new List<SystemTypeInfo>();
+
+        // Collect ElementTypes ONCE - avoid collector in loop
+        var elementTypes = new FilteredElementCollector(document)
+            .WhereElementIsElementType()
+            .ToElements();
+
+        var result = new List<SystemTypeInfo>();
+        var categorySet = new HashSet<BuiltInCategory>(categories);
+
+        foreach (var elementType in elementTypes)
+        {
+            var category = elementType.Category;
+            if (category == null) continue;
+
+            var bic = (BuiltInCategory)GetElementIdValue(category.Id);
+            if (!categorySet.Contains(bic)) continue;
+
+            var info = CreateSystemTypeInfo(elementType, bic);
+            if (info != null)
+                result.Add(info);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Gets the system family group for a category.
+    /// </summary>
+    public SystemFamilyGroup GetGroupForCategory(BuiltInCategory category)
+    {
+        if (Array.IndexOf(GroupACategories, category) >= 0)
+            return SystemFamilyGroup.GroupA;
+
+        if (Array.IndexOf(GroupECategories, category) >= 0)
+            return SystemFamilyGroup.GroupE;
+
+        return SystemFamilyGroup.GroupA; // Default
+    }
+
+    /// <summary>
+    /// Gets all WallTypes from document.
+    /// </summary>
+    public List<SystemTypeInfo> GetWallTypes(Document document)
+    {
+        return ScanSystemTypes(document, BuiltInCategory.OST_Walls);
+    }
+
+    /// <summary>
+    /// Gets all FloorTypes from document.
+    /// </summary>
+    public List<SystemTypeInfo> GetFloorTypes(Document document)
+    {
+        return ScanSystemTypes(document, BuiltInCategory.OST_Floors);
+    }
+
+    /// <summary>
+    /// Gets all RoofTypes from document.
+    /// </summary>
+    public List<SystemTypeInfo> GetRoofTypes(Document document)
+    {
+        return ScanSystemTypes(document, BuiltInCategory.OST_Roofs);
+    }
+
+    /// <summary>
+    /// Gets all CeilingTypes from document.
+    /// </summary>
+    public List<SystemTypeInfo> GetCeilingTypes(Document document)
+    {
+        return ScanSystemTypes(document, BuiltInCategory.OST_Ceilings);
+    }
+
+    /// <summary>
+    /// Gets all FoundationTypes from document.
+    /// </summary>
+    public List<SystemTypeInfo> GetFoundationTypes(Document document)
+    {
+        return ScanSystemTypes(document, BuiltInCategory.OST_StructuralFoundation);
+    }
+
+    /// <summary>
+    /// Gets all GroupA types (Walls, Floors, Roofs, Ceilings, Foundations).
+    /// </summary>
+    public List<SystemTypeInfo> GetGroupATypes(Document document)
+    {
+        return ScanSystemTypes(document, GroupACategories);
+    }
+
+    /// <summary>
+    /// Gets levels and grids (GroupE).
+    /// </summary>
+    public List<SystemTypeInfo> GetSimpleSystemTypes(Document document)
+    {
+        if (document == null) return new List<SystemTypeInfo>();
+
+        var result = new List<SystemTypeInfo>();
+
+        // Collect Levels
+        var levels = new FilteredElementCollector(document)
+            .OfClass(typeof(Level))
+            .WhereElementIsNotElementType()
+            .Cast<Level>();
+
+        foreach (var level in levels)
+        {
+            var info = CreateSystemTypeInfoFromElement(level, BuiltInCategory.OST_Levels, "Level");
+            if (info != null) result.Add(info);
+        }
+
+        // Collect Grids
+        var grids = new FilteredElementCollector(document)
+            .OfClass(typeof(Grid))
+            .WhereElementIsNotElementType()
+            .Cast<Grid>();
+
+        foreach (var grid in grids)
+        {
+            var info = CreateSystemTypeInfoFromElement(grid, BuiltInCategory.OST_Grids, "Grid");
+            if (info != null) result.Add(info);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Gets all system types from all supported categories.
+    /// </summary>
+    public List<SystemTypeInfo> GetAllSystemTypes(Document document)
+    {
+        var allCategories = GroupACategories.Concat(GroupECategories).ToArray();
+        return ScanSystemTypes(document, allCategories);
+    }
+
+    private SystemTypeInfo? CreateSystemTypeInfo(Element elementType, BuiltInCategory category)
+    {
+        var stampData = _esService.ReadStamp(elementType);
+        var group = GetGroupForCategory(category);
+
+        return new SystemTypeInfo
+        {
+            UniqueId = elementType.UniqueId,
+            TypeName = elementType.Name,
+            Category = category.ToString().Replace("OST_", ""),
+            SystemFamily = GetSystemFamilyName(elementType),
+            Group = group,
+            ElementId = elementType.Id,
+            HasStamp = stampData?.IsValid == true,
+            StampData = stampData
+        };
+    }
+
+    private SystemTypeInfo? CreateSystemTypeInfoFromElement(
+        Element element, 
+        BuiltInCategory category, 
+        string systemFamily)
+    {
+        var stampData = _esService.ReadStamp(element);
+
+        return new SystemTypeInfo
+        {
+            UniqueId = element.UniqueId,
+            TypeName = element.Name,
+            Category = category.ToString().Replace("OST_", ""),
+            SystemFamily = systemFamily,
+            Group = SystemFamilyGroup.GroupE,
+            ElementId = element.Id,
+            HasStamp = stampData?.IsValid == true,
+            StampData = stampData
+        };
+    }
+
+    private static string GetSystemFamilyName(Element elementType)
+    {
+        return elementType switch
+        {
+            WallType _ => "Wall",
+            FloorType _ => "Floor",
+            RoofType _ => "Roof",
+            CeilingType _ => "Ceiling",
+            _ => elementType.Category?.Name ?? "Unknown"
+        };
+    }
+
+    /// <summary>
+    /// Gets the integer value of an ElementId in a version-compatible way.
+    /// </summary>
+    private static int GetElementIdValue(ElementId elementId)
+    {
+#if REVIT2024 || REVIT2025 || REVIT2026
+        return (int)elementId.Value;
+#else
+        return elementId.IntegerValue;
+#endif
+    }
+}

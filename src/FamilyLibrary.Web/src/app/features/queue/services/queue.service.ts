@@ -10,6 +10,10 @@ import {
   Family,
   FamilyListRequest,
 } from '../../../core/models/family.model';
+import {
+  SystemType,
+  SystemTypeListRequest,
+} from '../../../core/models/system-type.model';
 
 export interface PagedResult<T> {
   data: T[];
@@ -125,5 +129,39 @@ export class QueueService {
   // Library statistics
   getStatistics(): Observable<LibraryStatistics> {
     return this.apiService.get<LibraryStatistics>('/statistics');
+  }
+
+  // System Types endpoints
+  getSystemTypes(
+    page: number,
+    pageSize: number,
+    filters?: SystemTypeListRequest,
+  ): Observable<PagedResult<SystemType>> {
+    const params: Record<string, string | number | boolean> = {
+      page,
+      pageSize,
+    };
+
+    if (filters?.searchTerm) {
+      params['searchTerm'] = filters.searchTerm;
+    }
+    if (filters?.roleId) {
+      params['roleId'] = filters.roleId;
+    }
+    if (filters?.category) {
+      params['category'] = filters.category;
+    }
+
+    return this.apiService
+      .get<PaginatedResponse<SystemType>>('/system-types', { params })
+      .pipe(
+        map(response => ({
+          data: response.data,
+          page: response.page,
+          pageSize: response.pageSize,
+          totalCount: response.totalCount,
+          totalPages: response.totalPages,
+        })),
+      );
   }
 }

@@ -28,6 +28,7 @@ public static class DependencyInjection
         services.AddScoped<IRecognitionRuleService, RecognitionRuleService>();
         services.AddScoped<IFamilyService, FamilyService>();
         services.AddScoped<IDraftService, DraftService>();
+        services.AddScoped<ISystemTypeService, SystemTypeService>();
 
         return services;
     }

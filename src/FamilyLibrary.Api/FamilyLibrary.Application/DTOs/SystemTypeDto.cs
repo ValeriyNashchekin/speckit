@@ -33,3 +33,12 @@ public record CreateSystemTypeDto
     public required string Json { get; init; }
     public required string Hash { get; init; }
 }
+
+/// <summary>
+/// DTO for updating an existing SystemType.
+/// </summary>
+public record UpdateSystemTypeDto
+{
+    public required string Json { get; init; }
+    public required string Hash { get; init; }
+}
