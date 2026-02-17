@@ -147,12 +147,12 @@
 
 ### Frontend - US1
 
-- [ ] T070 [P] [US1] [FRONTEND] Create `roles.service.ts` in `src/FamilyLibrary.Web/src/app/features/roles/services/`
-- [ ] T071 [P] [US1] [FRONTEND] Create `role-list.component.ts` using p-table in `src/FamilyLibrary.Web/src/app/features/roles/components/`
-- [ ] T072 [US1] [FRONTEND] Create `role-editor.component.ts` using p-dialog for create/edit
-- [ ] T073 [US1] [FRONTEND] Create `role-import.component.ts` with p-fileUpload for Excel import
-- [ ] T074 [US1] [FRONTEND] Add roles routes to `src/FamilyLibrary.Web/src/app/app.routes.ts`
-- [ ] T075 [US1] [FRONTEND] Create roles state management using Signals in `roles.store.ts`
+- [X] T070 [P] [US1] [FRONTEND] Create `roles.service.ts` in `src/FamilyLibrary.Web/src/app/features/roles/services/` → Artifacts: [roles.service.ts](src/FamilyLibrary.Web/src/app/features/roles/services/roles.service.ts)
+- [X] T071 [P] [US1] [FRONTEND] Create `role-list.component.ts` using p-table in `src/FamilyLibrary.Web/src/app/features/roles/components/` → Artifacts: [role-list](src/FamilyLibrary.Web/src/app/features/roles/components/role-list/)
+- [X] T072 [US1] [FRONTEND] Create `role-editor.component.ts` using p-dialog for create/edit → Artifacts: [role-editor](src/FamilyLibrary.Web/src/app/features/roles/components/role-editor/)
+- [X] T073 [US1] [FRONTEND] Create `role-import.component.ts` with p-fileUpload for Excel import → Artifacts: [role-import](src/FamilyLibrary.Web/src/app/features/roles/components/role-import/)
+- [X] T074 [US1] [FRONTEND] Add roles routes to `src/FamilyLibrary.Web/src/app/app.routes.ts` → Artifacts: [roles.routes.ts](src/FamilyLibrary.Web/src/app/features/roles/roles.routes.ts)
+- [X] T075 [US1] [FRONTEND] Create roles state management using Signals in `roles.store.ts` → Artifacts: [roles.store.ts](src/FamilyLibrary.Web/src/app/features/roles/roles.store.ts)
 
 ### Integration - US1
 
