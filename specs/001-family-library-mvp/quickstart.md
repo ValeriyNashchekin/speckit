@@ -102,14 +102,20 @@ az storage container create --name family-library --connection-string "DefaultEn
 
 ## 4. Backend API (Clean Architecture)
 
-The backend follows **Layered Clean Architecture** with 4 projects:
+The backend follows **Layered Clean Architecture** with 4 projects and **separate solution**:
 
 ```
-src/
-├── FamilyLibrary.Domain/         # Entities, Enums, Interfaces (NO dependencies)
-├── FamilyLibrary.Application/    # Services, DTOs, Validators, Mappers
-├── FamilyLibrary.Infrastructure/ # DbContext, Repositories, BlobStorage
-└── FamilyLibrary.Api/            # Controllers, Middleware, Program.cs
+src/FamilyLibrary.Api/                    # Backend folder
+├── FamilyLibrary.Domain/                 # Entities, Enums, Interfaces (NO dependencies)
+├── FamilyLibrary.Application/            # Services, DTOs, Validators, Mappers
+├── FamilyLibrary.Infrastructure/         # DbContext, Repositories, BlobStorage
+├── FamilyLibrary.Api/                    # Controllers, Middleware, Program.cs
+├── tests/                                # Backend test projects
+│   ├── FamilyLibrary.Domain.Tests/
+│   ├── FamilyLibrary.Application.Tests/
+│   ├── FamilyLibrary.Infrastructure.Tests/
+│   └── FamilyLibrary.Api.Tests/
+└── FamilyLibrary.Backend.sln             # ⭐ Backend Solution
 ```
 
 ### Run Backend
@@ -119,9 +125,10 @@ src/
 cd src/FamilyLibrary.Api
 
 # Restore dependencies
-dotnet restore
+dotnet restore FamilyLibrary.Backend.sln
 
 # Run
+cd FamilyLibrary.Api
 dotnet run
 
 # API will be available at:
@@ -187,17 +194,45 @@ export const environment = {
 
 ---
 
-## 6. Revit Plugin
+## 6. Revit Plugin (Nice3point Template)
+
+The plugin uses **Nice3point.Revit.Templates** with separate solution:
+
+```
+src/FamilyLibrary.Plugin/                 # Plugin folder
+├── source/
+│   └── FamilyLibrary.Plugin/             # Main plugin project
+│       ├── Commands/                     # IExternalCommand implementations
+│       ├── Core/                         # Shared entities, interfaces
+│       ├── Infrastructure/               # ES, Hashing, WebView2
+│       └── PluginApplication.cs          # IExternalApplication
+├── build/                                # ModularPipelines build system
+├── installer/                            # WixSharp installer
+├── .run/                                 # Rider run configurations
+├── FamilyLibrary.Plugin.sln              # ⭐ Plugin Solution
+├── global.json                           # SDK version
+└── Changelog.md
+```
+
+### Install Template (first time)
+
+```bash
+dotnet new install Nice3point.Revit.Templates
+```
 
 ### Build
 
 ```bash
 cd src/FamilyLibrary.Plugin
 
-# Build for Revit 2024
+# Build for all Revit versions
+dotnet build FamilyLibrary.Plugin.sln -c Release
+
+# Or specific framework:
+# Revit 2020-2024
 dotnet build -c Release -f net48
 
-# Build for Revit 2026
+# Revit 2025-2026
 dotnet build -c Release -f net8.0-windows
 ```
 
@@ -240,7 +275,7 @@ docker-compose up -d
 # docker start azurite
 
 # Terminal 2: Backend
-cd src/FamilyLibrary.Api && dotnet run
+cd src/FamilyLibrary.Api/FamilyLibrary.Api && dotnet run
 
 # Terminal 3: Frontend
 cd src/FamilyLibrary.Web && npm start
@@ -396,29 +431,54 @@ openapi-generator-cli generate \
 
 ## Architecture Reference
 
+### Solutions Structure
+
+| Component | Solution | Location |
+|-----------|----------|----------|
+| Backend | `FamilyLibrary.Backend.sln` | `src/FamilyLibrary.Api/` |
+| Revit Plugin | `FamilyLibrary.Plugin.sln` | `src/FamilyLibrary.Plugin/` |
+| Frontend | Angular CLI | `src/FamilyLibrary.Web/` |
+
+### Backend (Clean Architecture)
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    Api Layer                            │
-│  src/FamilyLibrary.Api/                                │
+│  src/FamilyLibrary.Api/FamilyLibrary.Api/              │
 │  (Controllers, Middleware, Program.cs)                  │
 └───────────────────────────┬─────────────────────────────┘
                             │ depends on
 ┌───────────────────────────▼─────────────────────────────┐
 │                Infrastructure Layer                     │
-│  src/FamilyLibrary.Infrastructure/                     │
+│  src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/   │
 │  (DbContext, Repositories, BlobStorage, External)       │
 └───────────────────────────┬─────────────────────────────┘
                             │ depends on
 ┌───────────────────────────▼─────────────────────────────┐
 │                 Application Layer                       │
-│  src/FamilyLibrary.Application/                        │
+│  src/FamilyLibrary.Api/FamilyLibrary.Application/      │
 │  (Services, DTOs, Validators, Mappers, Interfaces)      │
 └───────────────────────────┬─────────────────────────────┘
                             │ depends on
 ┌───────────────────────────▼─────────────────────────────┐
 │                   Domain Layer                          │
-│  src/FamilyLibrary.Domain/                             │
+│  src/FamilyLibrary.Api/FamilyLibrary.Domain/           │
 │  (Entities, Enums, Value Objects, Domain Interfaces)    │
 │  NO external dependencies                               │
 └─────────────────────────────────────────────────────────┘
 ```
+
+### Plugin (Nice3point Template)
+
+```
+src/FamilyLibrary.Plugin/
+├── source/FamilyLibrary.Plugin/    # Main project (multi-target)
+│   ├── Commands/                   # Flat command structure
+│   ├── Core/                       # Clean C# (no Revit API)
+│   └── Infrastructure/             # Revit API, ES, WebView2
+├── build/                          # ModularPipelines
+├── installer/                      # WixSharp MSI
+└── FamilyLibrary.Plugin.sln
+```
+
+**Multi-target**: net48 (Revit 2020-2024) + net8.0-windows (Revit 2025-2026)

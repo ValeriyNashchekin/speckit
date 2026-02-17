@@ -86,159 +86,183 @@ specs/001-family-library-mvp/
 ```text
 src/
 ├── # ============================================================
-├── # BACKEND: Clean Architecture (Layered) - 4 Projects
+├── # BACKEND: Clean Architecture (Layered) - Separate Solution
 ├── # ============================================================
 │
-├── FamilyLibrary.Domain/                     # Core Layer (NO external dependencies)
-│   ├── Entities/                             # Business entities
-│   │   ├── FamilyRole.cs
-│   │   ├── Category.cs
-│   │   ├── Tag.cs
-│   │   ├── Family.cs
-│   │   ├── FamilyVersion.cs
-│   │   ├── SystemType.cs
-│   │   ├── Draft.cs
-│   │   └── RecognitionRule.cs
-│   ├── ValueObjects/                         # Immutable value objects
-│   │   └── ContentHash.cs
-│   ├── Enums/                                # Domain enumerations
-│   │   ├── RoleType.cs
-│   │   ├── DraftStatus.cs
-│   │   ├── SystemFamilyGroup.cs
-│   │   └── RecognitionOperator.cs
-│   ├── Events/                               # Domain events
-│   │   ├── FamilyPublishedEvent.cs
-│   │   └── RoleCreatedEvent.cs
-│   ├── Exceptions/                           # Domain exceptions
-│   │   ├── EntityNotFoundException.cs
-│   │   └── BusinessRuleViolationException.cs
-│   ├── Interfaces/                           # Repository interfaces
-│   │   ├── IFamilyRoleRepository.cs
-│   │   ├── IFamilyRepository.cs
-│   │   ├── ISystemTypeRepository.cs
-│   │   └── IDraftRepository.cs
-│   └── FamilyLibrary.Domain.csproj           # ONLY System dependencies
-│
-├── FamilyLibrary.Application/               # Application Layer
-│   ├── DTOs/                                 # Data Transfer Objects
-│   │   ├── FamilyRoles/
-│   │   │   ├── FamilyRoleDto.cs
-│   │   │   ├── CreateRoleRequest.cs
-│   │   │   └── UpdateRoleRequest.cs
-│   │   ├── Families/
-│   │   │   ├── FamilyDto.cs
-│   │   │   ├── FamilyDetailDto.cs
-│   │   │   └── FamilyVersionDto.cs
-│   │   └── Common/
-│   │       └── PagedResult.cs
-│   ├── Interfaces/                           # Service interfaces
-│   │   ├── IFamilyRoleService.cs
-│   │   ├── IFamilyService.cs
-│   │   ├── IRecognitionService.cs
-│   │   ├── IBlobStorageService.cs
-│   │   └── IHashService.cs
-│   ├── Services/                             # Application services
-│   │   ├── FamilyRoleService.cs
-│   │   ├── FamilyService.cs
-│   │   ├── RecognitionRuleService.cs
-│   │   └── ExcelImportService.cs
-│   ├── Validators/                           # FluentValidation validators
-│   │   ├── CreateRoleValidator.cs
-│   │   └── RecognitionRuleValidator.cs
-│   ├── Mappers/                              # AutoMapper profiles
-│   │   └── MappingProfile.cs
-│   ├── Specifications/                       # Query specifications
-│   │   └── FamilyRoleSpecification.cs
-│   ├── DependencyInjection.cs                # DI registration
-│   └── FamilyLibrary.Application.csproj
-│
-├── FamilyLibrary.Infrastructure/            # Infrastructure Layer
-│   ├── Data/
-│   │   ├── AppDbContext.cs                   # EF Core DbContext
-│   │   ├── Configurations/                   # EF Core configurations
-│   │   │   ├── FamilyRoleConfiguration.cs
-│   │   │   ├── FamilyConfiguration.cs
-│   │   │   └── SystemTypeConfiguration.cs
-│   │   └── Migrations/                       # EF Core migrations
-│   ├── Repositories/                         # Repository implementations
-│   │   ├── FamilyRoleRepository.cs
-│   │   ├── FamilyRepository.cs
-│   │   ├── SystemTypeRepository.cs
-│   │   └── DraftRepository.cs
-│   ├── Services/                             # External services
-│   │   ├── BlobStorageService.cs             # Azure Blob implementation
-│   │   └── HashService.cs                    # Content hash implementation
-│   ├── DependencyInjection.cs                # DI registration
-│   └── FamilyLibrary.Infrastructure.csproj
-│
-├── FamilyLibrary.Api/                       # Presentation Layer
-│   ├── Controllers/                          # API endpoints
-│   │   ├── FamilyRolesController.cs
-│   │   ├── CategoriesController.cs
-│   │   ├── TagsController.cs
-│   │   ├── RecognitionRulesController.cs
-│   │   ├── FamiliesController.cs
-│   │   ├── SystemTypesController.cs
-│   │   └── DraftsController.cs
-│   ├── Filters/                              # Action filters
-│   │   └── ValidationFilter.cs
-│   ├── Middleware/                           # Custom middleware
-│   │   ├── ExceptionHandlingMiddleware.cs
-│   │   └── RequestLoggingMiddleware.cs
-│   ├── Program.cs                            # Composition root
-│   ├── appsettings.json
-│   ├── appsettings.Development.json
-│   └── FamilyLibrary.Api.csproj
+├── FamilyLibrary.Api/                       # Backend folder (contains all 4 projects)
+│   │
+│   ├── FamilyLibrary.Domain/                # Core Layer (NO external dependencies)
+│   │   ├── Entities/                        # Business entities
+│   │   │   ├── FamilyRole.cs
+│   │   │   ├── Category.cs
+│   │   │   ├── Tag.cs
+│   │   │   ├── Family.cs
+│   │   │   ├── FamilyVersion.cs
+│   │   │   ├── SystemType.cs
+│   │   │   ├── Draft.cs
+│   │   │   └── RecognitionRule.cs
+│   │   ├── ValueObjects/                    # Immutable value objects
+│   │   │   └── ContentHash.cs
+│   │   ├── Enums/                           # Domain enumerations
+│   │   │   ├── RoleType.cs
+│   │   │   ├── DraftStatus.cs
+│   │   │   ├── SystemFamilyGroup.cs
+│   │   │   └── RecognitionOperator.cs
+│   │   ├── Events/                          # Domain events
+│   │   │   ├── FamilyPublishedEvent.cs
+│   │   │   └── RoleCreatedEvent.cs
+│   │   ├── Exceptions/                      # Domain exceptions
+│   │   │   ├── EntityNotFoundException.cs
+│   │   │   └── BusinessRuleViolationException.cs
+│   │   ├── Interfaces/                      # Repository interfaces
+│   │   │   ├── IFamilyRoleRepository.cs
+│   │   │   ├── IFamilyRepository.cs
+│   │   │   ├── ISystemTypeRepository.cs
+│   │   │   └── IDraftRepository.cs
+│   │   └── FamilyLibrary.Domain.csproj      # ONLY System dependencies
+│   │
+│   ├── FamilyLibrary.Application/           # Application Layer
+│   │   ├── DTOs/                            # Data Transfer Objects
+│   │   │   ├── FamilyRoles/
+│   │   │   │   ├── FamilyRoleDto.cs
+│   │   │   │   ├── CreateRoleRequest.cs
+│   │   │   │   └── UpdateRoleRequest.cs
+│   │   │   ├── Families/
+│   │   │   │   ├── FamilyDto.cs
+│   │   │   │   ├── FamilyDetailDto.cs
+│   │   │   │   └── FamilyVersionDto.cs
+│   │   │   └── Common/
+│   │   │       └── PagedResult.cs
+│   │   ├── Interfaces/                      # Service interfaces
+│   │   │   ├── IFamilyRoleService.cs
+│   │   │   ├── IFamilyService.cs
+│   │   │   ├── IRecognitionService.cs
+│   │   │   ├── IBlobStorageService.cs
+│   │   │   └── IHashService.cs
+│   │   ├── Services/                        # Application services
+│   │   │   ├── FamilyRoleService.cs
+│   │   │   ├── FamilyService.cs
+│   │   │   ├── RecognitionRuleService.cs
+│   │   │   └── ExcelImportService.cs
+│   │   ├── Validators/                      # FluentValidation validators
+│   │   │   ├── CreateRoleValidator.cs
+│   │   │   └── RecognitionRuleValidator.cs
+│   │   ├── Mappers/                         # AutoMapper profiles
+│   │   │   └── MappingProfile.cs
+│   │   ├── DependencyInjection.cs           # DI registration
+│   │   └── FamilyLibrary.Application.csproj
+│   │
+│   ├── FamilyLibrary.Infrastructure/        # Infrastructure Layer
+│   │   ├── Data/
+│   │   │   ├── AppDbContext.cs              # EF Core DbContext
+│   │   │   ├── Configurations/              # EF Core configurations
+│   │   │   │   ├── FamilyRoleConfiguration.cs
+│   │   │   │   ├── FamilyConfiguration.cs
+│   │   │   │   └── SystemTypeConfiguration.cs
+│   │   │   └── Migrations/                  # EF Core migrations
+│   │   ├── Repositories/                    # Repository implementations
+│   │   │   ├── FamilyRoleRepository.cs
+│   │   │   ├── FamilyRepository.cs
+│   │   │   ├── SystemTypeRepository.cs
+│   │   │   └── DraftRepository.cs
+│   │   ├── Services/                        # External services
+│   │   │   ├── BlobStorageService.cs        # Azure Blob implementation
+│   │   │   └── HashService.cs               # Content hash implementation
+│   │   ├── DependencyInjection.cs           # DI registration
+│   │   └── FamilyLibrary.Infrastructure.csproj
+│   │
+│   ├── FamilyLibrary.Api/                   # Presentation Layer
+│   │   ├── Controllers/                     # API endpoints
+│   │   │   ├── FamilyRolesController.cs
+│   │   │   ├── CategoriesController.cs
+│   │   │   ├── TagsController.cs
+│   │   │   ├── RecognitionRulesController.cs
+│   │   │   ├── FamiliesController.cs
+│   │   │   ├── SystemTypesController.cs
+│   │   │   └── DraftsController.cs
+│   │   ├── Filters/                         # Action filters
+│   │   │   └── ValidationFilter.cs
+│   │   ├── Middleware/                      # Custom middleware
+│   │   │   ├── ExceptionHandlingMiddleware.cs
+│   │   │   └── RequestLoggingMiddleware.cs
+│   │   ├── Program.cs                       # Composition root
+│   │   ├── appsettings.json
+│   │   ├── appsettings.Development.json
+│   │   └── FamilyLibrary.Api.csproj
+│   │
+│   ├── FamilyLibrary.Backend.sln            # ⭐ Backend Solution
+│   │
+│   └── tests/                               # Backend tests
+│       ├── FamilyLibrary.Domain.Tests/
+│       ├── FamilyLibrary.Application.Tests/
+│       ├── FamilyLibrary.Infrastructure.Tests/
+│       └── FamilyLibrary.Api.Tests/
 │
 ├── # ============================================================
-├── # PLUGIN: Revit Plugin (Flat Command Structure)
+├── # PLUGIN: Revit Plugin - Separate Solution (Nice3point Template)
 ├── # ============================================================
 │
-├── FamilyLibrary.Plugin/                    # Revit Plugin
-│   ├── Commands/                             # Flat command structure
-│   │   ├── OpenLibraryCommand/
-│   │   │   ├── OpenLibraryCommand.cs         # IExternalCommand
-│   │   │   └── OpenLibraryAvailability.cs
-│   │   ├── StampFamilyCommand/
-│   │   │   ├── ViewModels/
-│   │   │   │   └── QueueViewModel.cs
-│   │   │   ├── Views/
-│   │   │   │   └── QueueWindow.xaml
-│   │   │   ├── Models/
-│   │   │   │   └── QueueItemModel.cs        # Clean C#, no Revit API
-│   │   │   ├── Services/
-│   │   │   │   ├── FamilyScannerService.cs   # Revit API here
-│   │   │   │   ├── StampService.cs
-│   │   │   │   └── PublishService.cs
-│   │   │   ├── Enums/
-│   │   │   │   └── QueueStatus.cs
-│   │   │   └── StampFamilyCommand.cs
-│   │   ├── LoadFamilyCommand/
-│   │   │   ├── Services/
-│   │   │   │   ├── FamilyDownloader.cs
-│   │   │   │   └── TypeCatalogParser.cs
-│   │   │   ├── Views/
-│   │   │   │   └── TypeSelectionWindow.xaml
-│   │   │   └── LoadFamilyCommand.cs
-│   │   └── PublishFromEditorCommand/
-│   │       └── PublishFromEditorCommand.cs
-│   ├── Core/                                 # Shared plugin core
-│   │   ├── Entities/                         # Clean C#, no Revit API
-│   │   ├── Interfaces/
-│   │   └── Events/
-│   ├── Infrastructure/
-│   │   ├── ExtensibleStorage/
-│   │   │   ├── EsSchema.cs
-│   │   │   └── EsService.cs
-│   │   ├── Hashing/
-│   │   │   ├── PartAtomNormalizer.cs
-│   │   │   └── ContentHashService.cs
-│   │   └── WebView2/
-│   │       ├── WebViewHost.cs
-│   │       └── RevitBridge.cs
-│   ├── PluginApplication.cs                  # IExternalApplication
-│   ├── FamilyLibrary.Plugin.csproj          # Multi-target: net48;net8.0-windows
-│   └── FamilyLibrary.Plugin.addin
+├── FamilyLibrary.Plugin/                    # Revit Plugin folder
+│   │
+│   ├── source/                              # Plugin source (Nice3point structure)
+│   │   └── FamilyLibrary.Plugin/            # Main plugin project
+│   │       ├── Commands/                    # Flat command structure
+│   │       │   ├── OpenLibraryCommand/
+│   │       │   │   ├── OpenLibraryCommand.cs
+│   │       │   │   └── OpenLibraryAvailability.cs
+│   │       │   ├── StampFamilyCommand/
+│   │       │   │   ├── ViewModels/
+│   │       │   │   │   └── QueueViewModel.cs
+│   │       │   │   ├── Views/
+│   │       │   │   │   └── QueueWindow.xaml
+│   │       │   │   ├── Models/              # Clean C#, no Revit API
+│   │       │   │   │   └── QueueItemModel.cs
+│   │       │   │   ├── Services/            # Revit API here
+│   │       │   │   │   ├── FamilyScannerService.cs
+│   │       │   │   │   ├── StampService.cs
+│   │       │   │   │   └── PublishService.cs
+│   │       │   │   └── StampFamilyCommand.cs
+│   │       │   ├── LoadFamilyCommand/
+│   │       │   │   ├── Services/
+│   │       │   │   │   ├── FamilyDownloader.cs
+│   │       │   │   │   └── TypeCatalogParser.cs
+│   │       │   │   ├── Views/
+│   │       │   │   │   └── TypeSelectionWindow.xaml
+│   │       │   │   └── LoadFamilyCommand.cs
+│   │       │   └── PublishFromEditorCommand/
+│   │       │       └── PublishFromEditorCommand.cs
+│   │       ├── Core/                        # Shared plugin core
+│   │       │   ├── Entities/                # Clean C#, no Revit API
+│   │       │   ├── Interfaces/
+│   │       │   └── Events/
+│   │       ├── Infrastructure/
+│   │       │   ├── ExtensibleStorage/
+│   │       │   │   ├── EsSchema.cs
+│   │       │   │   └── EsService.cs
+│   │       │   ├── Hashing/
+│   │       │   │   ├── PartAtomNormalizer.cs
+│   │       │   │   └── ContentHashService.cs
+│   │       │   └── WebView2/
+│   │       │       ├── WebViewHost.cs
+│   │       │       └── RevitBridge.cs
+│   │       ├── PluginApplication.cs         # IExternalApplication
+│   │       └── FamilyLibrary.Plugin.csproj  # Multi-target: net48;net8.0-windows
+│   │
+│   ├── build/                               # ModularPipelines build system
+│   │   └── Build.cs
+│   │
+│   ├── installer/                           # WixSharp installer
+│   │   └── Installer.cs
+│   │
+│   ├── .run/                                # Rider run configurations
+│   │   └── Revit 2024.run.xml
+│   │
+│   ├── FamilyLibrary.Plugin.sln             # ⭐ Plugin Solution
+│   │
+│   ├── .gitignore
+│   ├── Changelog.md
+│   ├── Readme.md
+│   └── global.json                          # SDK version
 │
 ├── # ============================================================
 ├── # FRONTEND: Angular 21 (Feature-Based with Core/Shared)
@@ -367,33 +391,27 @@ src/
 │   └── tsconfig.json
 │
 ├── # ============================================================
-├── # TESTS
-├── # ============================================================
-│
-├── tests/
-│   ├── FamilyLibrary.Domain.Tests/
-│   │   └── Entities/
-│   ├── FamilyLibrary.Application.Tests/
-│   │   ├── Services/
-│   │   └── Validators/
-│   ├── FamilyLibrary.Infrastructure.Tests/
-│   │   └── Repositories/
-│   ├── FamilyLibrary.Api.Tests/
-│   │   ├── Controllers/
-│   │   └── Integration/
-│   ├── FamilyLibrary.Plugin.Tests/
-│   │   └── Services/
-│   └── FamilyLibrary.Web.Tests/
-│       └── features/
-│
-├── # ============================================================
-├── # INFRASTRUCTURE
+├── # INFRASTRUCTURE (Repository Root)
 ├── # ============================================================
 │
 ├── docker-compose.yml                        # Azurite + SQL Server
 ├── .github/workflows/ci.yml
-└── FamilyLibrary.sln                        # Solution file
+└── README.md
 ```
+
+**Solution Structure**:
+
+| Component | Solution File | Location |
+|-----------|---------------|----------|
+| Backend | `FamilyLibrary.Backend.sln` | `src/FamilyLibrary.Api/` |
+| Revit Plugin | `FamilyLibrary.Plugin.sln` | `src/FamilyLibrary.Plugin/` |
+| Frontend | Angular CLI (no .sln) | `src/FamilyLibrary.Web/` |
+
+**Template Used for Plugin**: `Nice3point.Revit.Templates` - Revit AddIn Solution
+- Multi-target Revit 2020-2026 (extended from default 2021-2026)
+- ModularPipelines build system
+- WixSharp installer
+- CI/CD configs
 
 **Structure Decision**:
 

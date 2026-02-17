@@ -17,20 +17,20 @@
 
 ## Phase 1: Setup (Project Infrastructure)
 
-**Purpose**: Initialize all three components (Plugin, Backend, Frontend)
+**Purpose**: Initialize all three components (Plugin, Backend, Frontend) with separate solutions
 
-### Backend Setup (Clean Architecture - 4 Projects)
+### Backend Setup (Clean Architecture - 4 Projects, Separate Solution)
 
-- [ ] T001 Create solution file `FamilyLibrary.sln` at repository root
-- [ ] T002 Create Domain project `src/FamilyLibrary.Domain/FamilyLibrary.Domain.csproj` (.NET 10, NO external dependencies)
-- [ ] T003 [P] Create Application project `src/FamilyLibrary.Application/FamilyLibrary.Application.csproj` (.NET 10, references Domain)
-- [ ] T004 [P] Create Infrastructure project `src/FamilyLibrary.Infrastructure/FamilyLibrary.Infrastructure.csproj` (.NET 10, references Application)
-- [ ] T005 [P] Create Api project `src/FamilyLibrary.Api/FamilyLibrary.Api.csproj` (.NET 10, references Application, Infrastructure)
+- [ ] T001 Create Backend folder `src/FamilyLibrary.Api/` with solution file `FamilyLibrary.Backend.sln`
+- [ ] T002 Create Domain project `src/FamilyLibrary.Api/FamilyLibrary.Domain/FamilyLibrary.Domain.csproj` (.NET 10, NO external dependencies)
+- [ ] T003 [P] Create Application project `src/FamilyLibrary.Api/FamilyLibrary.Application/FamilyLibrary.Application.csproj` (.NET 10, references Domain)
+- [ ] T004 [P] Create Infrastructure project `src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/FamilyLibrary.Infrastructure.csproj` (.NET 10, references Application)
+- [ ] T005 [P] Create Api project `src/FamilyLibrary.Api/FamilyLibrary.Api/FamilyLibrary.Api.csproj` (.NET 10, references Application, Infrastructure)
 - [ ] T006 Add NuGet packages to Domain: `MediatR` (optional for CQRS)
 - [ ] T007 [P] Add NuGet packages to Application: `MediatR`, `FluentValidation`, `AutoMapper` or Mapster
 - [ ] T008 [P] Add NuGet packages to Infrastructure: `Microsoft.EntityFrameworkCore.SqlServer`, `Azure.Storage.Blobs`
 - [ ] T009 [P] Add NuGet packages to Api: `Swashbuckle.AspNetCore`
-- [ ] T010 [P] Configure `Program.cs` with DI, Swagger, CORS in `src/FamilyLibrary.Api/`
+- [ ] T010 [P] Configure `Program.cs` with DI, Swagger, CORS in `src/FamilyLibrary.Api/FamilyLibrary.Api/`
 - [ ] T011 [P] Create `appsettings.json` and `appsettings.Development.json` with connection strings in Api project
 
 ### Frontend Setup
@@ -42,18 +42,21 @@
 - [ ] T016 [P] Configure `src/app/app.config.ts` with standalone components, provideHttpClient
 - [ ] T017 [P] Create feature-based folder structure: `core/`, `shared/`, `features/`, `layout/`
 
-### Plugin Setup
+### Plugin Setup (Nice3point Template - Separate Solution)
 
-- [ ] T018 Create Plugin project `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin.csproj` (multi-target: net48;net8.0-windows)
-- [ ] T019 [P] Add NuGet packages: `Microsoft.Web.WebView2`, `Newtonsoft.Json`, `Azure.Storage.Blobs`
-- [ ] T020 [P] Create `.addin` manifest files for Revit 2024 and 2026
-- [ ] T021 Create Plugin entry point `PluginApplication.cs` implementing IExternalApplication
+- [ ] T018 Install Nice3point templates: `dotnet new install Nice3point.Revit.Templates`
+- [ ] T019 Create Plugin from template: `dotnet new revit-addin-solution -n FamilyLibrary.Plugin -o src/FamilyLibrary.Plugin`
+- [ ] T020 Extend Revit version support to 2020 (add net472 target, Revit 2020 references)
+- [ ] T021 [P] Add NuGet packages: `Microsoft.Web.WebView2`, `Azure.Storage.Blobs`
+- [ ] T022 [P] Configure multi-target frameworks: net48 (2020-2024) + net8.0-windows (2025-2026)
+- [ ] T023 [P] Update `.addin` manifest files for all Revit versions (2020-2026)
+- [ ] T024 Create Plugin entry point `PluginApplication.cs` implementing IExternalApplication
 
 ### Infrastructure Setup
 
-- [ ] T022 Create `docker-compose.yml` at repository root with Azurite + SQL Server services
-- [ ] T023 [P] Create `.github/workflows/ci.yml` for build and test automation
-- [ ] T024 [P] Create `.editorconfig` for code style consistency
+- [ ] T025 Create `docker-compose.yml` at repository root with Azurite + SQL Server services
+- [ ] T026 [P] Create `.github/workflows/ci.yml` for build and test automation
+- [ ] T027 [P] Create `.editorconfig` for code style consistency
 
 **Checkpoint**: All projects created and build successfully
 
@@ -67,51 +70,51 @@
 
 ### Backend Foundation - Domain Layer
 
-- [ ] T025 Create all Entity classes in `src/FamilyLibrary.Domain/Entities/` per data-model.md (FamilyRole, Category, Tag, Family, FamilyVersion, SystemType, Draft, FamilyNameMapping)
-- [ ] T026 [P] Create all Enums in `src/FamilyLibrary.Domain/Enums/` (RoleType, DraftStatus, SystemFamilyGroup, RecognitionOperator, LogicalOperator)
-- [ ] T027 [P] Create Domain Exceptions in `src/FamilyLibrary.Domain/Exceptions/` (EntityNotFoundException, BusinessRuleException)
-- [ ] T028 [P] Create Repository Interfaces in `src/FamilyLibrary.Domain/Interfaces/` (IFamilyRoleRepository, IFamilyRepository, etc.)
+- [ ] T028 Create all Entity classes in `src/FamilyLibrary.Api/FamilyLibrary.Domain/Entities/` per data-model.md (FamilyRole, Category, Tag, Family, FamilyVersion, SystemType, Draft, FamilyNameMapping)
+- [ ] T029 [P] Create all Enums in `src/FamilyLibrary.Api/FamilyLibrary.Domain/Enums/` (RoleType, DraftStatus, SystemFamilyGroup, RecognitionOperator, LogicalOperator)
+- [ ] T030 [P] Create Domain Exceptions in `src/FamilyLibrary.Api/FamilyLibrary.Domain/Exceptions/` (EntityNotFoundException, BusinessRuleException)
+- [ ] T031 [P] Create Repository Interfaces in `src/FamilyLibrary.Api/FamilyLibrary.Domain/Interfaces/` (IFamilyRoleRepository, IFamilyRepository, etc.)
 
 ### Backend Foundation - Application Layer
 
-- [ ] T029 Create all DTOs in `src/FamilyLibrary.Application/DTOs/` for API contracts
-- [ ] T030 [P] Create Mapper profiles in `src/FamilyLibrary.Application/Mappings/` (AutoMapper or Mapster)
-- [ ] T031 [P] Create Validators in `src/FamilyLibrary.Application/Validators/` using FluentValidation
-- [ ] T032 Create Service Interfaces in `src/FamilyLibrary.Application/Interfaces/` (IFamilyRoleService, IFamilyService, etc.)
-- [ ] T033 [P] Create Common Behaviors in `src/FamilyLibrary.Application/Common/` (PagedResult, Result pattern)
+- [ ] T032 Create all DTOs in `src/FamilyLibrary.Api/FamilyLibrary.Application/DTOs/` for API contracts
+- [ ] T033 [P] Create Mapper profiles in `src/FamilyLibrary.Api/FamilyLibrary.Application/Mappings/` (AutoMapper or Mapster)
+- [ ] T034 [P] Create Validators in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/` using FluentValidation
+- [ ] T035 Create Service Interfaces in `src/FamilyLibrary.Api/FamilyLibrary.Application/Interfaces/` (IFamilyRoleService, IFamilyService, etc.)
+- [ ] T036 [P] Create Common Behaviors in `src/FamilyLibrary.Api/FamilyLibrary.Application/Common/` (PagedResult, Result pattern)
 
 ### Backend Foundation - Infrastructure Layer
 
-- [ ] T034 Create `src/FamilyLibrary.Infrastructure/Data/AppDbContext.cs` with DbContext configuration
-- [ ] T035 [P] Create Entity Configurations in `src/FamilyLibrary.Infrastructure/Data/Configurations/`
-- [ ] T036 Create all Repository implementations in `src/FamilyLibrary.Infrastructure/Repositories/`
-- [ ] T037 Create `src/FamilyLibrary.Infrastructure/Services/BlobStorageService.cs`
-- [ ] T038 Create initial EF Core migration: `dotnet ef migrations add InitialCreate --project src/FamilyLibrary.Infrastructure --startup-project src/FamilyLibrary.Api`
-- [ ] T039 [P] Create DependencyInjection.cs in Infrastructure for service registration
+- [ ] T037 Create `src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Data/AppDbContext.cs` with DbContext configuration
+- [ ] T038 [P] Create Entity Configurations in `src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Data/Configurations/`
+- [ ] T039 Create all Repository implementations in `src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Repositories/`
+- [ ] T040 Create `src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Services/BlobStorageService.cs`
+- [ ] T041 Create initial EF Core migration: `dotnet ef migrations add InitialCreate --project src/FamilyLibrary.Api/FamilyLibrary.Infrastructure --startup-project src/FamilyLibrary.Api/FamilyLibrary.Api`
+- [ ] T042 [P] Create DependencyInjection.cs in Infrastructure for service registration
 
 ### Backend Foundation - Api Layer
 
-- [ ] T040 Create base `BaseController.cs` with common error handling in `src/FamilyLibrary.Api/Controllers/`
-- [ ] T041 [P] Create Global Exception Handler Middleware in `src/FamilyLibrary.Api/Middleware/`
-- [ ] T042 Configure Dependency Injection in `Program.cs` (Layered: Domain → Application → Infrastructure)
+- [ ] T043 Create base `BaseController.cs` with common error handling in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/`
+- [ ] T044 [P] Create Global Exception Handler Middleware in `src/FamilyLibrary.Api/FamilyLibrary.Api/Middleware/`
+- [ ] T045 Configure Dependency Injection in `Program.cs` (Layered: Domain → Application → Infrastructure)
 
 ### Frontend Foundation
 
-- [ ] T043 Create `src/FamilyLibrary.Web/src/app/core/api/api.service.ts` for HTTP client wrapper
-- [ ] T044 [P] Create `src/FamilyLibrary.Web/src/app/core/interceptors/` with auth and error interceptors
-- [ ] T045 [P] Generate TypeScript models from OpenAPI using openapi-generator-cli
-- [ ] T046 Create `src/FamilyLibrary.Web/src/app/core/models/` with all interfaces matching DTOs
-- [ ] T047 Create `src/FamilyLibrary.Web/src/app/layout/main-layout/` with app shell (header, sidebar)
-- [ ] T048 [P] Create `src/FamilyLibrary.Web/src/app/shared/components/` for reusable PrimeNG wrappers
+- [ ] T046 Create `src/FamilyLibrary.Web/src/app/core/api/api.service.ts` for HTTP client wrapper
+- [ ] T047 [P] Create `src/FamilyLibrary.Web/src/app/core/interceptors/` with auth and error interceptors
+- [ ] T048 [P] Generate TypeScript models from OpenAPI using openapi-generator-cli
+- [ ] T049 Create `src/FamilyLibrary.Web/src/app/core/models/` with all interfaces matching DTOs
+- [ ] T050 Create `src/FamilyLibrary.Web/src/app/layout/main-layout/` with app shell (header, sidebar)
+- [ ] T051 [P] Create `src/FamilyLibrary.Web/src/app/shared/components/` for reusable PrimeNG wrappers
 
 ### Plugin Foundation
 
-- [ ] T049 Create `src/FamilyLibrary.Plugin/Core/Entities/` with shared domain entities (no Revit API)
-- [ ] T050 [P] Create `src/FamilyLibrary.Plugin/Core/Interfaces/` with service contracts
-- [ ] T051 Create `src/FamilyLibrary.Plugin/Infrastructure/ExtensibleStorage/EsSchema.cs` with GUID definition
-- [ ] T052 [P] Create `src/FamilyLibrary.Plugin/Infrastructure/ExtensibleStorage/EsService.cs` for ES read/write
-- [ ] T053 Create `src/FamilyLibrary.Plugin/Infrastructure/Hashing/ContentHashService.cs` per research.md R1-R2
-- [ ] T054 Create `src/FamilyLibrary.Plugin/Infrastructure/WebView2/WebViewHost.cs` for embedded browser
+- [ ] T052 Create `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Core/Entities/` with shared domain entities (no Revit API)
+- [ ] T053 [P] Create `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Core/Interfaces/` with service contracts
+- [ ] T054 Create `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Infrastructure/ExtensibleStorage/EsSchema.cs` with GUID definition
+- [ ] T055 [P] Create `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Infrastructure/ExtensibleStorage/EsService.cs` for ES read/write
+- [ ] T056 Create `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Infrastructure/Hashing/ContentHashService.cs` per research.md R1-R2
+- [ ] T057 Create `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Infrastructure/WebView2/WebViewHost.cs` for embedded browser
 
 **Checkpoint**: Foundation ready - user story implementation can begin
 
@@ -125,14 +128,14 @@
 
 ### Backend - US1
 
-- [ ] T055 [P] [US1] Create `FamilyRoleService.cs` in `src/FamilyLibrary.Application/Services/`
-- [ ] T056 [P] [US1] Create `FamilyRoleValidator.cs` in `src/FamilyLibrary.Application/Validators/`
-- [ ] T057 [US1] Create `FamilyRoleController.cs` in `src/FamilyLibrary.Api/Controllers/`
+- [ ] T058 [P] [US1] Create `FamilyRoleService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/`
+- [ ] T059 [P] [US1] Create `FamilyRoleValidator.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/`
+- [ ] T060 [US1] Create `FamilyRoleController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/`
 - [ ] T058 [US1] Implement CRUD endpoints: GET /roles, POST /roles, PUT /roles/{id}, DELETE /roles/{id}
 - [ ] T059 [US1] Implement POST /roles/import for Excel upload and preview
 - [ ] T060 [US1] Implement batch create logic with duplicate skip in `FamilyRoleService.cs`
-- [ ] T061 [P] [US1] Create `CategoryService.cs` and `TagService.cs` in `src/FamilyLibrary.Application/Services/`
-- [ ] T062 [P] [US1] Create `CategoryController.cs` and `TagController.cs` in `src/FamilyLibrary.Api/Controllers/`
+- [ ] T064 [P] [US1] Create `CategoryService.cs` and `TagService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/`
+- [ ] T065 [P] [US1] Create `CategoryController.cs` and `TagController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/`
 
 ### Frontend - US1
 
@@ -160,9 +163,9 @@
 
 ### Backend - US2
 
-- [ ] T071 [P] [US2] Create `RecognitionRuleService.cs` with formula parser in `src/FamilyLibrary.Application/Services/`
-- [ ] T072 [P] [US2] Create `RecognitionRuleValidator.cs` in `src/FamilyLibrary.Application/Validators/`
-- [ ] T073 [US2] Create `RecognitionRuleController.cs` in `src/FamilyLibrary.Api/Controllers/`
+- [ ] T074 [P] [US2] Create `RecognitionRuleService.cs` with formula parser in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/`
+- [ ] T075 [P] [US2] Create `RecognitionRuleValidator.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/`
+- [ ] T076 [US2] Create `RecognitionRuleController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/`
 - [ ] T074 [US2] Implement CRUD endpoints: GET/POST/PUT/DELETE /recognition-rules
 - [ ] T075 [US2] Implement POST /recognition-rules/validate for syntax validation
 - [ ] T076 [US2] Implement POST /recognition-rules/test for testing rule against family name
@@ -194,23 +197,23 @@
 
 ### Plugin - US3 (Core)
 
-- [ ] T086 [P] [US3] Create `StampFamilyCommand/` structure in `src/FamilyLibrary.Plugin/Commands/`
-- [ ] T087 [US3] Create `FamilyScannerService.cs` in `src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/`
-- [ ] T088 [US3] Create `StampService.cs` implementing ES write logic
-- [ ] T089 [US3] Create `PublishService.cs` with Blob upload + API integration
-- [ ] T090 [US3] Create `LibraryQueueViewModel.cs` for Tab 2 state management
-- [ ] T091 [US3] Create `LibraryQueueView.xaml` with 3 tabs (All Families, Queue, Status)
+- [ ] T089 [P] [US3] Create `StampFamilyCommand/` structure in `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Commands/`
+- [ ] T090 [US3] Create `FamilyScannerService.cs` in `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/`
+- [ ] T091 [US3] Create `StampService.cs` implementing ES write logic
+- [ ] T092 [US3] Create `PublishService.cs` with Blob upload + API integration
+- [ ] T093 [US3] Create `LibraryQueueViewModel.cs` for Tab 2 state management
+- [ ] T094 [US3] Create `LibraryQueueView.xaml` with 3 tabs (All Families, Queue, Status)
 
 ### Backend - US3
 
-- [ ] T092 [P] [US3] Create `FamilyService.cs` in `src/FamilyLibrary.Application/Services/`
-- [ ] T093 [P] [US3] Create `FamilyValidator.cs` in `src/FamilyLibrary.Application/Validators/`
-- [ ] T094 [US3] Create `FamilyController.cs` in `src/FamilyLibrary.Api/Controllers/`
+- [ ] T095 [P] [US3] Create `FamilyService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/`
+- [ ] T096 [P] [US3] Create `FamilyValidator.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/`
+- [ ] T097 [US3] Create `FamilyController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/`
 - [ ] T095 [US3] Implement POST /families/publish with file upload
 - [ ] T096 [US3] Implement POST /families/validate-hash for duplicate detection
 - [ ] T097 [US3] Implement POST /families/batch-check for status checking
-- [ ] T098 [P] [US3] Create `DraftService.cs` in `src/FamilyLibrary.Application/Services/`
-- [ ] T099 [US3] Create `DraftController.cs` in `src/FamilyLibrary.Api/Controllers/`
+- [ ] T101 [P] [US3] Create `DraftService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/`
+- [ ] T102 [US3] Create `DraftController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/`
 - [ ] T100 [US3] Implement Draft CRUD: GET/POST/PUT/DELETE /drafts
 
 ### Frontend - US3
@@ -243,19 +246,19 @@
 
 ### Backend - US4
 
-- [ ] T110 [P] [US4] Create `SystemTypeService.cs` in `src/FamilyLibrary.Application/Services/`
-- [ ] T111 [P] [US4] Create `SystemTypeValidator.cs` in `src/FamilyLibrary.Application/Validators/`
-- [ ] T112 [US4] Create `SystemTypeController.cs` in `src/FamilyLibrary.Api/Controllers/`
+- [ ] T113 [P] [US4] Create `SystemTypeService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/`
+- [ ] T114 [P] [US4] Create `SystemTypeValidator.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/`
+- [ ] T115 [US4] Create `SystemTypeController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/`
 - [ ] T113 [US4] Implement CRUD: GET/POST /system-types with JSON storage
 - [ ] T114 [US4] Implement CompoundStructure JSON serialization for Group A
 - [ ] T115 [US4] Implement simple parameter JSON serialization for Group E
 
 ### Plugin - US4
 
-- [ ] T116 [P] [US4] Create `SystemTypeScannerService.cs` in `src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/`
-- [ ] T117 [US4] Create `CompoundStructureSerializer.cs` for WallType/FloorType/RoofType
-- [ ] T118 [US4] Create `SystemTypePublisher.cs` for JSON upload
-- [ ] T119 [US4] Implement material mapping warning dialog in UI
+- [ ] T119 [P] [US4] Create `SystemTypeScannerService.cs` in `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/`
+- [ ] T120 [US4] Create `CompoundStructureSerializer.cs` for WallType/FloorType/RoofType
+- [ ] T121 [US4] Create `SystemTypePublisher.cs` for JSON upload
+- [ ] T122 [US4] Implement material mapping warning dialog in UI
 
 ### Frontend - US4
 
@@ -295,8 +298,8 @@
 
 ### Plugin - US5
 
-- [ ] T134 [US5] Create `OpenLibraryCommand.cs` in `src/FamilyLibrary.Plugin/Commands/`
-- [ ] T135 [US5] Wire OpenLibraryCommand to WebView2 host with library URL
+- [ ] T137 [US5] Create `OpenLibraryCommand.cs` in `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Commands/`
+- [ ] T138 [US5] Wire OpenLibraryCommand to WebView2 host with library URL
 
 ### Integration - US5
 
@@ -319,10 +322,10 @@
 
 ### Plugin - US6
 
-- [ ] T139 [P] [US6] Create `LoadFamilyCommand/` structure in `src/FamilyLibrary.Plugin/Commands/`
-- [ ] T140 [US6] Create `FamilyDownloader.cs` in `src/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/`
-- [ ] T141 [US6] Create `FamilyLoader.cs` wrapping Revit LoadFamily() API
-- [ ] T142 [US6] Implement file rename to OriginalFileName logic
+- [ ] T142 [P] [US6] Create `LoadFamilyCommand/` structure in `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Commands/`
+- [ ] T143 [US6] Create `FamilyDownloader.cs` in `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/`
+- [ ] T144 [US6] Create `FamilyLoader.cs` wrapping Revit LoadFamily() API
+- [ ] T145 [US6] Implement file rename to OriginalFileName logic
 
 ### Frontend - US6
 
@@ -345,9 +348,9 @@
 
 ### Plugin - US7
 
-- [ ] T146 [US7] Create `PublishFromEditorCommand.cs` detecting Document.Kind == FamilyDocument
-- [ ] T147 [US7] Modify LibraryQueueView to hide Tab 1 and Tab 3 in Family Editor mode
-- [ ] T148 [US7] Auto-add current family to Queue when in Family Editor
+- [ ] T149 [US7] Create `PublishFromEditorCommand.cs` detecting Document.Kind == FamilyDocument in `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Commands/`
+- [ ] T150 [US7] Modify LibraryQueueView to hide Tab 1 and Tab 3 in Family Editor mode
+- [ ] T151 [US7] Auto-add current family to Queue when in Family Editor
 
 ### Integration - US7
 
@@ -370,10 +373,10 @@
 
 ### Plugin - US8
 
-- [ ] T152 [P] [US8] Create `TypeCatalogParser.cs` in `src/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/`
-- [ ] T153 [US8] Create `TypeSelectionWindow.xaml` with dynamic columns from TXT headers
-- [ ] T154 [US8] Create `TypeSelectionViewModel.cs` with search, filter, multi-select
-- [ ] T155 [US8] Implement LoadFamilySymbol for each selected type
+- [ ] T155 [P] [US8] Create `TypeCatalogParser.cs` in `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/`
+- [ ] T156 [US8] Create `TypeSelectionWindow.xaml` with dynamic columns from TXT headers
+- [ ] T157 [US8] Create `TypeSelectionViewModel.cs` with search, filter, multi-select
+- [ ] T158 [US8] Implement LoadFamilySymbol for each selected type
 
 ### Frontend - US8
 
@@ -542,7 +545,7 @@ US7 + US8  # Family Editor, Type Catalogs
 
 | Phase | Task Count | Parallelizable |
 |-------|------------|----------------|
-| Phase 1: Setup | 24 | 18 tasks |
+| Phase 1: Setup | 27 | 18 tasks |
 | Phase 2: Foundational | 30 | 15 tasks |
 | Phase 3: US1 Roles | 16 | 7 tasks |
 | Phase 4: US2 Rules | 15 | 4 tasks |
@@ -553,33 +556,43 @@ US7 + US8  # Family Editor, Type Catalogs
 | Phase 9: US7 Editor | 4 | 0 tasks |
 | Phase 10: US8 Catalog | 9 | 2 tasks |
 | Phase 11: Polish | 16 | 10 tasks |
-| **TOTAL** | **174** | **73 tasks** |
+| **TOTAL** | **177** | **73 tasks** |
 
 ---
 
 ## Clean Architecture Dependency Rule
 
 ```
+Backend Solution: src/FamilyLibrary.Api/FamilyLibrary.Backend.sln
+
 ┌─────────────────────────────────────────────────────────┐
 │                    Api Layer                            │
+│  src/FamilyLibrary.Api/FamilyLibrary.Api/              │
 │  (Controllers, Middleware, Program.cs)                  │
 └───────────────────────────┬─────────────────────────────┘
                             │ depends on
 ┌───────────────────────────▼─────────────────────────────┐
 │                Infrastructure Layer                     │
+│  src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/   │
 │  (DbContext, Repositories, BlobStorage, External)       │
 └───────────────────────────┬─────────────────────────────┘
                             │ depends on
 ┌───────────────────────────▼─────────────────────────────┐
 │                 Application Layer                       │
+│  src/FamilyLibrary.Api/FamilyLibrary.Application/      │
 │  (Services, DTOs, Validators, Mappers, Interfaces)      │
 └───────────────────────────┬─────────────────────────────┘
                             │ depends on
 ┌───────────────────────────▼─────────────────────────────┐
 │                   Domain Layer                          │
+│  src/FamilyLibrary.Api/FamilyLibrary.Domain/           │
 │  (Entities, Enums, Value Objects, Domain Interfaces)    │
 │  NO external dependencies                               │
 └─────────────────────────────────────────────────────────┘
+
+Plugin Solution: src/FamilyLibrary.Plugin/FamilyLibrary.Plugin.sln
+Template: Nice3point.Revit.Templates (Revit AddIn Solution)
+Target: Revit 2020-2026 (net48 + net8.0-windows)
 ```
 
 ---
