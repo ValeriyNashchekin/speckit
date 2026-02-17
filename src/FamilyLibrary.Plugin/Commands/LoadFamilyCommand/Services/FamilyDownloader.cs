@@ -1,6 +1,7 @@
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using FamilyLibrary.Plugin.Infrastructure.Http;
 using Newtonsoft.Json;
 
 namespace FamilyLibrary.Plugin.Commands.LoadFamilyCommand.Services;
@@ -29,41 +30,47 @@ public class FamilyDownloader
     /// </summary>
     public async Task<DownloadResult> DownloadFamilyAsync(Guid familyId, int? version = null)
     {
-        var url = version.HasValue
-            ? $"{_apiBaseUrl}/families/{familyId}/download/{version}"
-            : $"{_apiBaseUrl}/families/{familyId}/download";
-
-        var response = await _httpClient.GetAsync(url);
-        response.EnsureSuccessStatusCode();
-
-        var json = await response.Content.ReadAsStringAsync();
-        var downloadInfo = JsonConvert.DeserializeObject<FamilyDownloadResponse>(json);
-
-        if (downloadInfo == null)
+        return await RetryHelper.ExecuteWithRetryAsync(async () =>
         {
-            throw new InvalidOperationException("Failed to parse download response");
-        }
+            var url = version.HasValue
+                ? $"{_apiBaseUrl}/families/{familyId}/download/{version}"
+                : $"{_apiBaseUrl}/families/{familyId}/download";
 
-        var tempPath = Path.Combine(_tempFolder, downloadInfo.OriginalFileName);
-        await DownloadFileAsync(downloadInfo.DownloadUrl, tempPath);
+            var response = await _httpClient.GetAsync(url).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
 
-        return new DownloadResult
-        {
-            LocalPath = tempPath,
-            OriginalFileName = downloadInfo.OriginalFileName,
-            Hash = downloadInfo.Hash,
-            Version = downloadInfo.Version
-        };
+            var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var downloadInfo = JsonConvert.DeserializeObject<FamilyDownloadResponse>(json);
+
+            if (downloadInfo == null)
+            {
+                throw new InvalidOperationException("Failed to parse download response");
+            }
+
+            var tempPath = Path.Combine(_tempFolder, downloadInfo.OriginalFileName);
+            await DownloadFileAsync(downloadInfo.DownloadUrl, tempPath).ConfigureAwait(false);
+
+            return new DownloadResult
+            {
+                LocalPath = tempPath,
+                OriginalFileName = downloadInfo.OriginalFileName,
+                Hash = downloadInfo.Hash,
+                Version = downloadInfo.Version
+            };
+        }).ConfigureAwait(false);
     }
 
     private async Task DownloadFileAsync(string url, string destinationPath)
     {
-        using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-        response.EnsureSuccessStatusCode();
+        await RetryHelper.ExecuteWithRetryAsync(async () =>
+        {
+            using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
 
-        using var stream = await response.Content.ReadAsStreamAsync();
-        using var fileStream = File.Create(destinationPath);
-        await stream.CopyToAsync(fileStream);
+            using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+            using var fileStream = File.Create(destinationPath);
+            await stream.CopyToAsync(fileStream).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     /// <summary>

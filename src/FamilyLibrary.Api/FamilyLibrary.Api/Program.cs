@@ -1,3 +1,4 @@
+using FamilyLibrary.Api.Middleware;
 using FamilyLibrary.Application;
 using FamilyLibrary.Infrastructure;
 
@@ -10,17 +11,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS for Angular frontend
+// CORS for Angular frontend - configured from appsettings.json
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? ["http://localhost:4200", "https://localhost:5001"];
+
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
+    options.AddPolicy("DefaultPolicy", policy =>
     {
-        policy.WithOrigins(
-                "http://localhost:4200",
-                "http://localhost:5000",
-                "https://localhost:4200",
-                "https://localhost:5000"
-              )
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -36,6 +35,9 @@ builder.Services.AddApplication();
 
 var app = builder.Build();
 
+// Global exception handling middleware - must be first in the pipeline
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 // Configure HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
@@ -44,7 +46,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors();
+app.UseCors("DefaultPolicy");
 app.UseAuthorization();
 app.MapControllers();
 

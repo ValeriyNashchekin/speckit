@@ -4,9 +4,11 @@ using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using Autodesk.Revit.DB;
 using FamilyLibrary.Plugin.Core.Entities;
 using FamilyLibrary.Plugin.Core.Enums;
+using FamilyLibrary.Plugin.Infrastructure.Http;
 using Newtonsoft.Json;
 
 namespace FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services
@@ -190,15 +192,30 @@ namespace FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services
         {
             try
             {
-                var json = JsonConvert.SerializeObject(request);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = _httpClient.PostAsync(_apiBaseUrl + "/system-types", content).Result;
-                return response.IsSuccessStatusCode;
+                return RetryHelper.ExecuteWithRetryAsync(() =>
+                {
+                    var json = JsonConvert.SerializeObject(request);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+                    return ExecutePostRequestAsync(_apiBaseUrl + "/system-types", content);
+                }).Result;
             }
             catch
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Executes a POST request and returns success status.
+        /// </summary>
+        private async Task<bool> ExecutePostRequestAsync(string url, StringContent content)
+        {
+            var response = await _httpClient.PostAsync(url, content).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException($"API returned {(int)response.StatusCode} ({response.StatusCode})");
+            }
+            return true;
         }
 
         /// <summary>

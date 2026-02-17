@@ -1,10 +1,12 @@
 ﻿using System.IO;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using FamilyLibrary.Plugin.Commands.StampFamilyCommand.Models;
 using FamilyLibrary.Plugin.Core.Entities;
 using FamilyLibrary.Plugin.Core.Interfaces;
 using FamilyLibrary.Plugin.Infrastructure.Hashing;
+using FamilyLibrary.Plugin.Infrastructure.Http;
 using Newtonsoft.Json;
 
 namespace FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services;
@@ -123,16 +125,26 @@ public class PublishService
     {
         try
         {
-            var json = JsonConvert.SerializeObject(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            // MVP: Synchronous call for simplicity
-            var response = _httpClient.PostAsync($"{_apiBaseUrl}/families/publish", content).Result;
-            return response.IsSuccessStatusCode;
+            return RetryHelper.ExecuteWithRetryAsync(() =>
+            {
+                var json = JsonConvert.SerializeObject(request);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                return ExecutePostRequestAsync($"{_apiBaseUrl}/families/publish", content);
+            }).Result;
         }
         catch
         {
             return false;
         }
+    }
+
+    private async Task<bool> ExecutePostRequestAsync(string url, StringContent content)
+    {
+        var response = await _httpClient.PostAsync(url, content).ConfigureAwait(false);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException($"API returned {(int)response.StatusCode} ({response.StatusCode})");
+        }
+        return true;
     }
 }

@@ -1,5 +1,6 @@
 using System.Reflection;
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using FamilyLibrary.Application.Interfaces;
 using FamilyLibrary.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,9 @@ public static class DependencyInjection
     {
         // Register all validators from the Application assembly
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+        // Configure FluentValidation auto validation
+        services.AddFluentValidationAutoValidation();
 
         // Register Application services
         services.AddScoped<IFamilyRoleService, FamilyRoleService>();

@@ -417,15 +417,15 @@
 
 ### Security
 
-- [ ] T172 [P] [BACKEND] Add input validation on all endpoints (Validators)
-- [ ] T173 [P] [BACKEND] Configure CORS for production domains
+- [X] T172 [P] [BACKEND] Add input validation on all endpoints (Validators)
+- [X] T173 [P] [BACKEND] Configure CORS for production domains
 - [ ] T174 [BACKEND] Add rate limiting middleware
 
 ### Error Handling
 
-- [ ] T175 [P] [BACKEND] Implement global exception handler in Api layer
-- [ ] T176 [P] [FRONTEND] Add user-friendly error messages in Frontend (p-toast)
-- [ ] T177 [PLUGIN] Implement retry logic with exponential backoff in Plugin
+- [X] T175 [P] [BACKEND] Implement global exception handler in Api layer
+- [X] T176 [P] [FRONTEND] Add user-friendly error messages in Frontend (p-toast)
+- [X] T177 [PLUGIN] Implement retry logic with exponential backoff in Plugin
 
 ### Testing
 
