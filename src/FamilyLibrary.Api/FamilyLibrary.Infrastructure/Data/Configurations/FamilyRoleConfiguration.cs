@@ -23,8 +23,11 @@ public class FamilyRoleConfiguration : IEntityTypeConfiguration<FamilyRoleEntity
         builder.Property(r => r.Description)
             .HasMaxLength(500);
 
+        // Performance indexes per data-model.md
         builder.HasIndex(r => r.Name)
             .IsUnique();
+        builder.HasIndex(r => r.Type);
+        builder.HasIndex(r => r.CategoryId);
 
         builder.HasOne(r => r.Category)
             .WithMany(c => c.FamilyRoles)

@@ -405,14 +405,14 @@
 
 ### Documentation
 
-- [ ] T166 [P] Update quickstart.md with docker-compose instructions
-- [ ] T167 [P] Add OpenAPI codegen instructions to quickstart.md
-- [ ] T168 [P] Create API usage examples in `docs/api-examples.md`
+- [X] T166 [P] Update quickstart.md with docker-compose instructions → Artifacts: [quickstart.md](docs/quickstart.md)
+- [X] T167 [P] Add OpenAPI codegen instructions to quickstart.md
+- [X] T168 [P] Create API usage examples in `docs/api-examples.md` → Artifacts: [api-examples.md](docs/api-examples.md)
 
 ### Performance
 
 - [ ] T169 [BACKEND] Optimize batch-check endpoint for 500+ families
-- [ ] T170 [P] [BACKEND] Add database indexes per data-model.md specifications
+- [X] T170 [P] [BACKEND] Add database indexes per data-model.md specifications → Artifacts: [Migration](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Migrations/)
 - [ ] T171 [FRONTEND] Test virtual scroll performance with 5000+ rows
 
 ### Security

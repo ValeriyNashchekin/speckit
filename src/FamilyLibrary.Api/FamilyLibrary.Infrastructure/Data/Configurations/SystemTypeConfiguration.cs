@@ -42,6 +42,11 @@ public class SystemTypeConfiguration : IEntityTypeConfiguration<SystemTypeEntity
             .IsRequired()
             .HasMaxLength(64);
 
+        // Performance indexes per data-model.md
+        builder.HasIndex(s => s.RoleId);
+        builder.HasIndex(s => new { s.Category, s.TypeName });
+
+        // Unique constraint: one type name per role
         builder.HasIndex(s => new { s.RoleId, s.TypeName })
             .IsUnique();
 

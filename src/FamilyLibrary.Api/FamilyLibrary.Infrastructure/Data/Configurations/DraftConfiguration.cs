@@ -32,10 +32,12 @@ public class DraftConfiguration : IEntityTypeConfiguration<DraftEntity>
         builder.Property(d => d.LastSeen)
             .IsRequired();
 
+        // Performance indexes per data-model.md
         builder.HasIndex(d => d.FamilyUniqueId)
             .IsUnique();
-
         builder.HasIndex(d => d.Status);
+
+        // Note: FamilyId property does not exist on DraftEntity (uses SelectedRoleId instead)
 
         builder.HasOne(d => d.SelectedRole)
             .WithMany()

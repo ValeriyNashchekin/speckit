@@ -22,6 +22,11 @@ public class FamilyConfiguration : IEntityTypeConfiguration<FamilyEntity>
         builder.Property(f => f.RoleId)
             .IsRequired();
 
+        // Performance indexes per data-model.md
+        builder.HasIndex(f => f.RoleId);
+        builder.HasIndex(f => f.FamilyName);
+
+        // Unique constraint: one family name per role
         builder.HasIndex(f => new { f.RoleId, f.FamilyName })
             .IsUnique();
 

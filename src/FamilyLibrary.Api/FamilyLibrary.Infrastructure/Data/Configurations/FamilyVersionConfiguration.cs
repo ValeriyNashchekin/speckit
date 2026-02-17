@@ -55,9 +55,12 @@ public class FamilyVersionConfiguration : IEntityTypeConfiguration<FamilyVersion
             .IsRequired()
             .HasMaxLength(100);
 
+        // Performance indexes per data-model.md
+        builder.HasIndex(v => v.FamilyId);
+        builder.HasIndex(v => v.Hash);
+
+        // Unique constraint: one version per family
         builder.HasIndex(v => new { v.FamilyId, v.Version })
             .IsUnique();
-
-        builder.HasIndex(v => v.Hash);
     }
 }

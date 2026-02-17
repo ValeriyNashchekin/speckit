@@ -23,8 +23,10 @@ public class RecognitionRuleConfiguration : IEntityTypeConfiguration<Recognition
             .IsRequired()
             .HasMaxLength(500);
 
+        // Performance indexes per data-model.md
         builder.HasIndex(r => r.RoleId)
             .IsUnique();
+        // Note: IsActive property does not exist on RecognitionRuleEntity, skipping IsActive index
 
         builder.HasOne(r => r.Role)
             .WithOne(role => role.RecognitionRule)
