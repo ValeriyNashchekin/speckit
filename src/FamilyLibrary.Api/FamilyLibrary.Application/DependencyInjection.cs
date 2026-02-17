@@ -1,13 +1,27 @@
+using System.Reflection;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FamilyLibrary.Application;
 
+/// <summary>
+/// Extension methods for registering Application layer services.
+/// </summary>
 public static class DependencyInjection
 {
+    /// <summary>
+    /// Adds Application layer services to the DI container.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        // Application layer DI registration
-        // Services, Validators, Mappers will be registered here
+        // Register all validators from the Application assembly
+        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+        // Register Application services here (to be added later)
+        // services.AddScoped<IFamilyRoleService, FamilyRoleService>();
+        // services.AddScoped<ICategoryService, CategoryService>();
 
         return services;
     }

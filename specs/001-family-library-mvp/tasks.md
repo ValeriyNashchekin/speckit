@@ -79,8 +79,8 @@
 ### Backend Foundation - Application Layer
 
 - [X] T032 [BACKEND] Create all DTOs in `src/FamilyLibrary.Api/FamilyLibrary.Application/DTOs/` for API contracts
-- [ ] T033 [P] [BACKEND] Create Mapper profiles in `src/FamilyLibrary.Api/FamilyLibrary.Application/Mappings/` (AutoMapper or Mapster)
-- [ ] T034 [P] [BACKEND] Create Validators in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/` using FluentValidation
+- [X] T033 [P] [BACKEND] Create Mapper profiles in `src/FamilyLibrary.Api/FamilyLibrary.Application/Mappings/` (AutoMapper or Mapster) → Artifacts: [MappingProfile.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Mappings/MappingProfile.cs)
+- [X] T034 [P] [BACKEND] Create Validators in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/` using FluentValidation → Artifacts: [10 validators](src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/)
 - [X] T035 [BACKEND] Create Service Interfaces in `src/FamilyLibrary.Api/FamilyLibrary.Application/Interfaces/` (IFamilyRoleService, IFamilyService, etc.)
 - [X] T036 [P] [BACKEND] Create Common Behaviors in `src/FamilyLibrary.Api/FamilyLibrary.Application/Common/` (PagedResult, Result pattern)
 
