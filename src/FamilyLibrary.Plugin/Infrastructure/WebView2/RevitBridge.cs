@@ -1,6 +1,8 @@
 using System.Text;
+using Autodesk.Revit.DB;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using FamilyLibrary.Plugin.Commands.LoadFamilyCommand;
 using FamilyLibrary.Plugin.Core.Interfaces;
 
 namespace FamilyLibrary.Plugin.Infrastructure.WebView2;
@@ -14,10 +16,19 @@ public class RevitBridge : IWebViewBridge
     private readonly WebViewHost _webViewHost;
     private readonly Dictionary<string, List<Action<object>>> _handlers = new();
     private bool _isInitialized;
+    private Document? _activeDocument;
 
     public RevitBridge(WebViewHost webViewHost)
     {
         _webViewHost = webViewHost;
+    }
+
+    /// <summary>
+    /// Sets the active Revit document for load operations.
+    /// </summary>
+    public void SetActiveDocument(Document document)
+    {
+        _activeDocument = document;
     }
 
     public void Initialize()
@@ -113,8 +124,7 @@ public class RevitBridge : IWebViewBridge
                 break;
 
             case "ui:load-family":
-                // TODO: Handle load request
-                // Will be implemented in US6
+                HandleLoadFamilyRequest(message.Payload as JObject);
                 break;
 
             case "ui:log":
@@ -159,5 +169,61 @@ public class RevitBridge : IWebViewBridge
 #else
         return "Unknown";
 #endif
+    }
+
+    private void HandleLoadFamilyRequest(JObject? payload)
+    {
+        try
+        {
+            var familyIdStr = payload?["familyId"]?.ToString();
+            var versionToken = payload?["version"];
+
+            if (string.IsNullOrEmpty(familyIdStr))
+            {
+                SendLoadFamilyResult(success: false, message: "Family ID is required");
+                return;
+            }
+
+            if (!Guid.TryParse(familyIdStr, out var familyId))
+            {
+                SendLoadFamilyResult(success: false, message: "Invalid Family ID format");
+                return;
+            }
+
+            int? version = versionToken != null ? versionToken.Value<int?>() : null;
+
+            if (_activeDocument == null)
+            {
+                SendLoadFamilyResult(success: false, message: "No active document");
+                return;
+            }
+
+            var result = LoadFamilyCommand.LoadFamilyFromLibrary(_activeDocument, familyId, version);
+
+            SendLoadFamilyResult(
+                success: result.Success,
+                message: result.Message,
+                familyName: result.Family?.Name,
+                wasNewlyLoaded: result.WasNewlyLoaded
+            );
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Load family error: {ex.Message}");
+            SendLoadFamilyResult(success: false, message: ex.Message);
+        }
+    }
+
+    private void SendLoadFamilyResult(bool success, string message, string? familyName = null, bool? wasNewlyLoaded = null)
+    {
+        var payload = new
+        {
+            success,
+            message,
+            familyName,
+            wasNewlyLoaded
+        };
+
+        SendEvent("revit:family-loaded", payload);
     }
 }

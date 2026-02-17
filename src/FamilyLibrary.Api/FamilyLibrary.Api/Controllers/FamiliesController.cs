@@ -150,6 +150,25 @@ public class FamiliesController(IFamilyService service) : BaseController
         var results = await service.BatchCheckAsync(request.Hashes, ct);
         return Ok(results);
     }
+
+    /// <summary>
+    /// Gets download URL for a family version.
+    /// </summary>
+    /// <param name="id">The family ID.</param>
+    /// <param name="version">Optional version number. If not specified, returns the latest version.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Download URL and metadata.</returns>
+    [HttpGet("{id:guid}/download/{version:int?}")]
+    [ProducesResponseType<FamilyDownloadDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<FamilyDownloadDto>> Download(
+        Guid id,
+        int? version = null,
+        CancellationToken ct = default)
+    {
+        var result = await service.GetDownloadUrlAsync(id, version, ct);
+        return Ok(result);
+    }
 }
 
 /// <summary>

@@ -325,20 +325,20 @@
 
 ### Backend - US6
 
-- [ ] T144 [US6] [BACKEND] Implement GET /families/{id}/download/{version} returning SAS token or file in FamilyController
-- [ ] T145 [P] [US6] [BACKEND] Implement status check integration with batch-check endpoint
+- [X] T144 [US6] [BACKEND] Implement GET /families/{id}/download/{version} returning SAS token or file in FamilyController → Artifacts: [FamiliesController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/FamiliesController.cs)
+- [X] T145 [P] [US6] [BACKEND] Implement status check integration with batch-check endpoint (already existed)
 
 ### Plugin - US6
 
-- [ ] T146 [P] [US6] [PLUGIN] Create `LoadFamilyCommand/` structure in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/`
-- [ ] T147 [US6] [PLUGIN] Create `FamilyDownloader.cs` in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/`
-- [ ] T148 [US6] [PLUGIN] Create `FamilyLoader.cs` wrapping Revit LoadFamily() API
-- [ ] T149 [US6] [PLUGIN] Implement file rename to OriginalFileName logic
+- [X] T146 [P] [US6] [PLUGIN] Create `LoadFamilyCommand/` structure in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/` → Artifacts: [LoadFamilyCommand.cs](src/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/)
+- [X] T147 [US6] [PLUGIN] Create `FamilyDownloader.cs` in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/` → Artifacts: [FamilyDownloader.cs](src/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/FamilyDownloader.cs)
+- [X] T148 [US6] [PLUGIN] Create `FamilyLoader.cs` wrapping Revit LoadFamily() API → Artifacts: [FamilyLoader.cs](src/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/FamilyLoader.cs)
+- [X] T149 [US6] [PLUGIN] Implement file rename to OriginalFileName logic (downloaded files use OriginalFileName)
 
 ### Frontend - US6
 
-- [ ] T150 [US6] [FRONTEND] Add "Load to Project" button to family-detail component
-- [ ] T151 [US6] [FRONTEND] Wire button to `ui:load-family` WebView2 event
+- [X] T150 [US6] [FRONTEND] Add "Load to Project" button to family-detail component
+- [X] T151 [US6] [FRONTEND] Wire button to `ui:load-family` WebView2 event
 
 ### Integration - US6
 

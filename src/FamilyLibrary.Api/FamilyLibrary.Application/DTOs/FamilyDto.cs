@@ -53,3 +53,29 @@ public record FamilyStatusDto
     public string? FamilyName { get; init; }
     public int? CurrentVersion { get; init; }
 }
+
+/// <summary>
+/// DTO for family download URL response.
+/// </summary>
+public record FamilyDownloadDto
+{
+    /// <summary>
+    /// SAS URL for downloading the family file.
+    /// </summary>
+    public required string DownloadUrl { get; init; }
+
+    /// <summary>
+    /// Original file name of the family.
+    /// </summary>
+    public required string OriginalFileName { get; init; }
+
+    /// <summary>
+    /// Content hash of the family file.
+    /// </summary>
+    public required string Hash { get; init; }
+
+    /// <summary>
+    /// Version number of the family.
+    /// </summary>
+    public int Version { get; init; }
+}

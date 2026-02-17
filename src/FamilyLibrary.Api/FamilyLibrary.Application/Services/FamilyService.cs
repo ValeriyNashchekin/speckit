@@ -201,7 +201,7 @@ public class FamilyService : IFamilyService
         foreach (var hash in hashes)
         {
             var family = await _familyRepository.GetByHashAsync(hash, cancellationToken);
-            
+
             results.Add(new FamilyStatusDto
             {
                 Hash = hash,
@@ -213,6 +213,52 @@ public class FamilyService : IFamilyService
         }
 
         return results;
+    }
+
+    public async Task<FamilyDownloadDto> GetDownloadUrlAsync(
+        Guid familyId,
+        int? version,
+        CancellationToken cancellationToken = default)
+    {
+        var family = await _familyRepository.GetWithVersionsAsync(familyId, cancellationToken)
+            ?? throw new NotFoundException(nameof(FamilyEntity), familyId);
+
+        FamilyVersionEntity versionEntity;
+        if (version.HasValue)
+        {
+            versionEntity = family.Versions.FirstOrDefault(v => v.Version == version.Value)
+                ?? throw new NotFoundException("FamilyVersion", version.Value);
+        }
+        else
+        {
+            versionEntity = family.Versions.OrderByDescending(v => v.Version).First();
+        }
+
+        // Extract blob name from the full blob path
+        var blobUri = new Uri(versionEntity.BlobPath);
+        var blobName = blobUri.AbsolutePath.TrimStart('/');
+
+        // Remove container prefix from blob name if present
+        var containerPrefix = $"{FamiliesContainer}/";
+        if (blobName.StartsWith(containerPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            blobName = blobName.Substring(containerPrefix.Length);
+        }
+
+        // Generate SAS token for download
+        var downloadUrl = await _blobStorageService.GetSasUrlAsync(
+            FamiliesContainer,
+            blobName,
+            TimeSpan.FromMinutes(30),
+            cancellationToken);
+
+        return new FamilyDownloadDto
+        {
+            DownloadUrl = downloadUrl,
+            OriginalFileName = versionEntity.OriginalFileName,
+            Hash = versionEntity.Hash,
+            Version = versionEntity.Version
+        };
     }
 
     private static async Task<string> CalculateHashAsync(Stream stream, CancellationToken cancellationToken)

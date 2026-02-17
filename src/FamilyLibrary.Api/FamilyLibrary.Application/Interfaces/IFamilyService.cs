@@ -61,4 +61,16 @@ public interface IFamilyService
     Task<List<FamilyStatusDto>> BatchCheckAsync(
         List<string> hashes,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets download URL for a family version.
+    /// </summary>
+    /// <param name="familyId">The family ID.</param>
+    /// <param name="version">Optional specific version number. If null, returns the latest version.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Download URL and metadata for the family file.</returns>
+    Task<FamilyDownloadDto> GetDownloadUrlAsync(
+        Guid familyId,
+        int? version,
+        CancellationToken cancellationToken = default);
 }
