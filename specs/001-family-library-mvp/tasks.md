@@ -116,6 +116,13 @@
 - [ ] T056 Create `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Infrastructure/Hashing/ContentHashService.cs` per research.md R1-R2
 - [ ] T057 Create `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Infrastructure/WebView2/WebViewHost.cs` for embedded browser
 
+### Integration Foundation (WebView2 Events)
+
+- [ ] T058 Create `src/FamilyLibrary.Web/src/app/core/models/webview-events.model.ts` with all interfaces from `contracts/webview-events.md`
+- [ ] T059 [P] Create `src/FamilyLibrary.Web/src/app/core/services/revit-bridge.service.ts` for WebView2 communication
+- [ ] T060 [P] Create `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Infrastructure/WebView2/RevitBridge.cs` implementing event protocol from contract
+- [ ] T061 Create mock data `src/FamilyLibrary.Web/src/assets/mock/webview-events.json` for standalone browser testing
+
 **Checkpoint**: Foundation ready - user story implementation can begin
 
 ---
@@ -426,6 +433,14 @@
 - [ ] T173 [P] Add Frontend tests for roles feature
 - [ ] T174 Run quickstart.md validation end-to-end
 
+### Integration Verification
+
+- [ ] T175 [P] Verify all WebView2 events match `contracts/webview-events.md`
+- [ ] T176 [P] Test Plugin → Frontend event roundtrips in Revit
+- [ ] T177 [P] Test Frontend → Plugin event roundtrips in Revit
+- [ ] T178 Verify OpenAPI contract matches actual Backend endpoints
+- [ ] T179 Run full integration test: Scan → Stamp → Publish → Load
+
 ---
 
 ## Dependencies & Execution Order
@@ -546,7 +561,7 @@ US7 + US8  # Family Editor, Type Catalogs
 | Phase | Task Count | Parallelizable |
 |-------|------------|----------------|
 | Phase 1: Setup | 27 | 18 tasks |
-| Phase 2: Foundational | 30 | 15 tasks |
+| Phase 2: Foundational | 34 | 17 tasks |
 | Phase 3: US1 Roles | 16 | 7 tasks |
 | Phase 4: US2 Rules | 15 | 4 tasks |
 | Phase 5: US3 Loadable | 24 | 7 tasks |
@@ -555,8 +570,8 @@ US7 + US8  # Family Editor, Type Catalogs
 | Phase 8: US6 Load | 9 | 2 tasks |
 | Phase 9: US7 Editor | 4 | 0 tasks |
 | Phase 10: US8 Catalog | 9 | 2 tasks |
-| Phase 11: Polish | 16 | 10 tasks |
-| **TOTAL** | **177** | **73 tasks** |
+| Phase 11: Polish | 21 | 13 tasks |
+| **TOTAL** | **186** | **77 tasks** |
 
 ---
 
@@ -621,3 +636,19 @@ Structure (AS CREATED by template):
 - **Application Layer**: Business logic, DTOs, Validators
 - **Infrastructure Layer**: Data access, external services
 - **Api Layer**: Controllers, HTTP concerns only
+
+## Integration Contracts (MUST READ for all agents)
+
+**All agents MUST follow these contracts exactly:**
+
+| Contract | File | Consumers |
+|----------|------|-----------|
+| REST API | `contracts/api.yaml` | Backend, Frontend, Plugin |
+| WebView2 Events | `contracts/webview-events.md` | Plugin, Frontend |
+| Data Model | `data-model.md` | Backend, Plugin (Core) |
+
+**Before implementing ANY integration:**
+1. Read the relevant contract file
+2. Use exact event/endpoint names from contract
+3. Use exact payload structures from contract
+4. Run integration tests after completion

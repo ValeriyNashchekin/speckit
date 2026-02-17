@@ -258,3 +258,69 @@ bin/
 | R6 | Multi-target | net48 + net8.0-windows with conditional compilation |
 
 All research items resolved — ready for Phase 1 design.
+
+---
+
+## R7: WebView2 Event Contract
+
+**Question**: How to ensure Frontend and Plugin agents use the same event format?
+
+### Decision
+Formalize all WebView2 events in a single contract file with TypeScript interfaces.
+
+### Rationale
+- Different agents write Plugin (C#) and Frontend (TypeScript)
+- PostMessage format must be identical on both sides
+- TypeScript interfaces can be referenced by C# agent for payload structure
+- Single source of truth prevents integration bugs
+
+### Contract Location
+`contracts/webview-events.md` — complete event specification
+
+### Key Events
+
+| Direction | Event | Purpose |
+|-----------|-------|---------|
+| Plugin → UI | `revit:ready` | Plugin loaded |
+| Plugin → UI | `revit:families:list` | Scan results |
+| Plugin → UI | `revit:stamp:result` | Stamp operation result |
+| Plugin → UI | `revit:publish:result` | Publish operation result |
+| Plugin → UI | `revit:load:result` | Load operation result |
+| UI → Plugin | `ui:scan-families` | Request document scan |
+| UI → Plugin | `ui:stamp` | Stamp family with role |
+| UI → Plugin | `ui:publish` | Publish to library |
+| UI → Plugin | `ui:load-family` | Load from library |
+
+### Integration Strategy
+
+1. **Frontend Agent**: Reads `contracts/webview-events.md`, generates TypeScript interfaces
+2. **Plugin Agent**: Reads same contract, implements matching C# event handlers
+3. **Integration Test**: Verify event roundtrips match contract
+
+### TypeScript Interface Location
+`src/FamilyLibrary.Web/src/app/core/models/webview-events.model.ts`
+
+### C# Handler Location
+`src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Infrastructure/WebView2/RevitBridge.cs`
+
+### Alternatives Considered
+| Alternative | Rejected Because |
+|-------------|------------------|
+| Ad-hoc events | High risk of mismatch between agents |
+| Code generation from C# | Requires running C# compiler, complex setup |
+| Shared JSON Schema | Overkill for MVP, can add later |
+
+---
+
+## Summary: Key Technical Decisions
+
+| # | Topic | Decision |
+|---|-------|----------|
+| R1 | Hash Determinism | Hybrid hash: Normalized PartAtom XML + Binary streams |
+| R2 | OLE Streams | OpenMCDF library or custom reader |
+| R3 | ES Transfer | Preserved via Transfer Project Standards |
+| R4 | ES Upgrade | Preserved on Revit upgrade; fallback chain for recovery |
+| R5 | WebView2 Integration | postMessage bidirectional, same Angular codebase |
+| R6 | Multi-target | net48 + net8.0-windows with conditional compilation |
+| R7 | Event Contract | `contracts/webview-events.md` as single source of truth |
+
