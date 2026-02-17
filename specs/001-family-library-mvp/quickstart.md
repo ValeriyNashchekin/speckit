@@ -196,22 +196,19 @@ export const environment = {
 
 ## 6. Revit Plugin (Nice3point Template)
 
-The plugin uses **Nice3point.Revit.Templates** with separate solution:
+The plugin uses **Nice3point.Revit.Templates** with `revit-addin` (single project):
 
 ```
 src/FamilyLibrary.Plugin/                 # Plugin folder
-├── source/
-│   └── FamilyLibrary.Plugin/             # Main plugin project
-│       ├── Commands/                     # IExternalCommand implementations
-│       ├── Core/                         # Shared entities, interfaces
-│       ├── Infrastructure/               # ES, Hashing, WebView2
-│       └── PluginApplication.cs          # IExternalApplication
-├── build/                                # ModularPipelines build system
-├── installer/                            # WixSharp installer
-├── .run/                                 # Rider run configurations
-├── FamilyLibrary.Plugin.sln              # ⭐ Plugin Solution
-├── global.json                           # SDK version
-└── Changelog.md
+├── FamilyLibrary.Plugin/                 # Project folder (SAME NAME)
+│   ├── Commands/                         # IExternalCommand implementations
+│   ├── Core/                             # Our: shared entities, interfaces
+│   ├── Infrastructure/                   # Our: ES, Hashing, WebView2
+│   ├── Resources/                        # Icons (from template)
+│   ├── Application.cs                    # IExternalApplication (from template)
+│   ├── FamilyLibrary.Plugin.addin        # Manifest (from template)
+│   └── FamilyLibrary.Plugin.csproj       # Multi-target project
+└── FamilyLibrary.Plugin.sln              # Solution (from template)
 ```
 
 ### Install Template (first time)
@@ -219,6 +216,15 @@ src/FamilyLibrary.Plugin/                 # Plugin folder
 ```bash
 dotnet new install Nice3point.Revit.Templates
 ```
+
+### Create Project
+
+```bash
+cd src
+dotnet new revit-addin -n FamilyLibrary.Plugin -o FamilyLibrary.Plugin
+```
+
+This creates the exact structure above. **Do NOT modify the template structure** - add our code inside.
 
 ### Build
 
@@ -468,17 +474,24 @@ openapi-generator-cli generate \
 └─────────────────────────────────────────────────────────┘
 ```
 
-### Plugin (Nice3point Template)
+### Plugin (Nice3point Template - revit-addin)
 
 ```
 src/FamilyLibrary.Plugin/
-├── source/FamilyLibrary.Plugin/    # Main project (multi-target)
-│   ├── Commands/                   # Flat command structure
-│   ├── Core/                       # Clean C# (no Revit API)
-│   └── Infrastructure/             # Revit API, ES, WebView2
-├── build/                          # ModularPipelines
-├── installer/                      # WixSharp MSI
-└── FamilyLibrary.Plugin.sln
+├── FamilyLibrary.Plugin/           # Project (SAME NAME as solution)
+│   ├── Commands/                   # Our: flat command structure
+│   │   ├── OpenLibraryCommand/
+│   │   ├── StampFamilyCommand/
+│   │   ├── LoadFamilyCommand/
+│   │   └── PublishFromEditorCommand/
+│   ├── Core/                       # Our: Clean C# (no Revit API)
+│   ├── Infrastructure/             # Our: Revit API, ES, WebView2
+│   ├── Resources/                  # Template: Icons
+│   ├── Application.cs              # Template: IExternalApplication
+│   ├── FamilyLibrary.Plugin.addin  # Template: Manifest
+│   └── FamilyLibrary.Plugin.csproj # Template: Multi-target
+└── FamilyLibrary.Plugin.sln        # Template: Solution
 ```
 
+**Command**: `dotnet new revit-addin -n FamilyLibrary.Plugin`
 **Multi-target**: net48 (Revit 2020-2024) + net8.0-windows (Revit 2025-2026)

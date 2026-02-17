@@ -42,15 +42,15 @@
 - [ ] T016 [P] Configure `src/app/app.config.ts` with standalone components, provideHttpClient
 - [ ] T017 [P] Create feature-based folder structure: `core/`, `shared/`, `features/`, `layout/`
 
-### Plugin Setup (Nice3point Template - Separate Solution)
+### Plugin Setup (Nice3point Template - revit-addin)
 
 - [ ] T018 Install Nice3point templates: `dotnet new install Nice3point.Revit.Templates`
-- [ ] T019 Create Plugin from template: `dotnet new revit-addin-solution -n FamilyLibrary.Plugin -o src/FamilyLibrary.Plugin`
+- [ ] T019 Create Plugin from template: `dotnet new revit-addin -n FamilyLibrary.Plugin -o src/FamilyLibrary.Plugin`
 - [ ] T020 Extend Revit version support to 2020 (add net472 target, Revit 2020 references)
-- [ ] T021 [P] Add NuGet packages: `Microsoft.Web.WebView2`, `Azure.Storage.Blobs`
+- [ ] T021 [P] Add NuGet packages to project: `Microsoft.Web.WebView2`, `Azure.Storage.Blobs`
 - [ ] T022 [P] Configure multi-target frameworks: net48 (2020-2024) + net8.0-windows (2025-2026)
-- [ ] T023 [P] Update `.addin` manifest files for all Revit versions (2020-2026)
-- [ ] T024 Create Plugin entry point `PluginApplication.cs` implementing IExternalApplication
+- [ ] T023 [P] Update `.addin` manifest in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/` for all Revit versions
+- [ ] T024 Verify template created `Application.cs` implementing IExternalApplication
 
 ### Infrastructure Setup
 
@@ -109,12 +109,12 @@
 
 ### Plugin Foundation
 
-- [ ] T052 Create `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Core/Entities/` with shared domain entities (no Revit API)
-- [ ] T053 [P] Create `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Core/Interfaces/` with service contracts
-- [ ] T054 Create `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Infrastructure/ExtensibleStorage/EsSchema.cs` with GUID definition
-- [ ] T055 [P] Create `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Infrastructure/ExtensibleStorage/EsService.cs` for ES read/write
-- [ ] T056 Create `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Infrastructure/Hashing/ContentHashService.cs` per research.md R1-R2
-- [ ] T057 Create `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Infrastructure/WebView2/WebViewHost.cs` for embedded browser
+- [ ] T052 Create `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Core/Entities/` with shared domain entities (no Revit API)
+- [ ] T053 [P] Create `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Core/Interfaces/` with service contracts
+- [ ] T054 Create `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Infrastructure/ExtensibleStorage/EsSchema.cs` with GUID definition
+- [ ] T055 [P] Create `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Infrastructure/ExtensibleStorage/EsService.cs` for ES read/write
+- [ ] T056 Create `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Infrastructure/Hashing/ContentHashService.cs` per research.md R1-R2
+- [ ] T057 Create `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Infrastructure/WebView2/WebViewHost.cs` for embedded browser
 
 **Checkpoint**: Foundation ready - user story implementation can begin
 
@@ -197,8 +197,8 @@
 
 ### Plugin - US3 (Core)
 
-- [ ] T089 [P] [US3] Create `StampFamilyCommand/` structure in `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Commands/`
-- [ ] T090 [US3] Create `FamilyScannerService.cs` in `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/`
+- [ ] T089 [P] [US3] Create `StampFamilyCommand/` structure in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/`
+- [ ] T090 [US3] Create `FamilyScannerService.cs` in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/`
 - [ ] T091 [US3] Create `StampService.cs` implementing ES write logic
 - [ ] T092 [US3] Create `PublishService.cs` with Blob upload + API integration
 - [ ] T093 [US3] Create `LibraryQueueViewModel.cs` for Tab 2 state management
@@ -255,7 +255,7 @@
 
 ### Plugin - US4
 
-- [ ] T119 [P] [US4] Create `SystemTypeScannerService.cs` in `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/`
+- [ ] T119 [P] [US4] Create `SystemTypeScannerService.cs` in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/`
 - [ ] T120 [US4] Create `CompoundStructureSerializer.cs` for WallType/FloorType/RoofType
 - [ ] T121 [US4] Create `SystemTypePublisher.cs` for JSON upload
 - [ ] T122 [US4] Implement material mapping warning dialog in UI
@@ -298,7 +298,7 @@
 
 ### Plugin - US5
 
-- [ ] T137 [US5] Create `OpenLibraryCommand.cs` in `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Commands/`
+- [ ] T137 [US5] Create `OpenLibraryCommand.cs` in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/`
 - [ ] T138 [US5] Wire OpenLibraryCommand to WebView2 host with library URL
 
 ### Integration - US5
@@ -322,8 +322,8 @@
 
 ### Plugin - US6
 
-- [ ] T142 [P] [US6] Create `LoadFamilyCommand/` structure in `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Commands/`
-- [ ] T143 [US6] Create `FamilyDownloader.cs` in `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/`
+- [ ] T142 [P] [US6] Create `LoadFamilyCommand/` structure in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/`
+- [ ] T143 [US6] Create `FamilyDownloader.cs` in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/`
 - [ ] T144 [US6] Create `FamilyLoader.cs` wrapping Revit LoadFamily() API
 - [ ] T145 [US6] Implement file rename to OriginalFileName logic
 
@@ -348,7 +348,7 @@
 
 ### Plugin - US7
 
-- [ ] T149 [US7] Create `PublishFromEditorCommand.cs` detecting Document.Kind == FamilyDocument in `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Commands/`
+- [ ] T149 [US7] Create `PublishFromEditorCommand.cs` detecting Document.Kind == FamilyDocument in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/`
 - [ ] T150 [US7] Modify LibraryQueueView to hide Tab 1 and Tab 3 in Family Editor mode
 - [ ] T151 [US7] Auto-add current family to Queue when in Family Editor
 
@@ -373,7 +373,7 @@
 
 ### Plugin - US8
 
-- [ ] T155 [P] [US8] Create `TypeCatalogParser.cs` in `src/FamilyLibrary.Plugin/source/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/`
+- [ ] T155 [P] [US8] Create `TypeCatalogParser.cs` in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/LoadFamilyCommand/Services/`
 - [ ] T156 [US8] Create `TypeSelectionWindow.xaml` with dynamic columns from TXT headers
 - [ ] T157 [US8] Create `TypeSelectionViewModel.cs` with search, filter, multi-select
 - [ ] T158 [US8] Implement LoadFamilySymbol for each selected type
@@ -591,8 +591,20 @@ Backend Solution: src/FamilyLibrary.Api/FamilyLibrary.Backend.sln
 └─────────────────────────────────────────────────────────┘
 
 Plugin Solution: src/FamilyLibrary.Plugin/FamilyLibrary.Plugin.sln
-Template: Nice3point.Revit.Templates (Revit AddIn Solution)
+Template: Nice3point.Revit.Templates (revit-addin - Single Project)
 Target: Revit 2020-2026 (net48 + net8.0-windows)
+
+Structure (AS CREATED by template):
+├── FamilyLibrary.Plugin/                # Root folder
+│   ├── FamilyLibrary.Plugin/            # Project (SAME NAME)
+│   │   ├── Commands/                    # Our commands
+│   │   ├── Core/                        # Our additions
+│   │   ├── Infrastructure/              # Our additions
+│   │   ├── Resources/                   # From template
+│   │   ├── Application.cs               # From template
+│   │   ├── FamilyLibrary.Plugin.addin   # From template
+│   │   └── FamilyLibrary.Plugin.csproj  # From template
+│   └── FamilyLibrary.Plugin.sln         # From template
 ```
 
 ---

@@ -199,70 +199,62 @@ src/
 │       └── FamilyLibrary.Api.Tests/
 │
 ├── # ============================================================
-├── # PLUGIN: Revit Plugin - Separate Solution (Nice3point Template)
+├── # PLUGIN: Revit Plugin - Nice3point Template (revit-addin)
 ├── # ============================================================
 │
-├── FamilyLibrary.Plugin/                    # Revit Plugin folder
+├── FamilyLibrary.Plugin/                    # Plugin folder (root)
 │   │
-│   ├── source/                              # Plugin source (Nice3point structure)
-│   │   └── FamilyLibrary.Plugin/            # Main plugin project
-│   │       ├── Commands/                    # Flat command structure
-│   │       │   ├── OpenLibraryCommand/
-│   │       │   │   ├── OpenLibraryCommand.cs
-│   │       │   │   └── OpenLibraryAvailability.cs
-│   │       │   ├── StampFamilyCommand/
-│   │       │   │   ├── ViewModels/
-│   │       │   │   │   └── QueueViewModel.cs
-│   │       │   │   ├── Views/
-│   │       │   │   │   └── QueueWindow.xaml
-│   │       │   │   ├── Models/              # Clean C#, no Revit API
-│   │       │   │   │   └── QueueItemModel.cs
-│   │       │   │   ├── Services/            # Revit API here
-│   │       │   │   │   ├── FamilyScannerService.cs
-│   │       │   │   │   ├── StampService.cs
-│   │       │   │   │   └── PublishService.cs
-│   │       │   │   └── StampFamilyCommand.cs
-│   │       │   ├── LoadFamilyCommand/
-│   │       │   │   ├── Services/
-│   │       │   │   │   ├── FamilyDownloader.cs
-│   │       │   │   │   └── TypeCatalogParser.cs
-│   │       │   │   ├── Views/
-│   │       │   │   │   └── TypeSelectionWindow.xaml
-│   │       │   │   └── LoadFamilyCommand.cs
-│   │       │   └── PublishFromEditorCommand/
-│   │       │       └── PublishFromEditorCommand.cs
-│   │       ├── Core/                        # Shared plugin core
-│   │       │   ├── Entities/                # Clean C#, no Revit API
-│   │       │   ├── Interfaces/
-│   │       │   └── Events/
-│   │       ├── Infrastructure/
-│   │       │   ├── ExtensibleStorage/
-│   │       │   │   ├── EsSchema.cs
-│   │       │   │   └── EsService.cs
-│   │       │   ├── Hashing/
-│   │       │   │   ├── PartAtomNormalizer.cs
-│   │       │   │   └── ContentHashService.cs
-│   │       │   └── WebView2/
-│   │       │       ├── WebViewHost.cs
-│   │       │       └── RevitBridge.cs
-│   │       ├── PluginApplication.cs         # IExternalApplication
-│   │       └── FamilyLibrary.Plugin.csproj  # Multi-target: net48;net8.0-windows
+│   ├── FamilyLibrary.Plugin/                # Project folder (SAME NAME)
+│   │   │
+│   │   ├── Commands/                        # Flat command structure (from template)
+│   │   │   ├── OpenLibraryCommand/
+│   │   │   │   ├── OpenLibraryCommand.cs
+│   │   │   │   └── OpenLibraryAvailability.cs
+│   │   │   ├── StampFamilyCommand/
+│   │   │   │   ├── StampFamilyCommand.cs
+│   │   │   │   ├── ViewModels/
+│   │   │   │   │   └── QueueViewModel.cs
+│   │   │   │   ├── Views/
+│   │   │   │   │   └── QueueWindow.xaml
+│   │   │   │   ├── Models/                  # Clean C#, no Revit API
+│   │   │   │   │   └── QueueItemModel.cs
+│   │   │   │   └── Services/                # Revit API here
+│   │   │   │       ├── FamilyScannerService.cs
+│   │   │   │       ├── StampService.cs
+│   │   │   │       └── PublishService.cs
+│   │   │   ├── LoadFamilyCommand/
+│   │   │   │   ├── LoadFamilyCommand.cs
+│   │   │   │   ├── Services/
+│   │   │   │   │   ├── FamilyDownloader.cs
+│   │   │   │   │   └── TypeCatalogParser.cs
+│   │   │   │   └── Views/
+│   │   │   │       └── TypeSelectionWindow.xaml
+│   │   │   └── PublishFromEditorCommand/
+│   │   │       └── PublishFromEditorCommand.cs
+│   │   │
+│   │   ├── Core/                            # OUR additions: shared core
+│   │   │   ├── Entities/                    # Clean C#, no Revit API
+│   │   │   ├── Interfaces/
+│   │   │   └── Events/
+│   │   │
+│   │   ├── Infrastructure/                  # OUR additions
+│   │   │   ├── ExtensibleStorage/
+│   │   │   │   ├── EsSchema.cs
+│   │   │   │   └── EsService.cs
+│   │   │   ├── Hashing/
+│   │   │   │   ├── PartAtomNormalizer.cs
+│   │   │   │   └── ContentHashService.cs
+│   │   │   └── WebView2/
+│   │   │       ├── WebViewHost.cs
+│   │   │       └── RevitBridge.cs
+│   │   │
+│   │   ├── Resources/                       # Icons, images (from template)
+│   │   │
+│   │   ├── Application.cs                   # IExternalApplication (from template)
+│   │   ├── FamilyLibrary.Plugin.addin       # Manifest (from template)
+│   │   └── FamilyLibrary.Plugin.csproj      # Multi-target: net48;net8.0-windows
 │   │
-│   ├── build/                               # ModularPipelines build system
-│   │   └── Build.cs
-│   │
-│   ├── installer/                           # WixSharp installer
-│   │   └── Installer.cs
-│   │
-│   ├── .run/                                # Rider run configurations
-│   │   └── Revit 2024.run.xml
-│   │
-│   ├── FamilyLibrary.Plugin.sln             # ⭐ Plugin Solution
-│   │
-│   ├── .gitignore
-│   ├── Changelog.md
-│   ├── Readme.md
-│   └── global.json                          # SDK version
+│   └── FamilyLibrary.Plugin.sln             # ⭐ Plugin Solution
 │
 ├── # ============================================================
 ├── # FRONTEND: Angular 21 (Feature-Based with Core/Shared)
@@ -407,11 +399,11 @@ src/
 | Revit Plugin | `FamilyLibrary.Plugin.sln` | `src/FamilyLibrary.Plugin/` |
 | Frontend | Angular CLI (no .sln) | `src/FamilyLibrary.Web/` |
 
-**Template Used for Plugin**: `Nice3point.Revit.Templates` - Revit AddIn Solution
+**Template Used for Plugin**: `Nice3point.Revit.Templates` - `revit-addin` (Single Project)
+- Command: `dotnet new revit-addin -n FamilyLibrary.Plugin -o src/FamilyLibrary.Plugin`
+- Structure: Solution + Project folder with SAME NAME (not source/ subfolder)
 - Multi-target Revit 2020-2026 (extended from default 2021-2026)
-- ModularPipelines build system
-- WixSharp installer
-- CI/CD configs
+- Our code added inside template structure (Commands/, Core/, Infrastructure/)
 
 **Structure Decision**:
 
