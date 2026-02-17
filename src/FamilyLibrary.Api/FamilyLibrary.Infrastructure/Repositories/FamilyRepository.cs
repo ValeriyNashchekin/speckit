@@ -78,4 +78,94 @@ public class FamilyRepository : Repository<FamilyEntity>, IFamilyRepository
 
         return version?.Family;
     }
+
+    public async Task<(IReadOnlyList<FamilyEntity> Items, int TotalCount)> GetFilteredAsync(
+        Guid? roleId,
+        string? searchTerm,
+        Guid? categoryId,
+        List<Guid>? tagIds,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var query = DbSet
+            .Include(f => f.Role)
+                .ThenInclude(r => r!.Category)
+            .Include(f => f.Role)
+                .ThenInclude(r => r!.Tags)
+            .AsNoTracking()
+            .AsQueryable();
+
+        // Apply roleId filter at DB level
+        if (roleId.HasValue)
+        {
+            query = query.Where(f => f.RoleId == roleId.Value);
+        }
+
+        // Apply searchTerm filter at DB level (case-insensitive)
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(f => f.FamilyName.Contains(searchTerm));
+        }
+
+        // Apply categoryId filter at DB level
+        if (categoryId.HasValue)
+        {
+            query = query.Where(f => f.Role!.CategoryId == categoryId.Value);
+        }
+
+        // Apply tagIds filter at DB level
+        if (tagIds is not null && tagIds.Count > 0)
+        {
+            query = query.Where(f => f.Role!.Tags.Any(t => tagIds.Contains(t.Id)));
+        }
+
+        // Get total count before pagination
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        // Apply pagination at DB level
+        var items = await query
+            .OrderByDescending(f => f.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+
+    public async Task<FamilyEntity?> GetByRoleAndNameAsync(Guid roleId, string familyName, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .AsNoTracking()
+            .FirstOrDefaultAsync(
+                f => f.RoleId == roleId && f.FamilyName.ToLower() == familyName.ToLower(),
+                cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<FamilyEntity>> GetByHashesAsync(IEnumerable<string> hashes, CancellationToken cancellationToken = default)
+    {
+        var hashList = hashes.ToList();
+        if (hashList.Count == 0)
+            return [];
+
+        // Get latest version for each family and filter by hash
+        var familyIdsWithHashes = await Context.FamilyVersions
+            .AsNoTracking()
+            .Where(v => hashList.Contains(v.Hash))
+            .GroupBy(v => v.FamilyId)
+            .Select(g => new { FamilyId = g.Key, LatestHash = g.OrderByDescending(v => v.Version).First().Hash })
+            .ToListAsync(cancellationToken);
+
+        var filteredHashes = familyIdsWithHashes
+            .Where(x => hashList.Contains(x.LatestHash))
+            .Select(x => x.FamilyId)
+            .ToList();
+
+        return await DbSet
+            .Include(f => f.Role)
+            .Include(f => f.Versions.OrderByDescending(v => v.Version).Take(1))
+            .AsNoTracking()
+            .Where(f => filteredHashes.Contains(f.Id))
+            .ToListAsync(cancellationToken);
+    }
 }

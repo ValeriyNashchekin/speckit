@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using System.Text;
 using FamilyLibrary.Application.Common;
 using FamilyLibrary.Application.DTOs;
 using FamilyLibrary.Application.Interfaces;
@@ -43,50 +42,11 @@ public class FamilyService : IFamilyService
         List<Guid>? tagIds,
         CancellationToken cancellationToken = default)
     {
-        var allFamilies = await _familyRepository.GetAllWithRolesAsync(cancellationToken);
+        // Filtering and pagination at database level
+        var (items, totalCount) = await _familyRepository.GetFilteredAsync(
+            roleId, searchTerm, categoryId, tagIds, page, pageSize, cancellationToken);
 
-        // Apply filtering
-        var filteredFamilies = allFamilies.AsEnumerable();
-
-        // Filter by roleId
-        if (roleId.HasValue)
-        {
-            filteredFamilies = filteredFamilies.Where(f => f.RoleId == roleId.Value);
-        }
-
-        // Filter by searchTerm (family name search, case-insensitive)
-        if (!string.IsNullOrWhiteSpace(searchTerm))
-        {
-            filteredFamilies = filteredFamilies.Where(f =>
-                f.FamilyName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
-        }
-
-        // Filter by categoryId (check role's category)
-        if (categoryId.HasValue)
-        {
-            filteredFamilies = filteredFamilies.Where(f =>
-                f.Role?.CategoryId == categoryId.Value);
-        }
-
-        // Filter by tagIds (check if role has ANY of the specified tags)
-        if (tagIds is not null && tagIds.Count > 0)
-        {
-            var tagIdSet = new HashSet<Guid>(tagIds);
-            filteredFamilies = filteredFamilies.Where(f =>
-                f.Role?.Tags.Any(t => tagIdSet.Contains(t.Id)) == true);
-        }
-
-        var filteredList = filteredFamilies.ToList();
-        var totalCount = filteredList.Count;
-
-        // Apply pagination
-        var pagedItems = filteredList
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-
-        var dtos = pagedItems.Adapt<List<FamilyDto>>();
-
+        var dtos = items.Adapt<List<FamilyDto>>();
         return new PagedResult<FamilyDto>(dtos, totalCount, page, pageSize);
     }
 
@@ -110,70 +70,68 @@ public class FamilyService : IFamilyService
         string? typeCatalogFileName = null,
         CancellationToken cancellationToken = default)
     {
-        // Validate role exists
+        // ============================================================
+        // PHASE 1: Validation (DB reads only - no transaction yet)
+        // ============================================================
+
         var roleExists = await _roleRepository.ExistsAsync(dto.RoleId, cancellationToken);
         if (!roleExists)
         {
             throw new NotFoundException(nameof(FamilyRoleEntity), dto.RoleId);
         }
 
-        // Calculate content hash
         var hash = await CalculateHashAsync(fileStream, cancellationToken);
-        
-        // Reset stream position after hash calculation
         fileStream.Position = 0;
 
-        // Check for duplicate
         if (await _familyRepository.HashExistsAsync(hash, cancellationToken))
         {
             throw new ValidationException(nameof(fileName), $"A family with this content already exists (hash: {hash}).");
         }
 
-        // Check if family with same name already exists for this role
-        var existingFamilies = await _familyRepository.GetByRoleIdAsync(dto.RoleId, cancellationToken);
-        var existingFamily = existingFamilies.FirstOrDefault(f => 
-            f.FamilyName.Equals(dto.FamilyName, StringComparison.OrdinalIgnoreCase));
+        var existingFamily = await _familyRepository.GetByRoleAndNameAsync(dto.RoleId, dto.FamilyName, cancellationToken);
+
+        // ============================================================
+        // PHASE 2: Prepare entity & Upload blobs (I/O - OUTSIDE transaction)
+        // IMPORTANT: Blob upload can take seconds for large files.
+        // Do NOT hold DB connection during this operation!
+        // ============================================================
 
         FamilyEntity family;
         string? previousHash = null;
+        int newVersion;
 
         if (existingFamily != null)
         {
-            // Update existing family - increment version
             family = existingFamily;
             var latestVersion = await _versionRepository.GetLatestVersionAsync(family.Id, cancellationToken);
             previousHash = latestVersion?.Hash;
-            
-            // Note: We need to get a tracked entity for update
-            // The repository will handle incrementing version
+            newVersion = family.CurrentVersion + 1;
         }
         else
         {
-            // Create new family
+            // Create entity in memory (ID is auto-generated)
+            // NOT saved to DB yet - will be saved after blob upload
             family = new FamilyEntity(dto.RoleId, dto.FamilyName);
-            await _familyRepository.AddAsync(family, cancellationToken);
+            newVersion = 1;
         }
 
-        // Generate blob path
-        var blobName = $"{family.Id}/v{(existingFamily != null ? family.CurrentVersion + 1 : 1)}/{fileName}";
-        
-        // Upload to blob storage
+        // Upload main family file to blob storage
+        var blobName = $"{family.Id}/v{newVersion}/{fileName}";
         var blobPath = await _blobStorageService.UploadAsync(
             FamiliesContainer,
             blobName,
             fileStream,
             cancellationToken);
 
-        // Handle type catalog (TXT file) if provided
+        // Upload type catalog if provided
         string? catalogBlobPath = null;
         string? catalogHash = null;
         if (typeCatalogStream != null && !string.IsNullOrEmpty(typeCatalogFileName))
         {
-            // Calculate hash for type catalog
             catalogHash = await CalculateHashAsync(typeCatalogStream, cancellationToken);
             typeCatalogStream.Position = 0;
 
-            var catalogBlobName = $"{family.Id}/v{(existingFamily != null ? family.CurrentVersion + 1 : 1)}/{typeCatalogFileName}";
+            var catalogBlobName = $"{family.Id}/v{newVersion}/{typeCatalogFileName}";
             catalogBlobPath = await _blobStorageService.UploadAsync(
                 FamiliesContainer,
                 catalogBlobName,
@@ -181,28 +139,37 @@ public class FamilyService : IFamilyService
                 cancellationToken);
         }
 
-        // Create version entity
+        // ============================================================
+        // PHASE 3: Database writes (MINIMAL time in transaction)
+        // All I/O is done, now persist to DB atomically
+        // ============================================================
+
         var version = new FamilyVersionEntity(
             familyId: family.Id,
-            version: existingFamily != null ? family.CurrentVersion + 1 : 1,
+            version: newVersion,
             hash: hash,
             blobPath: blobPath,
             originalFileName: fileName,
-            snapshotJson: "{}", // TODO: Extract actual family snapshot from .rfa file
-            publishedBy: "system", // TODO: Use actual user context
+            snapshotJson: "{}",
+            publishedBy: "system",
             previousHash: previousHash,
             catalogBlobPath: catalogBlobPath,
             catalogHash: catalogHash,
             originalCatalogName: typeCatalogFileName);
 
-        await _versionRepository.AddAsync(version, cancellationToken);
-
-        // Increment family version if updating existing
-        if (existingFamily != null)
+        if (existingFamily == null)
         {
+            // New family - save entity first
+            await _familyRepository.AddAsync(family, cancellationToken);
+        }
+        else
+        {
+            // Existing family - increment version
             family.IncrementVersion();
             await _familyRepository.UpdateAsync(family, cancellationToken);
         }
+
+        await _versionRepository.AddAsync(version, cancellationToken);
 
         // Fetch updated family with role
         var updatedFamily = await _familyRepository.GetByIdAsync(family.Id, cancellationToken);
@@ -221,12 +188,12 @@ public class FamilyService : IFamilyService
         if (hashes == null || hashes.Count == 0)
             return [];
 
-        // Single query to get all families with versions (hash is stored in versions)
-        var allFamilies = await _familyRepository.GetWithVersionsAsync(cancellationToken);
+        // Single query to get families by hashes at database level
+        var families = await _familyRepository.GetByHashesAsync(hashes, cancellationToken);
 
-        // Build a lookup dictionary from hash to family using the latest version's hash
+        // Build a lookup dictionary from hash to family
         var hashToFamily = new Dictionary<string, FamilyEntity>(StringComparer.OrdinalIgnoreCase);
-        foreach (var family in allFamilies)
+        foreach (var family in families)
         {
             var latestVersion = family.Versions.OrderByDescending(v => v.Version).FirstOrDefault();
             if (latestVersion != null && !string.IsNullOrEmpty(latestVersion.Hash))
@@ -235,7 +202,7 @@ public class FamilyService : IFamilyService
             }
         }
 
-        // Build results preserving original order and handling duplicates
+        // Build results preserving original order
         var results = new List<FamilyStatusDto>(hashes.Count);
         foreach (var hash in hashes)
         {

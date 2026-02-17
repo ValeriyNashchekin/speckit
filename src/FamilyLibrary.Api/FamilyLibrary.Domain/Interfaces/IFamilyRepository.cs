@@ -18,4 +18,26 @@ public interface IFamilyRepository : IRepository<FamilyEntity>
     Task<IReadOnlyList<FamilyEntity>> GetByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default);
     Task<bool> HashExistsAsync(string hash, CancellationToken cancellationToken = default);
     Task<FamilyEntity?> GetByHashAsync(string hash, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets families with filtering and pagination at database level.
+    /// </summary>
+    Task<(IReadOnlyList<FamilyEntity> Items, int TotalCount)> GetFilteredAsync(
+        Guid? roleId,
+        string? searchTerm,
+        Guid? categoryId,
+        List<Guid>? tagIds,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a family by role ID and name (case-insensitive).
+    /// </summary>
+    Task<FamilyEntity?> GetByRoleAndNameAsync(Guid roleId, string familyName, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets families by multiple hashes (batch lookup).
+    /// </summary>
+    Task<IReadOnlyList<FamilyEntity>> GetByHashesAsync(IEnumerable<string> hashes, CancellationToken cancellationToken = default);
 }
