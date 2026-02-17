@@ -48,4 +48,15 @@ public class FamilyRepository : Repository<FamilyEntity>, IFamilyRepository
     {
         return await Context.FamilyVersions.AnyAsync(v => v.Hash == hash, cancellationToken);
     }
+
+    public async Task<FamilyEntity?> GetByHashAsync(string hash, CancellationToken cancellationToken = default)
+    {
+        var version = await Context.FamilyVersions
+            .Include(v => v.Family)
+            .ThenInclude(f => f!.Role)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(v => v.Hash == hash, cancellationToken);
+
+        return version?.Family;
+    }
 }

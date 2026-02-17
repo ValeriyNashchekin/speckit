@@ -214,8 +214,8 @@
 
 ### Backend - US3
 
-- [ ] T099 [P] [US3] [BACKEND] Create `FamilyService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/`
-- [ ] T100 [P] [US3] [BACKEND] Create `FamilyValidator.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/`
+- [X] T099 [P] [US3] [BACKEND] Create `FamilyService.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Services/` → Artifacts: [FamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Services/FamilyService.cs)
+- [X] T100 [P] [US3] [BACKEND] Create `FamilyValidator.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/` → Artifacts: [FamilyValidator.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/FamilyValidator.cs)
 - [ ] T101 [US3] [BACKEND] Create `FamilyController.cs` in `src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/`
 - [ ] T102 [US3] [BACKEND] Implement POST /families/publish with file upload
 - [ ] T103 [US3] [BACKEND] Implement POST /families/validate-hash for duplicate detection

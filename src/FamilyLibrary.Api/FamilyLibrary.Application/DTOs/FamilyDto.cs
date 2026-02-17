@@ -29,4 +29,27 @@ public record CreateFamilyDto
 {
     public Guid RoleId { get; init; }
     public required string FamilyName { get; init; }
+    public string? OriginalFileName { get; init; }
+}
+
+/// <summary>
+/// DTO for updating a Family.
+/// </summary>
+public record UpdateFamilyDto
+{
+    public Guid? RoleId { get; init; }
+    public string? FamilyName { get; init; }
+    public string? OriginalFileName { get; init; }
+}
+
+/// <summary>
+/// DTO for family status check result.
+/// </summary>
+public record FamilyStatusDto
+{
+    public required string Hash { get; init; }
+    public bool Exists { get; init; }
+    public Guid? FamilyId { get; init; }
+    public string? FamilyName { get; init; }
+    public int? CurrentVersion { get; init; }
 }
