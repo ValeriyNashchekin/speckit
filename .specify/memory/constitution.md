@@ -108,12 +108,57 @@ Commands/
 
 **Reference:** `/angular-best-practices`, `/angular-guidelines`, `/tailwind-css`
 
+#### Core Angular Patterns
 - **Signals** для reactive state (не RxJS BehaviorSubject)
 - **Standalone components** (не NgModules)
 - **OnPush** change detection везде
 - **New control flow**: `@if`, `@for`, `@switch` (не `*ngIf`, `*ngFor`)
-- **PrimeNG** для UI компонентов
-- **Tailwind CSS v4** для стилизации
+
+#### UI Components (NON-NEGOTIABLE)
+- **PrimeNG** используется ВЕЗДЕ где есть подходящий компонент
+- Запрещено создавать кастомные компоненты если есть PrimeNG аналог
+- Список обязательных PrimeNG компонентов:
+  - Tables, DataGrid → `p-table` (с virtual scroll)
+  - Forms → `p-inputText`, `p-dropdown`, `p-multiSelect`, `p-calendar`
+  - Buttons → `p-button`, `p-splitButton`
+  - Dialogs → `p-dialog`, `p-confirmDialog`
+  - Overlays → `p-tooltip`, `p-overlayPanel`, `p-menu`
+  - Messages → `p-toast`, `p-messages`
+  - Cards → `p-card`
+  - Tabs → `p-tabView`
+  - File upload → `p-fileUpload`
+
+#### Styling (NON-NEGOTIABLE)
+- **Tailwind CSS v4** — ТОЛЬКО utility classes
+- **❌ Запрещено:**
+  - Кастомные CSS файлы (`*.component.css`, `styles.css`)
+  - Inline styles в templates (`style="..."`)
+  - SCSS/SASS препроцессоры
+  - Кастомные CSS классы (кроме Tailwind `@apply` в крайних случаях)
+- **✅ Разрешено:**
+  - Tailwind utility classes в templates: `class="flex items-center gap-4 p-4"`
+  - Tailwind конфигурация для темы (colors, fonts)
+  - PrimeNG theming через CSS variables
+
+**Example:**
+```html
+<!-- ✅ Good: PrimeNG + Tailwind -->
+<p-table [value]="families()" styleClass="w-full" [rows]="50" [virtualScroll]="true">
+  <ng-template pTemplate="header">
+    <tr>
+      <th pSortableColumn="name" class="p-4 bg-gray-100">Name</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-family>
+    <tr>
+      <td class="p-4">{{ family.name }}</td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<!-- ❌ Bad: Custom CSS -->
+<p-table class="family-table">  <!-- family-table defined in .css -->
+```
 
 **Structure:**
 ```
@@ -124,8 +169,10 @@ src/
 │   │       ├── components/
 │   │       ├── services/
 │   │       └── models/
-│   ├── shared/             # Shared components
-│   └── core/               // API, interceptors
+│   ├── shared/             # Shared components (только если нет PrimeNG аналога)
+│   └── core/               # API, interceptors
+├── tailwind.config.js      # Tailwind конфигурация
+└── styles.css              # ТОЛЬКО Tailwind directives (@tailwind base; @tailwind components; @tailwind utilities;)
 ```
 
 ---
@@ -216,6 +263,9 @@ Types: feat, fix, refactor, docs, test, chore
 - [ ] No boolean parameters
 - [ ] Proper async/await usage
 - [ ] Tests cover happy path + edge cases
+- [ ] PrimeNG component used if available (no custom components)
+- [ ] Only Tailwind utility classes (no custom CSS files)
+- [ ] No inline styles in templates
 
 ---
 
@@ -228,4 +278,4 @@ Types: feat, fix, refactor, docs, test, chore
 
 ---
 
-**Version**: 1.0.0 | **Ratified**: 2026-02-17 | **Last Amended**: 2026-02-17
+**Version**: 1.1.0 | **Ratified**: 2026-02-17 | **Last Amended**: 2026-02-17
