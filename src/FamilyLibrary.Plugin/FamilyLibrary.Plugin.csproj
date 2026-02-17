@@ -1,0 +1,48 @@
+<Project Sdk="Nice3point.Revit.Sdk/6.1.2">
+
+    <PropertyGroup>
+        <UseWPF>true</UseWPF>
+        <DeployAddin>true</DeployAddin>
+        <LaunchRevit>true</LaunchRevit>
+        <IsRepackable>false</IsRepackable>
+        <EnableDynamicLoading>true</EnableDynamicLoading>
+        <!-- Extended support: Revit 2020-2026 -->
+        <Configurations>Debug.R20;Debug.R21;Debug.R22;Debug.R23;Debug.R24;Debug.R25;Debug.R26</Configurations>
+        <Configurations>$(Configurations);Release.R20;Release.R21;Release.R22;Release.R23;Release.R24;Release.R25;Release.R26</Configurations>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Revit Platform -->
+        <PackageReference Include="Nice3point.Revit.Toolkit" Version="$(RevitVersion).*"/>
+        <PackageReference Include="Nice3point.Revit.Extensions" Version="$(RevitVersion).*"/>
+        <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="$(RevitVersion).*"/>
+        <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="$(RevitVersion).*"/>
+
+        <!-- MVVM -->
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
+
+        <!-- WebView2 for embedded browser -->
+        <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45"/>
+
+        <!-- Azure Blob Storage -->
+        <PackageReference Include="Azure.Storage.Blobs" Version="12.23.0"/>
+
+        <!-- JSON handling -->
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+
+        <!-- Development References -->
+        <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" PrivateAssets="all"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Resource Include="Resources\Icons\RibbonIcon16.png"/>
+        <Resource Include="Resources\Icons\RibbonIcon32.png"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Models"/>
+        <Folder Include="Core"/>
+        <Folder Include="Infrastructure"/>
+    </ItemGroup>
+
+</Project>

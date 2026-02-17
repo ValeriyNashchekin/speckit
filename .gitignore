@@ -1,0 +1,45 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+packages/
+*.nupkg
+*.snupkg
+*.dll
+*.pdb
+*.cache
+*.log
+
+# Node.js / TypeScript
+node_modules/
+dist/
+build/
+*.log
+.env*
+!.env.example
+
+# Angular
+.angular/
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.sln.ide/
+
+# OS
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+
+# Azure / Azurite
+.azurite/
+
+# Test coverage
+coverage/
+
+# Revit Plugin build output
+*.addin
+!src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/*.addin

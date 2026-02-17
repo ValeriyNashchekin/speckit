@@ -22,42 +22,42 @@
 
 ### Backend Setup (Clean Architecture - 4 Projects, Separate Solution)
 
-- [ ] T001 [BACKEND] Create Backend folder `src/FamilyLibrary.Api/` with solution file `FamilyLibrary.Backend.sln`
-- [ ] T002 [BACKEND] Create Domain project `src/FamilyLibrary.Api/FamilyLibrary.Domain/FamilyLibrary.Domain.csproj` (.NET 10, NO external dependencies)
-- [ ] T003 [P] [BACKEND] Create Application project `src/FamilyLibrary.Api/FamilyLibrary.Application/FamilyLibrary.Application.csproj` (.NET 10, references Domain)
-- [ ] T004 [P] [BACKEND] Create Infrastructure project `src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/FamilyLibrary.Infrastructure.csproj` (.NET 10, references Application)
-- [ ] T005 [P] [BACKEND] Create Api project `src/FamilyLibrary.Api/FamilyLibrary.Api/FamilyLibrary.Api.csproj` (.NET 10, references Application, Infrastructure)
-- [ ] T006 [BACKEND] Add NuGet packages to Domain: `MediatR` (optional for CQRS)
-- [ ] T007 [P] [BACKEND] Add NuGet packages to Application: `MediatR`, `FluentValidation`, `AutoMapper` or Mapster
-- [ ] T008 [P] [BACKEND] Add NuGet packages to Infrastructure: `Microsoft.EntityFrameworkCore.SqlServer`, `Azure.Storage.Blobs`
-- [ ] T009 [P] [BACKEND] Add NuGet packages to Api: `Swashbuckle.AspNetCore`
-- [ ] T010 [P] [BACKEND] Configure `Program.cs` with DI, Swagger, CORS in `src/FamilyLibrary.Api/FamilyLibrary.Api/`
-- [ ] T011 [P] [BACKEND] Create `appsettings.json` and `appsettings.Development.json` with connection strings in Api project
+- [X] T001 [BACKEND] Create Backend folder `src/FamilyLibrary.Api/` with solution file `FamilyLibrary.Backend.sln`
+- [X] T002 [BACKEND] Create Domain project `src/FamilyLibrary.Api/FamilyLibrary.Domain/FamilyLibrary.Domain.csproj` (.NET 10, NO external dependencies)
+- [X] T003 [P] [BACKEND] Create Application project `src/FamilyLibrary.Api/FamilyLibrary.Application/FamilyLibrary.Application.csproj` (.NET 10, references Domain)
+- [X] T004 [P] [BACKEND] Create Infrastructure project `src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/FamilyLibrary.Infrastructure.csproj` (.NET 10, references Application)
+- [X] T005 [P] [BACKEND] Create Api project `src/FamilyLibrary.Api/FamilyLibrary.Api/FamilyLibrary.Api.csproj` (.NET 10, references Application, Infrastructure)
+- [X] T006 [BACKEND] Add NuGet packages to Domain: `MediatR` (optional for CQRS)
+- [X] T007 [P] [BACKEND] Add NuGet packages to Application: `MediatR`, `FluentValidation`, `AutoMapper` or Mapster
+- [X] T008 [P] [BACKEND] Add NuGet packages to Infrastructure: `Microsoft.EntityFrameworkCore.SqlServer`, `Azure.Storage.Blobs`
+- [X] T009 [P] [BACKEND] Add NuGet packages to Api: `Swashbuckle.AspNetCore`
+- [X] T010 [P] [BACKEND] Configure `Program.cs` with DI, Swagger, CORS in `src/FamilyLibrary.Api/FamilyLibrary.Api/`
+- [X] T011 [P] [BACKEND] Create `appsettings.json` and `appsettings.Development.json` with connection strings in Api project
 
 ### Frontend Setup
 
-- [ ] T012 [FRONTEND] Create Angular project at `src/FamilyLibrary.Web/` with Angular 21 CLI
-- [ ] T013 [P] [FRONTEND] Add npm packages: `primeng@19`, `primeicons`, `tailwindcss@4`, `@tanstack/virtual`
-- [ ] T014 [P] [FRONTEND] Configure `tailwind.config.js` at `src/FamilyLibrary.Web/`
-- [ ] T015 [P] [FRONTEND] Update `src/styles.css` with Tailwind directives only (NO custom CSS)
-- [ ] T016 [P] [FRONTEND] Configure `src/app/app.config.ts` with standalone components, provideHttpClient
-- [ ] T017 [P] [FRONTEND] Create feature-based folder structure: `core/`, `shared/`, `features/`, `layout/`
+- [X] T012 [FRONTEND] Create Angular project at `src/FamilyLibrary.Web/` with Angular 21 CLI
+- [X] T013 [P] [FRONTEND] Add npm packages: `primeng@21`, `primeicons`, `tailwindcss@4`, `@tanstack/angular-virtual`
+- [X] T014 [P] [FRONTEND] Configure `tailwind.config.js` at `src/FamilyLibrary.Web/`
+- [X] T015 [P] [FRONTEND] Update `src/styles.css` with Tailwind directives only (NO custom CSS)
+- [X] T016 [P] [FRONTEND] Configure `src/app/app.config.ts` with standalone components, provideHttpClient
+- [X] T017 [P] [FRONTEND] Create feature-based folder structure: `core/`, `shared/`, `features/`, `layout/`
 
 ### Plugin Setup (Nice3point Template - revit-addin)
 
-- [ ] T018 [PLUGIN] Install Nice3point templates: `dotnet new install Nice3point.Revit.Templates`
-- [ ] T019 [PLUGIN] Create Plugin from template: `dotnet new revit-addin -n FamilyLibrary.Plugin -o src/FamilyLibrary.Plugin`
-- [ ] T020 [PLUGIN] Extend Revit version support to 2020 (add net472 target, Revit 2020 references)
-- [ ] T021 [P] [PLUGIN] Add NuGet packages to project: `Microsoft.Web.WebView2`, `Azure.Storage.Blobs`
-- [ ] T022 [P] [PLUGIN] Configure multi-target frameworks: net48 (2020-2024) + net8.0-windows (2025-2026)
-- [ ] T023 [P] [PLUGIN] Update `.addin` manifest in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/` for all Revit versions
-- [ ] T024 [PLUGIN] Verify template created `Application.cs` implementing IExternalApplication
+- [X] T018 [PLUGIN] Install Nice3point templates: `dotnet new install Nice3point.Revit.Templates`
+- [X] T019 [PLUGIN] Create Plugin from template: `dotnet new revit-addin -n FamilyLibrary.Plugin -o src/FamilyLibrary.Plugin`
+- [X] T020 [PLUGIN] Extend Revit version support to 2020 (added R20-R21 configurations)
+- [X] T021 [P] [PLUGIN] Add NuGet packages to project: `Microsoft.Web.WebView2`, `Azure.Storage.Blobs`, `Newtonsoft.Json`
+- [X] T022 [P] [PLUGIN] Configure multi-target frameworks via Nice3point SDK (R20-R26)
+- [X] T023 [P] [PLUGIN] SDK auto-generates `.addin` manifest per Revit version
+- [X] T024 [PLUGIN] Verify template created `Application.cs` implementing ExternalApplication
 
 ### Infrastructure Setup
 
-- [ ] T025 Create `docker-compose.yml` at repository root with Azurite + SQL Server services
-- [ ] T026 [P] Create `.github/workflows/ci.yml` for build and test automation
-- [ ] T027 [P] Create `.editorconfig` for code style consistency
+- [X] T025 Create `docker-compose.yml` at repository root with Azurite + SQL Server services
+- [X] T026 [P] Create `.github/workflows/ci.yml` for build and test automation
+- [X] T027 [P] Create `.editorconfig` for code style consistency
 
 **Checkpoint**: All projects created and build successfully
 
