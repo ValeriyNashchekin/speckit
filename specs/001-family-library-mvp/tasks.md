@@ -356,9 +356,9 @@
 
 ### Plugin - US7
 
-- [ ] T153 [US7] [PLUGIN] Create `PublishFromEditorCommand.cs` detecting Document.Kind == FamilyDocument in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/`
-- [ ] T154 [US7] [PLUGIN] Modify LibraryQueueView to hide Tab 1 and Tab 3 in Family Editor mode
-- [ ] T155 [US7] [PLUGIN] Auto-add current family to Queue when in Family Editor
+- [X] T153 [US7] [PLUGIN] Create `PublishFromEditorCommand.cs` detecting Document.Kind == FamilyDocument in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/` → Artifacts: [PublishFromEditorCommand.cs](src/FamilyLibrary.Plugin/Commands/PublishFromEditorCommand/)
+- [X] T154 [US7] [PLUGIN] Modify LibraryQueueView to hide Tab 1 and Tab 3 in Family Editor mode
+- [X] T155 [US7] [PLUGIN] Auto-add current family to Queue when in Family Editor
 
 ### Integration - US7
 

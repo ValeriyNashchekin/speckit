@@ -40,15 +40,58 @@ public sealed partial class LibraryQueueViewModel : ObservableObject
     [ObservableProperty]
     private bool _isProcessing;
 
+    [ObservableProperty]
+    private bool _isFamilyEditorMode;
+
+    [ObservableProperty]
+    private bool _showScanTab = true;
+
+    [ObservableProperty]
+    private bool _showStatusTab = true;
+
     private Autodesk.Revit.DB.Document? _document;
 
     public string StatusSummary => GetStatusSummary();
 
-    public LibraryQueueViewModel()
+    public LibraryQueueViewModel() : this(isFamilyEditorMode: false, currentFamily: null)
+    {
+    }
+
+    public LibraryQueueViewModel(bool isFamilyEditorMode, Autodesk.Revit.DB.Family? currentFamily)
     {
         _scannerService = new FamilyScannerService();
         _stampService = new StampService();
         _publishService = new PublishService();
+
+        _isFamilyEditorMode = isFamilyEditorMode;
+
+        if (isFamilyEditorMode)
+        {
+            _showScanTab = false;
+            _showStatusTab = false;
+            _statusMessage = "Family Editor mode. Current family is ready for processing.";
+
+            // Auto-add current family to queue (T155)
+            if (currentFamily != null)
+            {
+                AddCurrentFamilyToQueue(currentFamily);
+            }
+        }
+    }
+
+    private void AddCurrentFamilyToQueue(Autodesk.Revit.DB.Family family)
+    {
+        var item = new FamilyQueueItem
+        {
+            UniqueId = family.UniqueId,
+            FamilyName = family.Name,
+            CategoryName = family.FamilyCategory?.Name ?? "Unknown",
+            SourcePath = null,
+            IsSystemFamily = false,
+            Status = QueueItemStatus.Pending
+        };
+
+        QueueItems.Add(item);
     }
 
     public void SetDocument(Autodesk.Revit.DB.Document? document)

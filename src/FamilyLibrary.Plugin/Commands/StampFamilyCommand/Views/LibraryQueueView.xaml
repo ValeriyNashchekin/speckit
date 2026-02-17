@@ -14,6 +14,7 @@
     WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="FontSize" Value="14"/>
@@ -59,8 +60,8 @@
 
         <!-- Tab Control -->
         <TabControl Grid.Row="1">
-            <!-- Tab 1: All Families -->
-            <TabItem Header="All Families">
+            <!-- Tab 1: All Families - Hidden in Family Editor mode -->
+            <TabItem Header="All Families" Visibility="{Binding ShowScanTab, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -88,8 +89,8 @@
                 </Grid>
             </TabItem>
 
-            <!-- Tab 2: Queue -->
-            <TabItem Header="Queue">
+            <!-- Tab 2: Queue - Always visible -->
+            <TabItem Header="Queue" IsSelected="{Binding IsFamilyEditorMode, Mode=OneTime}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -118,8 +119,8 @@
                 </Grid>
             </TabItem>
 
-            <!-- Tab 3: Status -->
-            <TabItem Header="Status">
+            <!-- Tab 3: Status - Hidden in Family Editor mode -->
+            <TabItem Header="Status" Visibility="{Binding ShowStatusTab, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>

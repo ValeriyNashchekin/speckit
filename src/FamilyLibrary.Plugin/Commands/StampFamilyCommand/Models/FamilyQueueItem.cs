@@ -14,6 +14,7 @@ public class FamilyQueueItem
     public string? SourcePath { get; set; }
     public bool IsSelected { get; set; }
     public bool HasStamp { get; set; }
+    public bool IsSystemFamily { get; set; }
     public EsStampData? StampData { get; set; }
     public QueueItemStatus Status { get; set; }
     public string? ErrorMessage { get; set; }
