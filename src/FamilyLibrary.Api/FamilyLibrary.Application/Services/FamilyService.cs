@@ -38,15 +38,42 @@ public class FamilyService : IFamilyService
         int page,
         int pageSize,
         Guid? roleId,
+        string? searchTerm,
+        Guid? categoryId,
+        List<Guid>? tagIds,
         CancellationToken cancellationToken = default)
     {
-        var allFamilies = await _familyRepository.GetAllAsync(cancellationToken);
+        var allFamilies = await _familyRepository.GetAllWithRolesAsync(cancellationToken);
 
         // Apply filtering
         var filteredFamilies = allFamilies.AsEnumerable();
+
+        // Filter by roleId
         if (roleId.HasValue)
         {
             filteredFamilies = filteredFamilies.Where(f => f.RoleId == roleId.Value);
+        }
+
+        // Filter by searchTerm (family name search, case-insensitive)
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredFamilies = filteredFamilies.Where(f =>
+                f.FamilyName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Filter by categoryId (check role's category)
+        if (categoryId.HasValue)
+        {
+            filteredFamilies = filteredFamilies.Where(f =>
+                f.Role?.CategoryId == categoryId.Value);
+        }
+
+        // Filter by tagIds (check if role has ANY of the specified tags)
+        if (tagIds is not null && tagIds.Count > 0)
+        {
+            var tagIdSet = new HashSet<Guid>(tagIds);
+            filteredFamilies = filteredFamilies.Where(f =>
+                f.Role?.Tags.Any(t => tagIdSet.Contains(t.Id)) == true);
         }
 
         var filteredList = filteredFamilies.ToList();
@@ -67,6 +94,12 @@ public class FamilyService : IFamilyService
     {
         var entity = await _familyRepository.GetWithVersionsAsync(id, cancellationToken);
         return entity?.Adapt<FamilyDetailDto>();
+    }
+
+    public async Task<List<FamilyVersionDto>> GetVersionsAsync(Guid familyId, CancellationToken cancellationToken = default)
+    {
+        var versions = await _versionRepository.GetByFamilyIdAsync(familyId, cancellationToken);
+        return versions.Adapt<List<FamilyVersionDto>>();
     }
 
     public async Task<FamilyDto> PublishAsync(

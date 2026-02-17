@@ -1,0 +1,38 @@
+<Window
+    x:Class="FamilyLibrary.Plugin.Commands.OpenLibraryCommand.Views.OpenLibraryView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:viewModel="clr-namespace:FamilyLibrary.Plugin.Commands.OpenLibraryCommand.ViewModels"
+    xmlns:webView2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance viewModel:OpenLibraryViewModel}"
+    Title="Family Library"
+    Width="1024"
+    Height="768"
+    ResizeMode="CanResize"
+    WindowStartupLocation="CenterScreen"
+    Loaded="OnLoaded"
+    Closed="OnClosed">
+
+    <Window.Resources>
+        <Style x:Key="LoadingTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="#666666"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- WebView2 Control -->
+        <webView2:WebView2
+            x:Name="WebView"
+            Source="http://localhost:4200/library"/>
+    </Grid>
+</Window>

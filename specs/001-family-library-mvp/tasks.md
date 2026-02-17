@@ -290,24 +290,24 @@
 
 ### Backend - US5
 
-- [ ] T131 [US5] [BACKEND] Implement GET /families with search, filters, pagination in FamilyController
-- [ ] T132 [P] [US5] [BACKEND] Implement GET /families/{id} with versions and types
-- [ ] T133 [P] [US5] [BACKEND] Implement GET /families/{id}/versions for history
+- [X] T131 [US5] [BACKEND] Implement GET /families with search, filters, pagination in FamilyController → Artifacts: [FamiliesController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/FamiliesController.cs), [FamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Services/FamilyService.cs)
+- [X] T132 [P] [US5] [BACKEND] Implement GET /families/{id} with versions and types (already existed)
+- [X] T133 [P] [US5] [BACKEND] Implement GET /families/{id}/versions for history → Artifacts: [FamiliesController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/FamiliesController.cs)
 
 ### Frontend - US5
 
-- [ ] T134 [P] [US5] [FRONTEND] Create `library.service.ts` in `src/FamilyLibrary.Web/src/app/features/library/services/`
-- [ ] T135 [US5] [FRONTEND] Create `library.component.ts` with view toggle (cards/table)
-- [ ] T136 [US5] [FRONTEND] Create `family-card.component.ts` using p-card for grid view
-- [ ] T137 [US5] [FRONTEND] Create `family-table.component.ts` using p-table with virtual scroll
-- [ ] T138 [US5] [FRONTEND] Create `library-filters.component.ts` with p-dropdown, p-multiSelect
-- [ ] T139 [US5] [FRONTEND] Create `family-detail.component.ts` with version table
-- [ ] T140 [US5] [FRONTEND] Add library routes and navigation
+- [X] T134 [P] [US5] [FRONTEND] Create `library.service.ts` in `src/FamilyLibrary.Web/src/app/features/library/services/` → Artifacts: [library.service.ts](src/FamilyLibrary.Web/src/app/features/library/services/library.service.ts)
+- [X] T135 [US5] [FRONTEND] Create `library.component.ts` with view toggle (cards/table) → Artifacts: [library.component.ts](src/FamilyLibrary.Web/src/app/features/library/components/library/)
+- [X] T136 [US5] [FRONTEND] Create `family-card.component.ts` using p-card for grid view → Artifacts: [family-card.component.ts](src/FamilyLibrary.Web/src/app/features/library/components/family-card/)
+- [X] T137 [US5] [FRONTEND] Create `family-table.component.ts` using p-table with virtual scroll → Artifacts: [family-table.component.ts](src/FamilyLibrary.Web/src/app/features/library/components/family-table/)
+- [X] T138 [US5] [FRONTEND] Create `library-filters.component.ts` with p-dropdown, p-multiSelect → Artifacts: [library-filters.component.ts](src/FamilyLibrary.Web/src/app/features/library/components/library-filters/)
+- [X] T139 [US5] [FRONTEND] Create `family-detail.component.ts` with version table → Artifacts: [family-detail.component.ts](src/FamilyLibrary.Web/src/app/features/library/components/family-detail/)
+- [X] T140 [US5] [FRONTEND] Add library routes and navigation → Artifacts: [library.routes.ts](src/FamilyLibrary.Web/src/app/features/library/library.routes.ts)
 
 ### Plugin - US5
 
-- [ ] T141 [US5] [PLUGIN] Create `OpenLibraryCommand.cs` in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/`
-- [ ] T142 [US5] [PLUGIN] Wire OpenLibraryCommand to WebView2 host with library URL
+- [X] T141 [US5] [PLUGIN] Create `OpenLibraryCommand.cs` in `src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/` → Artifacts: [OpenLibraryCommand.cs](src/FamilyLibrary.Plugin/Commands/OpenLibraryCommand/)
+- [X] T142 [US5] [PLUGIN] Wire OpenLibraryCommand to WebView2 host with library URL
 
 ### Integration - US5
 

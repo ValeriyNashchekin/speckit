@@ -3,6 +3,7 @@
 export interface Family {
   id: string;
   roleId: string;
+  roleName: string;
   familyName: string;
   currentVersion: number;
   createdAt: string;
@@ -34,6 +35,8 @@ export interface FamilyListRequest {
   pageSize?: number;
   searchTerm?: string;
   roleId?: string | null;
+  categoryId?: string | null;
+  tagIds?: string[];
 }
 
 export interface PublishFamilyRequest {

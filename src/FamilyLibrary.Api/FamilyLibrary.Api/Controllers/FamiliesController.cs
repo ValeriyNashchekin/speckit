@@ -18,6 +18,9 @@ public class FamiliesController(IFamilyService service) : BaseController
     /// <param name="page">Page number (default: 1).</param>
     /// <param name="pageSize">Page size (default: 10).</param>
     /// <param name="roleId">Filter by role ID.</param>
+    /// <param name="searchTerm">Search term for family name (case-insensitive).</param>
+    /// <param name="categoryId">Filter by category ID.</param>
+    /// <param name="tagIds">Filter by tag IDs (comma-separated GUIDs).</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>Paged list of families.</returns>
     [HttpGet]
@@ -26,9 +29,29 @@ public class FamiliesController(IFamilyService service) : BaseController
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10,
         [FromQuery] Guid? roleId = null,
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] Guid? categoryId = null,
+        [FromQuery] string? tagIds = null,
         CancellationToken ct = default)
     {
-        var result = await service.GetAllAsync(page, pageSize, roleId, ct);
+        // Parse comma-separated tag IDs
+        List<Guid>? tagIdList = null;
+        if (!string.IsNullOrWhiteSpace(tagIds))
+        {
+            tagIdList = tagIds
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(s => Guid.TryParse(s, out var guid) ? guid : (Guid?)null)
+                .Where(g => g.HasValue)
+                .Select(g => g!.Value)
+                .ToList();
+
+            if (tagIdList.Count == 0)
+            {
+                tagIdList = null;
+            }
+        }
+
+        var result = await service.GetAllAsync(page, pageSize, roleId, searchTerm, categoryId, tagIdList, ct);
         return Ok(result);
     }
 
@@ -50,6 +73,21 @@ public class FamiliesController(IFamilyService service) : BaseController
             return NotFoundResult(nameof(FamilyDetailDto), id);
         }
 
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Gets version history for a family.
+    /// </summary>
+    /// <param name="id">The family ID.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>List of family versions.</returns>
+    [HttpGet("{id:guid}/versions")]
+    [ProducesResponseType<List<FamilyVersionDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<List<FamilyVersionDto>>> GetVersions(Guid id, CancellationToken ct)
+    {
+        var result = await service.GetVersionsAsync(id, ct);
         return Ok(result);
     }
 

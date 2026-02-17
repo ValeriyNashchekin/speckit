@@ -9,6 +9,17 @@ public class FamilyRepository : Repository<FamilyEntity>, IFamilyRepository
 {
     public FamilyRepository(AppDbContext context) : base(context) { }
 
+    public async Task<IReadOnlyList<FamilyEntity>> GetAllWithRolesAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(f => f.Role)
+                .ThenInclude(r => r!.Category)
+            .Include(f => f.Role)
+                .ThenInclude(r => r!.Tags)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+
     public override async Task<FamilyEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await DbSet

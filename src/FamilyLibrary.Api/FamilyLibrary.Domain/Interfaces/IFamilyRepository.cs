@@ -7,6 +7,11 @@ namespace FamilyLibrary.Domain.Interfaces;
 /// </summary>
 public interface IFamilyRepository : IRepository<FamilyEntity>
 {
+    /// <summary>
+    /// Gets all families with their roles (including category and tags) loaded.
+    /// </summary>
+    Task<IReadOnlyList<FamilyEntity>> GetAllWithRolesAsync(CancellationToken cancellationToken = default);
+
     Task<FamilyEntity?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
     Task<FamilyEntity?> GetWithVersionsAsync(Guid id, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<FamilyEntity>> GetByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default);

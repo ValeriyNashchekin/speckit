@@ -32,6 +32,11 @@ export const routes: Routes = [
           import('./features/tags/tags.routes').then(m => m.TAGS_ROUTES),
       },
       {
+        path: 'library',
+        loadChildren: () =>
+          import('./features/library/library.routes').then(m => m.LIBRARY_ROUTES),
+      },
+      {
         path: 'families',
         loadChildren: () =>
           import('./features/families/families.routes').then(m => m.FAMILIES_ROUTES),
