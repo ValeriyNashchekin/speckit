@@ -1,0 +1,116 @@
+<div class="bg-white rounded-lg shadow-sm border border-gray-200">
+  @if (showHeader()) {
+    <!-- Header with summary -->
+    <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-semibold text-gray-700">Used In</h3>
+        <div class="flex items-center gap-4 text-xs text-gray-500">
+          <span>{{ totalCount() }} parent families</span>
+          @if (outdatedCount() > 0) {
+            <span class="text-red-600 font-medium flex items-center gap-1">
+              <i class="pi pi-exclamation-triangle"></i>
+              {{ outdatedCount() }} with old version
+            </span>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Table -->
+  <p-table
+    [value]="references()"
+    [loading]="loading()"
+    dataKey="familyId"
+    [rowHover]="true"
+    [showGridlines]="false"
+    [stripedRows]="true"
+    tableStyleClass="w-full"
+  >
+    <ng-template #header>
+      <tr>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 40%">
+          Family Name
+        </th>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 30%">
+          Role Name
+        </th>
+        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700" style="width: 15%">
+          Nested Version
+        </th>
+        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700" style="width: 15%">
+          Status
+        </th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-ref>
+      <tr class="border-t border-gray-100 cursor-pointer hover:bg-blue-50 transition-colors"
+          (click)="navigateToFamily(ref.familyId)"
+          (keydown.enter)="navigateToFamily(ref.familyId)"
+          tabindex="0"
+          role="button"
+          [attr.aria-label]="'View family ' + ref.familyName">
+        <td class="px-4 py-3">
+          <div class="flex items-center gap-2">
+            <i class="pi pi-box text-gray-400"></i>
+            <span class="font-medium text-blue-600 hover:text-blue-800 hover:underline">{{ ref.familyName }}</span>
+          </div>
+        </td>
+        <td class="px-4 py-3">
+          <span class="text-gray-600">{{ ref.roleName }}</span>
+        </td>
+        <td class="px-4 py-3 text-center">
+          <p-tag [value]="'v' + ref.version" [severity]="getVersionSeverity(ref)" />
+        </td>
+        <td class="px-4 py-3 text-center">
+          @if (ref.isOutdated) {
+            <div class="flex items-center justify-center gap-1">
+              <span pBadge value="!" severity="danger" class="text-xs" pTooltip="Nested version is outdated"></span>
+              <span class="text-xs text-red-600">Outdated</span>
+            </div>
+          } @else {
+            <div class="flex items-center justify-center gap-1">
+              <i class="pi pi-check-circle text-green-500" pTooltip="Up to date"></i>
+              <span class="text-xs text-green-600">Current</span>
+            </div>
+          }
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="4" class="px-4 py-8 text-center">
+          <div class="flex flex-col items-center gap-2">
+            <i class="pi pi-folder-open text-2xl text-gray-300"></i>
+            <p class="text-gray-500 text-sm">Not used in any other families</p>
+            <p class="text-gray-400 text-xs">This family is not nested in any parent families</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #loadingbody>
+      @for (i of [1, 2, 3]; track i) {
+        <tr class="border-t border-gray-100">
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-2">
+              <p-skeleton width="1rem" height="1rem" />
+              <p-skeleton width="8rem" height="1rem" />
+            </div>
+          </td>
+          <td class="px-4 py-3">
+            <p-skeleton width="6rem" height="1rem" />
+          </td>
+          <td class="px-4 py-3">
+            <p-skeleton width="3rem" height="1.5rem" class="mx-auto" />
+          </td>
+          <td class="px-4 py-3">
+            <p-skeleton width="4rem" height="1rem" class="mx-auto" />
+          </td>
+        </tr>
+      }
+    </ng-template>
+  </p-table>
+</div>

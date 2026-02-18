@@ -16,6 +16,7 @@ import { LibraryService } from '../../services/library.service';
 import { FamilyDetail, FamilyVersion, TypeCatalogEntry } from '../../../../core/models/family.model';
 import { ChangelogComponent } from '../changelog/changelog.component';
 import { PreLoadSummaryComponent } from '../../../scanner/components/pre-load-summary/pre-load-summary.component';
+import { UsedInListComponent } from '../used-in-list/used-in-list.component';
 import { RevitBridgeService } from '../../../../core/services/revit-bridge.service';
 import type { LoadPreviewEvent } from '../../../../core/models/webview-events.model';
 
@@ -57,6 +58,7 @@ interface RevitFamilyLoadedDetail {
     DatePipe,
     ChangelogComponent,
     PreLoadSummaryComponent,
+    UsedInListComponent,
   ],
   templateUrl: './family-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -179,15 +179,15 @@ Based on plan.md structure:
 
 ### Backend - US5
 
-- [ ] T042 [US5] [BACKEND] Add GetUsedInAsync to NestedFamilyService in `src/FamilyLibrary.Application/Services/NestedFamilyService.cs`
-- [ ] T043 [US5] [BACKEND] Add GET /api/families/{id}/used-in endpoint in `src/FamilyLibrary.Api/Controllers/FamiliesController.cs`
+- [X] T042 [US5] [BACKEND] Add GetUsedInAsync to NestedFamilyService in `src/FamilyLibrary.Application/Services/NestedFamilyService.cs` → Artifacts: [NestedFamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Services/NestedFamilyService.cs)
+- [X] T043 [US5] [BACKEND] Add GET /api/families/{id}/used-in endpoint in `src/FamilyLibrary.Api/Controllers/FamiliesController.cs` → Artifacts: [FamiliesController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/FamiliesController.cs)
 
 ### Frontend - US5
 
-- [ ] T044 [P] [US5] [FRONTEND] Create used-in-list component in `src/FamilyLibrary.Web/src/app/features/library/components/used-in-list/`
-- [ ] T045 [US5] [FRONTEND] Add "Used In" section to family detail page in `src/FamilyLibrary.Web/src/app/features/library/components/family-detail/`
-- [ ] T046 [US5] [FRONTEND] Show warning if parent has old nested version in `src/FamilyLibrary.Web/src/app/features/library/components/used-in-list/`
-- [ ] T047 [US5] [FRONTEND] Add link to parent family on click in `src/FamilyLibrary.Web/src/app/features/library/components/used-in-list/`
+- [X] T044 [P] [US5] [FRONTEND] Create used-in-list component in `src/FamilyLibrary.Web/src/app/features/library/components/used-in-list/` → Artifacts: [used-in-list.component.ts](src/FamilyLibrary.Web/src/app/features/library/components/used-in-list/used-in-list.component.ts)
+- [X] T045 [US5] [FRONTEND] Add "Used In" section to family detail page in `src/FamilyLibrary.Web/src/app/features/library/components/family-detail/` → Artifacts: [family-detail.component.ts](src/FamilyLibrary.Web/src/app/features/library/components/family-detail/family-detail.component.ts), [family-detail.component.html](src/FamilyLibrary.Web/src/app/features/library/components/family-detail/family-detail.component.html)
+- [X] T046 [US5] [FRONTEND] Show warning if parent has old nested version in `src/FamilyLibrary.Web/src/app/features/library/components/used-in-list/` → Artifacts: [used-in-list.component.html](src/FamilyLibrary.Web/src/app/features/library/components/used-in-list/used-in-list.component.html)
+- [X] T047 [US5] [FRONTEND] Add link to parent family on click in `src/FamilyLibrary.Web/src/app/features/library/components/used-in-list/` → Artifacts: [used-in-list.component.ts](src/FamilyLibrary.Web/src/app/features/library/components/used-in-list/used-in-list.component.ts)
 
 **Checkpoint**: "Used In" показывает все родительские семейства для nested
 

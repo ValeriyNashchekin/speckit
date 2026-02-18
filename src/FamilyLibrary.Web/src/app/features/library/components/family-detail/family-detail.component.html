@@ -47,6 +47,7 @@
           @if (hasTypeCatalog()) {
             <p-tab value="type-catalog">Type Catalog</p-tab>
           }
+          <p-tab value="used-in">Used In</p-tab>
           <p-tab value="changelog">Changelog</p-tab>
         </p-tablist>
 
@@ -188,6 +189,16 @@
               </div>
             </p-tabpanel>
           }
+
+          <!-- Used In Tab -->
+          <p-tabpanel value="used-in">
+            <div class="p-4">
+              <app-used-in-list
+                [familyId]="familyId()"
+                [currentVersion]="familyData.currentVersion"
+              />
+            </div>
+          </p-tabpanel>
 
           <!-- Changelog Tab -->
           <p-tabpanel value="changelog">
