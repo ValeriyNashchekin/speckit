@@ -99,12 +99,45 @@ You **MUST** consider the user input before proceeding (if not empty).
      * Simple research: solve with agent tools (Grep, Read, web-search-prime, Context7, Microsoft Learn)
      * Complex research: create research prompt in research/, wait for user deepresearch, incorporate results
    - Output: Updated tasks.md with executor annotations
-   - **Atomicity Rule (CRITICAL)**: 1 Task = 1 Agent Invocation
-     * Never give multiple tasks to one agent in single run
-     * **Parallel execution**: Launch N agent calls in single message (not sequentially)
-     * Example: 3 parallel tasks for meta-agent → 3 meta-agent calls in single message
-     * Example: 5 parallel tasks for fullstack → 5 fullstack calls in single message
-     * Sequential tasks: 1 agent run, wait for completion, then next agent run
+
+   - **CRITICAL: ATOMIC EXECUTION RULE**
+     ```
+     ╔═══════════════════════════════════════════════════════════════════╗
+     ║  1 TASK = 1 AGENT INVOCATION (STRICTLY, NO EXCEPTIONS)           ║
+     ║                                                                   ║
+     ║  ❌ NEVER: Give multiple tasks to one agent                       ║
+     ║  ✅ ALWAYS: Launch separate agent for each task                   ║
+     ║                                                                   ║
+     ║  MAX PARALLEL AGENTS: 9                                          ║
+     ╚═══════════════════════════════════════════════════════════════════╝
+     ```
+
+   - **Parallel Execution Rules**:
+     * Tasks marked [P] AND affecting DIFFERENT files → can run in parallel
+     * Launch ALL parallel agents in SINGLE message (not sequentially)
+     * Maximum 9 agents simultaneously
+     * Example: 3 parallel frontend tasks → 3 angular-developer Task calls in one message
+     * Example: 2 backend + 2 plugin + 1 frontend → 5 Task calls in one message
+
+   - **Sequential Execution Rules**:
+     * Tasks affecting SAME file → MUST run sequentially
+     * Tasks with dependencies → wait for completion before next
+     * One agent per task, complete, verify, then launch next agent
+
+   - **Concrete Examples**:
+     ```bash
+     # CORRECT: 3 parallel tasks → 3 agents in one message
+     Task: T024 [P] [US1] [FRONTEND] scanner.service.ts
+     Task: T025 [P] [US1] [FRONTEND] scanner.component.ts
+     Task: T026 [P] [US1] [FRONTEND] scanner-table.component.ts
+     → Launch 3 angular-developer agents simultaneously
+
+     # CORRECT: Sequential tasks (same file or dependencies)
+     Task: T013 → wait → Task: T014 → wait → Task: T015
+
+     # WRONG: Multiple tasks to one agent
+     Task tool prompt: "Implement T024, T025, T026"
+     ```
 
 5. **Project Setup Verification**:
    - **REQUIRED**: Create/verify ignore files based on actual project setup:
@@ -213,6 +246,16 @@ You **MUST** consider the user input before proceeding (if not empty).
    - **Integration work**: Database connections, middleware, logging, external services
    - **Polish and validation**: Unit tests, performance optimization, documentation
 
+   - **STRICT EXECUTION PATTERN**:
+     ```
+     For each incomplete task:
+       1. Check if parallel [P] AND different files from other pending tasks
+       2. If YES → collect ALL parallel tasks, launch N agents in single message
+       3. If NO → launch single agent, wait for completion
+       4. Verify ALL completed tasks before next batch
+       5. Commit each task individually via /push patch
+     ```
+
 10. Progress tracking and error handling:
    - Report progress after each completed task
    - **Commit after each task**: Run `/push patch` before moving to next
@@ -226,6 +269,9 @@ You **MUST** consider the user input before proceeding (if not empty).
      * NEVER proceed if task failed
      * NEVER batch commits (1 task = 1 commit)
      * ONE task in_progress at a time (atomic execution)
+     * **NEVER give multiple tasks to one agent** (1 task = 1 agent invocation)
+     * **Maximum 9 parallel agents** - launch all parallel tasks in single message
+     * **Same file tasks** → MUST run sequentially, not parallel
 
 11. Completion validation:
    - Verify all required tasks are completed
