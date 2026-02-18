@@ -1,6 +1,7 @@
 using System.IO;
 using System.Linq;
 using Autodesk.Revit.DB;
+using FamilyLibrary.Plugin.Services;
 
 namespace FamilyLibrary.Plugin.Commands.LoadFamilyCommand.Services;
 
@@ -99,23 +100,4 @@ public class LoadFamilyResult
     public Family? Family { get; set; }
     public bool WasNewlyLoaded { get; set; }
     public string Message { get; set; } = string.Empty;
-}
-
-/// <summary>
-/// Simple family load options that overwrites existing families.
-/// </summary>
-internal class SimpleFamilyLoadOptions : IFamilyLoadOptions
-{
-    public bool OnFamilyFound(bool familyInUse, out bool overwriteParameterValues)
-    {
-        overwriteParameterValues = true;
-        return true;
-    }
-
-    public bool OnSharedFamilyFound(Family sharedFamily, bool familyInUse, out FamilySource source, out bool overwriteParameterValues)
-    {
-        source = FamilySource.Family;
-        overwriteParameterValues = true;
-        return true;
-    }
 }

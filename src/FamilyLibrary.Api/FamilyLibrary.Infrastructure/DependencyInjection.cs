@@ -34,6 +34,8 @@ public static class DependencyInjection
         // Services
         services.AddScoped<IBlobStorageService, BlobStorageService>();
         services.AddScoped<IChangeDetectionService, ChangeDetectionService>();
+        services.AddScoped<IMaterialMappingService, MaterialMappingService>();
+        services.AddScoped<INestedFamilyService, NestedFamilyService>();
 
         return services;
     }

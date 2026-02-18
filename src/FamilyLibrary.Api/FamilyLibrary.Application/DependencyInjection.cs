@@ -34,6 +34,9 @@ public static class DependencyInjection
         services.AddScoped<IDraftService, DraftService>();
         services.AddScoped<ISystemTypeService, SystemTypeService>();
 
+        // Note: IMaterialMappingService is registered in Infrastructure layer
+        // because it directly injects AppDbContext
+
         return services;
     }
 }

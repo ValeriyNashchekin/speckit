@@ -91,5 +91,16 @@ public static class MappingProfile
         TypeAdapterConfig<CreateRecognitionRuleDto, RecognitionRuleEntity>
             .NewConfig()
             .ConstructUsing(src => new RecognitionRuleEntity(src.RoleId, src.RootNode, src.Formula));
+
+        // MaterialMapping mappings
+        TypeAdapterConfig<MaterialMappingEntity, MaterialMappingDto>
+            .NewConfig();
+
+        TypeAdapterConfig<CreateMaterialMappingRequest, MaterialMappingEntity>
+            .NewConfig()
+            .ConstructUsing(src => new MaterialMappingEntity(
+                src.ProjectId,
+                src.TemplateMaterialName,
+                src.ProjectMaterialName));
     }
 }

@@ -66,16 +66,16 @@ Based on plan.md structure:
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T007 [BACKEND] Create NestedFamilyDto in `src/FamilyLibrary.Application/DTOs/NestedFamilyDto.cs`
-- [ ] T008 [P] [BACKEND] Create PreLoadSummaryDto in `src/FamilyLibrary.Application/DTOs/PreLoadSummaryDto.cs`
-- [ ] T009 [P] [BACKEND] Create UsedInDto in `src/FamilyLibrary.Application/DTOs/UsedInDto.cs`
-- [ ] T010 [P] [BACKEND] Create MaterialMappingDto in `src/FamilyLibrary.Application/DTOs/MaterialMappingDto.cs`
-- [ ] T011 [BACKEND] Create NestedFamilyService in `src/FamilyLibrary.Application/Services/NestedFamilyService.cs`
-- [ ] T012 [BACKEND] Create MaterialMappingService in `src/FamilyLibrary.Application/Services/MaterialMappingService.cs`
-- [ ] T013 [PLUGIN] Create NestedFamilyInfo model in `src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Models/NestedFamilyInfo.cs`
-- [ ] T014 [PLUGIN] Create NestedDetectionService in `src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/NestedDetectionService.cs`
-- [ ] T015 [PLUGIN] Create NestedFamilyLoadOptions in `src/FamilyLibrary.Plugin/Services/NestedFamilyLoadOptions.cs`
-- [ ] T016 [PLUGIN] Create NestedFamilyLoadService in `src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs`
+- [X] T007 [BACKEND] Create NestedFamilyDto in `src/FamilyLibrary.Application/DTOs/NestedFamilyDto.cs` → Artifacts: [NestedFamilyDto.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/DTOs/NestedFamilyDto.cs)
+- [X] T008 [P] [BACKEND] Create PreLoadSummaryDto in `src/FamilyLibrary.Application/DTOs/PreLoadSummaryDto.cs` → Artifacts: [PreLoadSummaryDto.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/DTOs/PreLoadSummaryDto.cs)
+- [X] T009 [P] [BACKEND] Create UsedInDto in `src/FamilyLibrary.Application/DTOs/UsedInDto.cs` → Artifacts: [UsedInDto.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/DTOs/UsedInDto.cs)
+- [X] T010 [P] [BACKEND] Create MaterialMappingDto in `src/FamilyLibrary.Application/DTOs/MaterialMappingDto.cs` → Artifacts: [MaterialMappingDto.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/DTOs/MaterialMappingDto.cs)
+- [X] T011 [BACKEND] Create NestedFamilyService in `src/FamilyLibrary.Application/Services/NestedFamilyService.cs` → Artifacts: [INestedFamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Interfaces/INestedFamilyService.cs), [NestedFamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Services/NestedFamilyService.cs)
+- [X] T012 [BACKEND] Create MaterialMappingService in `src/FamilyLibrary.Application/Services/MaterialMappingService.cs` → Artifacts: [IMaterialMappingService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Interfaces/IMaterialMappingService.cs), [MaterialMappingService.cs](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Services/MaterialMappingService.cs)
+- [X] T013 [PLUGIN] Create NestedFamilyInfo model in `src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Models/NestedFamilyInfo.cs` → Artifacts: [NestedFamilyInfo.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Models/NestedFamilyInfo.cs)
+- [X] T014 [PLUGIN] Create NestedDetectionService in `src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/NestedDetectionService.cs` → Artifacts: [NestedDetectionService.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/NestedDetectionService.cs)
+- [X] T015 [PLUGIN] Create NestedFamilyLoadOptions in `src/FamilyLibrary.Plugin/Services/NestedFamilyLoadOptions.cs` → Artifacts: [NestedFamilyLoadOptions.cs](src/FamilyLibrary.Plugin/Services/NestedFamilyLoadOptions.cs), [NestedLoadChoice.cs](src/FamilyLibrary.Plugin/Services/NestedLoadChoice.cs)
+- [X] T016 [PLUGIN] Create NestedFamilyLoadService in `src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs` → Artifacts: [NestedFamilyLoadService.cs](src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

@@ -1,0 +1,43 @@
+namespace FamilyLibrary.Application.DTOs;
+
+/// <summary>
+/// DTO representing a nested family within a parent family RFA file.
+/// Contains information about the family and its version status across library, RFA file, and project.
+/// </summary>
+public record NestedFamilyDto
+{
+    /// <summary>
+    /// Name of the nested family.
+    /// </summary>
+    public required string FamilyName { get; init; }
+
+    /// <summary>
+    /// Role name of the nested family, if assigned.
+    /// </summary>
+    public string? RoleName { get; init; }
+
+    /// <summary>
+    /// Indicates whether the nested family is a shared family.
+    /// </summary>
+    public bool IsShared { get; init; }
+
+    /// <summary>
+    /// Indicates whether the nested family exists in the family library.
+    /// </summary>
+    public bool InLibrary { get; init; }
+
+    /// <summary>
+    /// Version number of the family in the library, if exists.
+    /// </summary>
+    public int? LibraryVersion { get; init; }
+
+    /// <summary>
+    /// Version of the nested family embedded in the parent RFA file.
+    /// </summary>
+    public int? RfaVersion { get; init; }
+
+    /// <summary>
+    /// Version of the nested family currently loaded in the Revit project.
+    /// </summary>
+    public int? ProjectVersion { get; init; }
+}
