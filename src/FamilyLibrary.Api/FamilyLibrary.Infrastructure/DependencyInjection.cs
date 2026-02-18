@@ -33,6 +33,7 @@ public static class DependencyInjection
 
         // Services
         services.AddScoped<IBlobStorageService, BlobStorageService>();
+        services.AddScoped<IChangeDetectionService, ChangeDetectionService>();
 
         return services;
     }

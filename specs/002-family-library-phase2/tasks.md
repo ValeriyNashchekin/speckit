@@ -79,7 +79,7 @@
 
 ### Backend for US2
 
-- [ ] T031 [US2] [BACKEND] Create ChangeDetectionService in src/FamilyLibrary.Infrastructure/Services/ChangeDetectionService.cs
+- [X] T031 [US2] [BACKEND] Create ChangeDetectionService in src/FamilyLibrary.Infrastructure/Services/ChangeDetectionService.cs → Artifacts: [IChangeDetectionService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Interfaces/IChangeDetectionService.cs), [ChangeDetectionService.cs](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Services/ChangeDetectionService.cs)
 - [ ] T032 [US2] [BACKEND] Add GetChangesAsync to IFamilyService in src/FamilyLibrary.Application/Interfaces/IFamilyService.cs
 - [ ] T033 [US2] [BACKEND] Implement GetChangesAsync in FamilyService in src/FamilyLibrary.Infrastructure/Services/FamilyService.cs
 - [ ] T034 [US2] [BACKEND] Add changes endpoint to FamiliesController in src/FamilyLibrary.Api/Controllers/FamiliesController.cs
