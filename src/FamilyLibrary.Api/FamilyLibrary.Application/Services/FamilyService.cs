@@ -388,6 +388,58 @@ public class FamilyService : IFamilyService
         return _changeDetectionService.DetectChanges(fromSnapshot, toSnapshot);
     }
 
+    /// <summary>
+    /// Gets a preview of changes that will occur when updating a family.
+    /// US4: Pre-Update Preview - designers see what will change before confirming update.
+    /// </summary>
+    public async Task<ChangeSetDto> GetUpdatePreviewAsync(
+        Guid familyId,
+        int currentVersion,
+        int targetVersion,
+        CancellationToken cancellationToken = default)
+    {
+        // Delegate to GetChangesAsync with semantic naming for update context
+        return await GetChangesAsync(familyId, currentVersion, targetVersion, cancellationToken);
+    }
+
+    public async Task<ChangeSetDto> DetectLocalChangesAsync(
+        Guid familyId,
+        string localSnapshotJson,
+        CancellationToken cancellationToken = default)
+    {
+        // Verify family exists
+        var familyExists = await _familyRepository.ExistsAsync(familyId, cancellationToken);
+        if (!familyExists)
+        {
+            throw new NotFoundException(nameof(FamilyEntity), familyId);
+        }
+
+        // Get the latest version from library
+        var latestVersion = await _versionRepository.GetLatestVersionAsync(familyId, cancellationToken);
+        if (latestVersion is null)
+        {
+            throw new NotFoundException("FamilyVersion", $"No versions found for family {familyId}");
+        }
+
+        // Deserialize local snapshot
+        var localSnapshot = JsonSerializer.Deserialize<FamilySnapshot>(localSnapshotJson);
+        if (localSnapshot is null)
+        {
+            throw new ValidationException("localSnapshotJson", "Failed to deserialize local snapshot JSON");
+        }
+
+        // Deserialize library snapshot
+        var librarySnapshot = JsonSerializer.Deserialize<FamilySnapshot>(latestVersion.SnapshotJson);
+        if (librarySnapshot is null)
+        {
+            throw new ValidationException("SnapshotJson", $"Failed to deserialize snapshot for version {latestVersion.Version}");
+        }
+
+        // Detect changes between local and library versions
+        // Local is the "previous" (what user has), Library is the "current" (what's in library)
+        return _changeDetectionService.DetectChanges(localSnapshot, librarySnapshot);
+    }
+
     private static async Task<string> CalculateHashAsync(Stream stream, CancellationToken cancellationToken)
     {
         using var sha256 = SHA256.Create();

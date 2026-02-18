@@ -176,7 +176,7 @@ public class SnapshotService
                 {
                     Name = param.Definition.Name,
                     Value = GetParameterValueAsString(param),
-                    Group = param.Definition.ParameterGroup.ToString()
+                    Group = GetParameterGroupName(param)
                 };
 
                 parameters.Add(snapshot);
@@ -224,6 +224,23 @@ public class SnapshotService
         return (int)elementId.Value;
 #else
         return elementId.IntegerValue;
+#endif
+    }
+
+    /// <summary>
+    /// Gets parameter group name in a version-compatible way.
+    /// Revit 2024+ uses GetGroupTypeId(), earlier versions use ParameterGroup property.
+    /// </summary>
+    private static string GetParameterGroupName(Parameter param)
+    {
+        if (param?.Definition == null)
+            return string.Empty;
+
+#if REVIT2024 || REVIT2025 || REVIT2026
+        var groupId = param.Definition.GetGroupTypeId();
+        return groupId?.TypeId ?? string.Empty;
+#else
+        return param.Definition.ParameterGroup.ToString();
 #endif
     }
 }

@@ -1,0 +1,166 @@
+<p-dialog
+  [visible]="visible()"
+  (visibleChange)="onVisibleChange($event)"
+  [modal]="true"
+  [closable]="true"
+  [closeOnEscape]="true"
+  [dismissableMask]="false"
+  [draggable]="false"
+  [resizable]="false"
+  position="center"
+  [style]="{ width: '32rem', maxWidth: '90vw' }"
+  styleClass="bg-white rounded-lg"
+  [showHeader]="true"
+  [blockScroll]="true"
+  [focusTrap]="true"
+>
+  <!-- Header -->
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <i class="pi pi-exclamation-triangle text-amber-500 text-xl"></i>
+      <span class="text-lg font-semibold text-gray-900">Confirm Family Update</span>
+    </div>
+  </ng-template>
+
+  <!-- Content -->
+  <div class="space-y-4">
+    <!-- Family name -->
+    <div class="bg-gray-50 rounded-lg px-4 py-3">
+      <span class="text-sm text-gray-500">Family:</span>
+      <span class="ml-2 font-medium text-gray-900">{{ familyName() }}</span>
+    </div>
+
+    @if (hasChanges()) {
+      <!-- Summary -->
+      <div class="flex items-center gap-4 text-sm">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-list text-blue-500"></i>
+          <span class="text-gray-600">{{ totalChangesCount() }} change(s)</span>
+        </div>
+        @if (affectedTypesCount() > 0) {
+          <div class="flex items-center gap-2">
+            <i class="pi pi-box text-amber-500"></i>
+            <span class="text-gray-600">{{ affectedTypesCount() }} affected type(s)</span>
+          </div>
+        }
+      </div>
+
+      <!-- Changes grouped by category -->
+      <div class="space-y-3 max-h-80 overflow-y-auto pr-1">
+        @for (group of groupedChanges(); track trackByCategory($index, group)) {
+          <div class="border border-gray-200 rounded-lg overflow-hidden">
+            <!-- Category header -->
+            <div class="bg-gray-50 px-4 py-2 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <p-tag
+                  [value]="group.label"
+                  [severity]="getCategorySeverity(group.category)"
+                  styleClass="text-xs"
+                />
+                <span class="text-sm text-gray-500">{{ group.items.length }} change(s)</span>
+              </div>
+            </div>
+
+            <!-- Category items -->
+            <div class="p-3 space-y-2">
+              @for (item of group.items; track $index) {
+                <div class="text-sm">
+                  @if (item.previousValue !== undefined && item.currentValue !== undefined) {
+                    <!-- Value change -->
+                    <div class="flex items-center gap-2">
+                      <span class="text-red-600 line-through">{{ item.previousValue }}</span>
+                      <i class="pi pi-arrow-right text-gray-400 text-xs"></i>
+                      <span class="text-green-600 font-medium">{{ item.currentValue }}</span>
+                    </div>
+                  }
+
+                  @if (item.addedItems !== undefined && item.addedItems.length > 0) {
+                    <!-- Added items -->
+                    <div class="space-y-1">
+                      <span class="text-gray-500">Added:</span>
+                      <div class="flex flex-wrap gap-1 ml-2">
+                        @for (added of item.addedItems; track added) {
+                          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                            <i class="pi pi-plus text-green-600 mr-1 text-xs"></i>
+                            {{ added }}
+                          </span>
+                        }
+                      </div>
+                    </div>
+                  }
+
+                  @if (item.removedItems !== undefined && item.removedItems.length > 0) {
+                    <!-- Removed items -->
+                    <div class="space-y-1 mt-2">
+                      <span class="text-gray-500">Removed:</span>
+                      <div class="flex flex-wrap gap-1 ml-2">
+                        @for (removed of item.removedItems; track removed) {
+                          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                            <i class="pi pi-minus text-red-600 mr-1 text-xs"></i>
+                            {{ removed }}
+                          </span>
+                        }
+                      </div>
+                    </div>
+                  }
+
+                  @if (item.parameterChanges !== undefined && item.parameterChanges.length > 0) {
+                    <!-- Parameter changes -->
+                    <div class="space-y-1">
+                      @for (param of item.parameterChanges; track param.name) {
+                        <div class="flex items-center gap-2 text-xs">
+                          <span class="text-gray-600 font-medium">{{ param.name }}:</span>
+                          <span class="text-red-600">{{ param.previousValue ?? '-' }}</span>
+                          <i class="pi pi-arrow-right text-gray-400"></i>
+                          <span class="text-green-600 font-medium">{{ param.currentValue ?? '-' }}</span>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <!-- No changes -->
+      <div class="flex flex-col items-center justify-center py-8 text-center">
+        <i class="pi pi-check-circle text-4xl text-green-500 mb-3"></i>
+        <p class="text-gray-600 font-medium">No changes detected</p>
+        <p class="text-sm text-gray-400 mt-1">The family is already up to date</p>
+      </div>
+    }
+
+    <!-- Warning message -->
+    <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+      <div class="flex items-start gap-3">
+        <i class="pi pi-info-circle text-amber-500 mt-0.5"></i>
+        <p class="text-sm text-amber-800">
+          Updating this family will replace the local version with the library version.
+          This action cannot be undone.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <ng-template #footer>
+    <div class="flex items-center justify-end gap-3">
+      <p-button
+        label="Cancel"
+        icon="pi pi-times"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="onCancel()"
+      />
+      <p-button
+        label="Confirm Update"
+        icon="pi pi-check"
+        severity="success"
+        (onClick)="onConfirm()"
+        [disabled]="!hasChanges()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>

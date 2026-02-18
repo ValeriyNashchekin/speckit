@@ -93,4 +93,31 @@ public interface IFamilyService
         int fromVersion,
         int toVersion,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a preview of changes that will occur when updating a family.
+    /// US4: Pre-Update Preview - designers see what will change before confirming update.
+    /// </summary>
+    /// <param name="familyId">The family ID.</param>
+    /// <param name="currentVersion">The current local version of the family.</param>
+    /// <param name="targetVersion">The target library version to update to.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Change set describing what will change after the update.</returns>
+    Task<ChangeSetDto> GetUpdatePreviewAsync(
+        Guid familyId,
+        int currentVersion,
+        int targetVersion,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Detects local changes by comparing a local snapshot with the latest library version.
+    /// </summary>
+    /// <param name="familyId">The family ID to compare against.</param>
+    /// <param name="localSnapshotJson">JSON-serialized local snapshot of the family.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Change set describing the differences between local and library versions.</returns>
+    Task<ChangeSetDto> DetectLocalChangesAsync(
+        Guid familyId,
+        string localSnapshotJson,
+        CancellationToken cancellationToken = default);
 }

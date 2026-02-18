@@ -111,20 +111,20 @@
 
 ### Backend for US3
 
-- [ ] T044 [US3] [BACKEND] Add DetectLocalChangesAsync to IFamilyService in src/FamilyLibrary.Application/Interfaces/IFamilyService.cs
-- [ ] T045 [US3] [BACKEND] Implement DetectLocalChangesAsync in FamilyService in src/FamilyLibrary.Infrastructure/Services/FamilyService.cs
+- [X] T044 [US3] [BACKEND] Add DetectLocalChangesAsync to IFamilyService in src/FamilyLibrary.Application/Interfaces/IFamilyService.cs → Artifacts: [IFamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Interfaces/IFamilyService.cs), [FamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Services/FamilyService.cs)
+- [X] T045 [US3] [BACKEND] Implement DetectLocalChangesAsync in FamilyService in src/FamilyLibrary.Infrastructure/Services/FamilyService.cs → Artifacts: Done as part of T044
 - [ ] T046 [US3] [BACKEND] Add local-changes endpoint to FamiliesController in src/FamilyLibrary.Api/Controllers/FamiliesController.cs
 
 ### Plugin for US3
 
-- [ ] T047 [US3] [PLUGIN] Create LocalChangeDetector in src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/
+- [X] T047 [US3] [PLUGIN] Create LocalChangeDetector in src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/ → Artifacts: [LocalChangeDetector.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/LocalChangeDetector.cs)
 - [ ] T048 [US3] [PLUGIN] Add Local Modified status detection to LibraryQueueViewModel
 - [ ] T049 [US3] [PLUGIN] Add View Changes button to Queue tab
 - [ ] T050 [US3] [PLUGIN] Add changes:result event to RevitBridge
 
 ### Frontend for US3
 
-- [ ] T051 [P] [US3] [FRONTEND] Create view-changes-modal.component.ts in src/FamilyLibrary.Web/src/app/features/library/components/
+- [X] T051 [P] [US3] [FRONTEND] Create view-changes-modal.component.ts in src/FamilyLibrary.Web/src/app/features/library/components/ → Artifacts: [view-changes-modal.component.ts](src/FamilyLibrary.Web/src/app/features/library/components/view-changes-modal/view-changes-modal.component.ts), [view-changes-modal.component.html](src/FamilyLibrary.Web/src/app/features/library/components/view-changes-modal/view-changes-modal.component.html)
 - [ ] T052 [US3] [FRONTEND] Add View Changes button to queue-list component
 - [ ] T053 [US3] [FRONTEND] Handle revit:changes:result event in RevitBridgeService
 
@@ -140,19 +140,19 @@
 
 ### Backend for US4
 
-- [ ] T054 [US4] [BACKEND] Add GetUpdatePreviewAsync to IFamilyService in src/FamilyLibrary.Application/Interfaces/IFamilyService.cs
-- [ ] T055 [US4] [BACKEND] Implement GetUpdatePreviewAsync in FamilyService in src/FamilyLibrary.Infrastructure/Services/FamilyService.cs
+- [X] T054 [US4] [BACKEND] Add GetUpdatePreviewAsync to IFamilyService in src/FamilyLibrary.Application/Interfaces/IFamilyService.cs → Artifacts: [IFamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Interfaces/IFamilyService.cs), [FamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Services/FamilyService.cs)
+- [X] T055 [US4] [BACKEND] Implement GetUpdatePreviewAsync in FamilyService in src/FamilyLibrary.Infrastructure/Services/FamilyService.cs → Artifacts: Done as part of T054
 - [ ] T056 [US4] [BACKEND] Add update-preview endpoint to FamiliesController in src/FamilyLibrary.Api/Controllers/FamiliesController.cs
 
 ### Plugin for US4
 
-- [ ] T057 [US4] [PLUGIN] Create UpdatePreviewService in src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/Services/
+- [X] T057 [US4] [PLUGIN] Create UpdatePreviewService in src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/Services/ → Artifacts: [UpdatePreviewService.cs](src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/Services/UpdatePreviewService.cs)
 - [ ] T058 [US4] [PLUGIN] Add pre-update preview check to FamilyUpdaterService
 - [ ] T059 [US4] [PLUGIN] Send preview data before update via WebView2
 
 ### Frontend for US4
 
-- [ ] T060 [P] [US4] [FRONTEND] Create pre-update-preview.component.ts in src/FamilyLibrary.Web/src/app/features/scanner/components/
+- [X] T060 [P] [US4] [FRONTEND] Create pre-update-preview.component.ts in src/FamilyLibrary.Web/src/app/features/scanner/components/ → Artifacts: [pre-update-preview.component.ts](src/FamilyLibrary.Web/src/app/features/scanner/components/pre-update-preview.component.ts), [pre-update-preview.component.html](src/FamilyLibrary.Web/src/app/features/scanner/components/pre-update-preview.component.html)
 - [ ] T061 [US4] [FRONTEND] Show preview dialog before update confirmation
 - [ ] T062 [US4] [FRONTEND] Add Show Details expansion to preview
 
@@ -168,14 +168,14 @@
 
 ### Backend for US5
 
-- [ ] T063 [US5] [BACKEND] Add RoutingPreferencesJson model in src/FamilyLibrary.Application/DTOs/SystemTypeDtos.cs
+- [X] T063 [US5] [BACKEND] Add RoutingPreferencesJson model in src/FamilyLibrary.Application/DTOs/SystemTypeDtos.cs → Artifacts: [RoutingPreferencesDto.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/DTOs/RoutingPreferencesDto.cs)
 - [ ] T064 [US5] [BACKEND] Update SystemTypeService for Group A categories (Roofs, Ceilings, Foundations)
 - [ ] T065 [US5] [BACKEND] Update SystemTypeValidator for MEP types
 
 ### Plugin for US5
 
-- [ ] T066 [P] [US5] [PLUGIN] Create RoutingPreferencesSerializer in src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/
-- [ ] T067 [P] [US5] [PLUGIN] Create RoutingPreferencesApplier in src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/
+- [X] T066 [P] [US5] [PLUGIN] Create RoutingPreferencesSerializer in src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/ → Artifacts: [RoutingPreferencesSerializer.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/RoutingPreferencesSerializer.cs), [RoutingPreferencesJson.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Models/RoutingPreferencesJson.cs)
+- [X] T067 [P] [US5] [PLUGIN] Create RoutingPreferencesApplier in src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/ → Artifacts: [RoutingPreferencesApplier.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/RoutingPreferencesApplier.cs)
 - [ ] T068 [US5] [PLUGIN] Update SystemTypeScannerService for Group A categories
 - [ ] T069 [US5] [PLUGIN] Update SystemTypeScannerService for Group B (Pipes, Ducts)
 - [ ] T070 [US5] [PLUGIN] Update SystemTypePublisher with RoutingPreferences serialization
@@ -183,7 +183,7 @@
 
 ### Frontend for US5
 
-- [ ] T072 [P] [US5] [FRONTEND] Create routing-preferences-display.component.ts in src/FamilyLibrary.Web/src/app/features/library/components/system-type-detail/
+- [X] T072 [P] [US5] [FRONTEND] Create routing-preferences-display.component.ts in src/FamilyLibrary.Web/src/app/features/library/components/system-type-detail/ → Artifacts: [routing-preferences-display.component.ts](src/FamilyLibrary.Web/src/app/features/library/components/system-type-detail/routing-preferences-display.component.ts), [routing-preferences-display.component.html](src/FamilyLibrary.Web/src/app/features/library/components/system-type-detail/routing-preferences-display.component.html)
 - [ ] T073 [US5] [FRONTEND] Add routing preferences section to system-type-detail
 
 **Checkpoint**: MEP system families publish and update with RoutingPreferences
