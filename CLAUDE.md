@@ -24,6 +24,7 @@ npm test; npm run lint
 C# (.NET 10 / .NET Framework 4.8), TypeScript (Angular 21): Follow standard conventions
 
 ## Recent Changes
+- 003-family-library-phase3: Added C# (.NET 10 Backend, .NET Framework 4.8 + .NET 8 Plugin), TypeScript (Angular 21) + ASP.NET Core, EF Core 9, Revit API 2020-2026, PrimeNG 19, Tailwind CSS 4
 - 002-family-library-phase2: Added C# (.NET 10 Backend, .NET Framework 4.8 + .NET 8 Plugin), TypeScript (Angular 21) + ASP.NET Core, EF Core 9, Revit API 2020-2026, PrimeNG 19, Tailwind CSS 4
 
 - 001-family-library-mvp: Added C# (.NET 10 / .NET Framework 4.8), TypeScript (Angular 21)

@@ -49,12 +49,12 @@ Based on plan.md structure:
 
 **Purpose**: Add Phase 3 entities to database
 
-- [ ] T001 [BACKEND] Create FamilyDependency entity in `src/FamilyLibrary.Domain/Entities/FamilyDependency.cs`
-- [ ] T002 [P] [BACKEND] Create MaterialMapping entity in `src/FamilyLibrary.Domain/Entities/MaterialMapping.cs`
-- [ ] T003 [BACKEND] Create FamilyDependencyConfiguration in `src/FamilyLibrary.Infrastructure/Persistence/Configurations/FamilyDependencyConfiguration.cs`
-- [ ] T004 [P] [BACKEND] Create MaterialMappingConfiguration in `src/FamilyLibrary.Infrastructure/Persistence/Configurations/MaterialMappingConfiguration.cs`
-- [ ] T005 [BACKEND] Add FamilyDependencies and MaterialMappings to DbContext in `src/FamilyLibrary.Infrastructure/Persistence/ApplicationDbContext.cs`
-- [ ] T006 [BACKEND] Create migration AddPhase3Entities in `src/FamilyLibrary.Infrastructure/`
+- [X] T001 [BACKEND] Create FamilyDependency entity in `src/FamilyLibrary.Domain/Entities/FamilyDependencyEntity.cs` → Artifacts: [FamilyDependencyEntity.cs](src/FamilyLibrary.Api/FamilyLibrary.Domain/Entities/FamilyDependencyEntity.cs)
+- [X] T002 [P] [BACKEND] Create MaterialMapping entity in `src/FamilyLibrary.Domain/Entities/MaterialMappingEntity.cs` → Artifacts: [MaterialMappingEntity.cs](src/FamilyLibrary.Api/FamilyLibrary.Domain/Entities/MaterialMappingEntity.cs)
+- [X] T003 [BACKEND] Create FamilyDependencyConfiguration in `src/FamilyLibrary.Infrastructure/Data/Configurations/FamilyDependencyConfiguration.cs` → Artifacts: [FamilyDependencyConfiguration.cs](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Data/Configurations/FamilyDependencyConfiguration.cs)
+- [X] T004 [P] [BACKEND] Create MaterialMappingConfiguration in `src/FamilyLibrary.Infrastructure/Data/Configurations/MaterialMappingConfiguration.cs` → Artifacts: [MaterialMappingConfiguration.cs](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Data/Configurations/MaterialMappingConfiguration.cs)
+- [X] T005 [BACKEND] Add FamilyDependencies and MaterialMappings to DbContext in `src/FamilyLibrary.Infrastructure/Data/AppDbContext.cs`
+- [X] T006 [BACKEND] Create migration AddPhase3Entities in `src/FamilyLibrary.Infrastructure/Data/Migrations/`
 
 **Checkpoint**: Database schema updated, migration ready to apply
 

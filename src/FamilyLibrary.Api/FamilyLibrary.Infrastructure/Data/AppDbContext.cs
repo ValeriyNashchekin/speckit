@@ -16,6 +16,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<RecognitionRuleEntity> RecognitionRules => Set<RecognitionRuleEntity>();
     public DbSet<FamilyNameMappingEntity> FamilyNameMappings => Set<FamilyNameMappingEntity>();
     public DbSet<FamilyRoleTagEntity> FamilyRoleTags => Set<FamilyRoleTagEntity>();
+    public DbSet<FamilyDependencyEntity> FamilyDependencies => Set<FamilyDependencyEntity>();
+    public DbSet<MaterialMappingEntity> MaterialMappings => Set<MaterialMappingEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
