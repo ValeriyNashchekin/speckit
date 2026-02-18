@@ -59,6 +59,11 @@ export const routes: Routes = [
           import('./features/queue/queue.routes').then(m => m.QUEUE_ROUTES),
       },
       {
+        path: 'scanner',
+        loadChildren: () =>
+          import('./features/scanner/scanner.routes').then((m) => m.SCANNER_ROUTES),
+      },
+      {
         path: 'settings',
         loadComponent: () =>
           import('./features/settings/settings.component').then(m => m.SettingsComponent),

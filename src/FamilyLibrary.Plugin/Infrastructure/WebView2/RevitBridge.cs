@@ -3,6 +3,8 @@ using Autodesk.Revit.DB;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using FamilyLibrary.Plugin.Commands.LoadFamilyCommand;
+using FamilyLibrary.Plugin.Commands.UpdateFamiliesCommand.Services;
+using FamilyLibrary.Plugin.Core.Enums;
 using FamilyLibrary.Plugin.Core.Interfaces;
 
 namespace FamilyLibrary.Plugin.Infrastructure.WebView2;
@@ -133,6 +135,19 @@ public class RevitBridge : IWebViewBridge
                 var logMessage = logPayload?["message"]?.ToString() ?? "";
                 System.Diagnostics.Debug.WriteLine($"[UI {level.ToUpper()}] {logMessage}");
                 break;
+
+            // Phase 2 - Scanner events
+            case "ui:scan-project":
+                HandleScanProjectAsync(message.Payload as JObject).ConfigureAwait(false);
+                break;
+
+            case "ui:update-families":
+                HandleUpdateFamiliesAsync(message.Payload as JObject).ConfigureAwait(false);
+                break;
+
+            case "ui:stamp-legacy":
+                HandleStampLegacyAsync(message.Payload as JObject).ConfigureAwait(false);
+                break;
         }
     }
 
@@ -226,4 +241,176 @@ public class RevitBridge : IWebViewBridge
 
         SendEvent("revit:family-loaded", payload);
     }
+
+    #region Phase 2 - Scanner Event Handlers
+
+    private async System.Threading.Tasks.Task HandleScanProjectAsync(JObject? payload)
+    {
+        if (_activeDocument == null)
+        {
+            SendScanError("No active document");
+            return;
+        }
+
+        try
+        {
+            var scannerService = new ProjectScannerService();
+            var results = await scannerService.ScanAsync(_activeDocument).ConfigureAwait(false);
+
+            var summary = new
+            {
+                upToDate = results.Count(r => r.Status == FamilyScanStatus.UpToDate),
+                updateAvailable = results.Count(r => r.Status == FamilyScanStatus.UpdateAvailable),
+                legacyMatch = results.Count(r => r.Status == FamilyScanStatus.LegacyMatch),
+                unmatched = results.Count(r => r.Status == FamilyScanStatus.Unmatched),
+                localModified = results.Count(r => r.Status == FamilyScanStatus.LocalModified)
+            };
+
+            SendEvent("revit:scan:result", new
+            {
+                families = results,
+                totalCount = results.Count,
+                summary
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Scan error: {ex.Message}");
+            SendScanError(ex.Message);
+        }
+    }
+
+    private async System.Threading.Tasks.Task HandleUpdateFamiliesAsync(JObject? payload)
+    {
+        if (_activeDocument == null)
+        {
+            SendUpdateResult(false, "No active document", new List<UpdateResult>());
+            return;
+        }
+
+        try
+        {
+            var familiesArray = payload?["families"] as JArray;
+            if (familiesArray == null || familiesArray.Count == 0)
+            {
+                SendUpdateResult(false, "No families to update", new List<UpdateResult>());
+                return;
+            }
+
+            var updaterService = new FamilyUpdaterService();
+            var results = new List<UpdateResult>();
+
+            foreach (var item in familiesArray)
+            {
+                var uniqueId = item["uniqueId"]?.ToString();
+                var roleName = item["roleName"]?.ToString();
+                var targetVersion = item.Value<int?>("targetVersion");
+
+                if (string.IsNullOrEmpty(uniqueId) || string.IsNullOrEmpty(roleName) || !targetVersion.HasValue)
+                    continue;
+
+                var result = await updaterService.UpdateFamilyAsync(
+                    _activeDocument, uniqueId, roleName, targetVersion.Value).ConfigureAwait(false);
+
+                results.Add(result);
+            }
+
+            var success = results.All(r => r.Success);
+            var message = success
+                ? $"Updated {results.Count} families"
+                : $"Updated {results.Count(r => r.Success)}/{results.Count} families";
+
+            SendUpdateResult(success, message, results);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Update error: {ex.Message}");
+            SendUpdateResult(false, ex.Message, new List<UpdateResult>());
+        }
+    }
+
+    private async System.Threading.Tasks.Task HandleStampLegacyAsync(JObject? payload)
+    {
+        if (_activeDocument == null)
+        {
+            SendStampLegacyResult(false, "No active document", 0);
+            return;
+        }
+
+        try
+        {
+            var familiesArray = payload?["families"] as JArray;
+            if (familiesArray == null || familiesArray.Count == 0)
+            {
+                SendStampLegacyResult(false, "No families to stamp", 0);
+                return;
+            }
+
+            var esService = new Infrastructure.ExtensibleStorage.EsService();
+            int stampedCount = 0;
+
+            using (var transaction = new Transaction(_activeDocument, "Stamp Legacy Families"))
+            {
+                transaction.Start();
+
+                foreach (var item in familiesArray)
+                {
+                    var uniqueId = item["uniqueId"]?.ToString();
+                    var roleId = item["roleId"]?.ToString();
+                    var roleName = item["roleName"]?.ToString();
+
+                    if (string.IsNullOrEmpty(uniqueId) || string.IsNullOrEmpty(roleName))
+                        continue;
+
+                    // Find family by UniqueId
+                    var family = new FilteredElementCollector(_activeDocument)
+                        .OfClass(typeof(Family))
+                        .Cast<Family>()
+                        .FirstOrDefault(f => f.UniqueId == uniqueId);
+
+                    if (family == null) continue;
+
+                    // Create stamp data
+                    var stampData = new Core.Entities.EsStampData
+                    {
+                        RoleId = Guid.TryParse(roleId, out var rid) ? rid : Guid.NewGuid(),
+                        RoleName = roleName,
+                        FamilyName = family.Name,
+                        ContentHash = "", // Will be computed on next scan
+                        StampedAt = DateTime.UtcNow,
+                        StampedBy = Environment.UserName
+                    };
+
+                    esService.WriteStamp(family, stampData);
+                    stampedCount++;
+                }
+
+                transaction.Commit();
+            }
+
+            SendStampLegacyResult(true, $"Stamped {stampedCount} families", stampedCount);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Stamp legacy error: {ex.Message}");
+            SendStampLegacyResult(false, ex.Message, 0);
+        }
+    }
+
+    private void SendScanError(string error)
+    {
+        SendEvent("revit:scan:error", new { error });
+    }
+
+    private void SendUpdateResult(bool success, string message, List<UpdateResult> results)
+    {
+        SendEvent("revit:update:result", new { success, message, results });
+    }
+
+    private void SendStampLegacyResult(bool success, string message, int stampedCount)
+    {
+        SendEvent("revit:stamp-legacy:result", new { success, message, stampedCount });
+    }
+
+    #endregion
 }

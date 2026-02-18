@@ -1,0 +1,18 @@
+<div class="flex flex-wrap items-center gap-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
+  <span class="text-sm font-medium text-gray-600 mr-2">Filter:</span>
+  @for (option of filterOptions; track option.status) {
+    <button
+      type="button"
+      [class]="getButtonClasses(option)"
+      (click)="setFilter(option.status)"
+      [attr.aria-pressed]="currentFilter() === option.status"
+    >
+      <span>{{ option.label }}</span>
+      <span class="ml-1.5 px-1.5 py-0.5 text-xs rounded-full" 
+            [class.bg-white/20]="currentFilter() === option.status"
+            [class.bg-gray-300]="currentFilter() !== option.status">
+        {{ option.count }}
+      </span>
+    </button>
+  }
+</div>

@@ -42,30 +42,30 @@
 
 ### Backend for US1
 
-- [ ] T013 [US1] [BACKEND] Add BatchCheckAsync to IFamilyService in src/FamilyLibrary.Application/Interfaces/IFamilyService.cs
-- [ ] T014 [US1] [BACKEND] Implement BatchCheckAsync in FamilyService in src/FamilyLibrary.Infrastructure/Services/FamilyService.cs
-- [ ] T015 [US1] [BACKEND] Add batch-check endpoint to FamiliesController in src/FamilyLibrary.Api/Controllers/FamiliesController.cs
-- [ ] T016 [US1] [BACKEND] Create ProjectsController with scan/batch-update stubs in src/FamilyLibrary.Api/Controllers/ProjectsController.cs
+- [X] T013 [US1] [BACKEND] Add BatchCheckAsync to IFamilyService → Artifacts: [IFamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Interfaces/IFamilyService.cs)
+- [X] T014 [US1] [BACKEND] Implement BatchCheckAsync in FamilyService → Artifacts: [FamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Services/FamilyService.cs), [FamilyRepository.cs](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Repositories/FamilyRepository.cs)
+- [X] T015 [US1] [BACKEND] Add batch-check endpoint to FamiliesController → Artifacts: [FamiliesController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/FamiliesController.cs)
+- [X] T016 [US1] [BACKEND] Create ProjectsController with scan/batch-update stubs → Artifacts: [ProjectsController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/ProjectsController.cs)
 
 ### Plugin for US1
 
-- [ ] T017 [P] [US1] [PLUGIN] Create LegacyRecognitionService in src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/Services/
-- [ ] T018 [P] [US1] [PLUGIN] Create ProjectScannerService in src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/Services/
-- [ ] T019 [P] [US1] [PLUGIN] Create FamilyUpdaterService in src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/Services/
-- [ ] T020 [US1] [PLUGIN] Create UpdateFamiliesCommand in src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/
-- [ ] T021 [US1] [PLUGIN] Create UpdateFamiliesAvailability in src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/
-- [ ] T022 [US1] [PLUGIN] Add scanner WebView2 events to RevitBridge in src/FamilyLibrary.Plugin/Infrastructure/WebView2/RevitBridge.cs
-- [ ] T023 [US1] [PLUGIN] Create scanner .addin entries for Revit 2020-2026
+- [X] T017 [P] [US1] [PLUGIN] Create LegacyRecognitionService → Artifacts: [LegacyRecognitionService.cs](src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/Services/LegacyRecognitionService.cs)
+- [X] T018 [P] [US1] [PLUGIN] Create ProjectScannerService → Artifacts: [ProjectScannerService.cs](src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/Services/ProjectScannerService.cs)
+- [X] T019 [P] [US1] [PLUGIN] Create FamilyUpdaterService → Artifacts: [FamilyUpdaterService.cs](src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/Services/FamilyUpdaterService.cs)
+- [X] T020 [US1] [PLUGIN] Create UpdateFamiliesCommand → Artifacts: [UpdateFamiliesCommand.cs](src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/UpdateFamiliesCommand.cs)
+- [X] T021 [US1] [PLUGIN] Create UpdateFamiliesAvailability → Artifacts: [UpdateFamiliesAvailability.cs](src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/UpdateFamiliesAvailability.cs)
+- [X] T022 [US1] [PLUGIN] Add scanner WebView2 events to RevitBridge → Artifacts: [RevitBridge.cs](src/FamilyLibrary.Plugin/Infrastructure/WebView2/RevitBridge.cs)
+- [X] T023 [US1] [PLUGIN] Create ScannerWindow → Artifacts: [ScannerWindow.xaml](src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/Views/ScannerWindow.xaml)
 
 ### Frontend for US1
 
-- [ ] T024 [P] [US1] [FRONTEND] Create scanner.service.ts in src/FamilyLibrary.Web/src/app/features/scanner/services/
-- [ ] T025 [P] [US1] [FRONTEND] Create scanner.component.ts in src/FamilyLibrary.Web/src/app/features/scanner/
-- [ ] T026 [P] [US1] [FRONTEND] Create scanner-table.component.ts in src/FamilyLibrary.Web/src/app/features/scanner/components/
-- [ ] T027 [P] [US1] [FRONTEND] Create scanner-filters.component.ts in src/FamilyLibrary.Web/src/app/features/scanner/components/
-- [ ] T028 [P] [US1] [FRONTEND] Create update-progress.component.ts in src/FamilyLibrary.Web/src/app/features/scanner/components/
-- [ ] T029 [US1] [FRONTEND] Add scanner route and lazy loading in src/FamilyLibrary.Web/src/app/app.routes.ts
-- [ ] T030 [US1] [FRONTEND] Add scanner navigation item in sidebar
+- [X] T024 [P] [US1] [FRONTEND] Create scanner.service.ts → Artifacts: [scanner.service.ts](src/FamilyLibrary.Web/src/app/features/scanner/services/scanner.service.ts)
+- [X] T025 [P] [US1] [FRONTEND] Create scanner.component.ts → Artifacts: [scanner.component.ts](src/FamilyLibrary.Web/src/app/features/scanner/scanner.component.ts)
+- [X] T026 [P] [US1] [FRONTEND] Create scanner-table.component.ts → Artifacts: [scanner-table.component.ts](src/FamilyLibrary.Web/src/app/features/scanner/components/scanner-table.component.ts)
+- [X] T027 [P] [US1] [FRONTEND] Create scanner-filters.component.ts → Artifacts: [scanner-filters.component.ts](src/FamilyLibrary.Web/src/app/features/scanner/components/scanner-filters.component.ts)
+- [X] T028 [P] [US1] [FRONTEND] Create update-progress.component.ts → Artifacts: [update-progress.component.ts](src/FamilyLibrary.Web/src/app/features/scanner/components/update-progress.component.ts)
+- [X] T029 [US1] [FRONTEND] Add scanner route → Artifacts: [app.routes.ts](src/FamilyLibrary.Web/src/app/app.routes.ts)
+- [X] T030 [US1] [FRONTEND] Add scanner navigation item → Artifacts: [main-layout.component.ts](src/FamilyLibrary.Web/src/app/layout/main-layout/main-layout.component.ts)
 
 **Checkpoint**: Scanner fully functional - can scan, filter, update families
 

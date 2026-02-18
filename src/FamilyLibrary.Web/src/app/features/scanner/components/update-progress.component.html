@@ -1,0 +1,64 @@
+@if (visible() && progress(); as p) {
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="progress-title">
+    <div class="bg-white p-6 rounded-lg shadow-xl w-96 max-w-full mx-4">
+      <!-- Header -->
+      <h3 id="progress-title" class="text-lg font-semibold text-gray-900 mb-4">
+        @if (isComplete()) {
+          Update Complete
+        } @else {
+          Updating Families...
+        }
+      </h3>
+
+      <!-- Progress bar -->
+      <p-progressBar [value]="progressPercent()" [showValue]="true" styleClass="h-4" />
+
+      <!-- Progress details -->
+      <div class="mt-4 space-y-2">
+        <p class="text-sm text-gray-600">
+          <span class="font-medium">{{ p.completed }}</span>
+          <span class="text-gray-400">/</span>
+          <span>{{ p.total }}</span>
+          <span class="text-gray-500 ml-1">families processed</span>
+        </p>
+
+        @if (p.currentFamily && !isComplete()) {
+          <p class="text-sm text-gray-500 truncate">
+            Current: {{ p.currentFamily }}
+          </p>
+        }
+
+        @if (p.success > 0) {
+          <p class="text-sm text-green-600">
+            <i class="pi pi-check-circle mr-1"></i>
+            {{ p.success }} succeeded
+          </p>
+        }
+
+        @if (hasFailures()) {
+          <p class="text-sm text-red-600">
+            <i class="pi pi-times-circle mr-1"></i>
+            {{ p.failed }} failed
+          </p>
+        }
+      </div>
+
+      <!-- Summary on complete -->
+      @if (isComplete()) {
+        <div class="mt-4 p-3 rounded-md" 
+             [class.bg-green-50]="!hasFailures()" 
+             [class.bg-yellow-50]="hasFailures()">
+          <p class="text-sm font-medium" 
+             [class.text-green-700]="!hasFailures()" 
+             [class.text-yellow-700]="hasFailures()">
+            @if (hasFailures()) {
+              Completed with {{ p.failed }} error(s)
+            } @else {
+              All families updated successfully!
+            }
+          </p>
+        </div>
+      }
+    </div>
+  </div>
+}

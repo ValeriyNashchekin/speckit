@@ -1,0 +1,175 @@
+<div class="bg-white rounded-lg shadow-sm border border-gray-200">
+  <p-table
+    [value]="families()"
+    [loading]="loading()"
+    [rows]="rows"
+    [scrollable]="true"
+    scrollHeight="500px"
+    [virtualScroll]="true"
+    [virtualScrollItemSize]="48"
+    dataKey="uniqueId"
+    [rowHover]="true"
+    [showGridlines]="false"
+    [stripedRows]="true"
+    [(selection)]="selectedFamilies"
+    selectionMode="multiple"
+    [rowTrackBy]="trackByUniqueId"
+    styleClass="w-full"
+  >
+    <!-- Caption with actions -->
+    <ng-template #caption>
+      <div class="flex items-center justify-between">
+        <span class="text-lg font-medium text-gray-700">
+          {{ families().length }} families found
+        </span>
+        <div class="flex items-center gap-2">
+          @if (selectedCount() > 0) {
+            <span class="text-sm text-gray-500 mr-2">
+              {{ selectedCount() }} selected
+            </span>
+          }
+          <p-button
+            label="Update Selected"
+            icon="pi pi-refresh"
+            severity="success"
+            [outlined]="true"
+            [disabled]="!hasUpdatableSelected()"
+            (onClick)="onUpdateSelected()"
+          />
+          <p-button
+            label="Stamp Selected"
+            icon="pi pi-tag"
+            severity="warn"
+            [outlined]="true"
+            [disabled]="!hasStampableSelected()"
+            (onClick)="onStampSelected()"
+          />
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- Header -->
+    <ng-template #header>
+      <tr>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 3rem">
+          <p-tableHeaderCheckbox />
+        </th>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 25%">
+          Family Name
+        </th>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 20%">
+          Category
+        </th>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 15%">
+          Role
+        </th>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 15%">
+          Status
+        </th>
+        <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700" style="width: 12%">
+          Actions
+        </th>
+      </tr>
+    </ng-template>
+
+    <!-- Body -->
+    <ng-template #body let-family>
+      <tr class="border-t border-gray-100" style="height: 48px">
+        <td class="px-4 py-3">
+          <p-tableCheckbox [value]="family" />
+        </td>
+        <td class="px-4 py-3">
+          <span class="font-medium text-gray-900">{{ family.familyName }}</span>
+        </td>
+        <td class="px-4 py-3 text-gray-600">
+          {{ family.category }}
+        </td>
+        <td class="px-4 py-3">
+          @if (family.roleName) {
+            <span class="text-gray-700">{{ family.roleName }}</span>
+            @if (family.isAutoRole) {
+              <span class="text-gray-400 text-xs ml-1">(auto)</span>
+            }
+          } @else {
+            <span class="text-gray-400">-</span>
+          }
+        </td>
+        <td class="px-4 py-3">
+          <p-tag
+            [value]="getStatusLabel(family.status)"
+            [severity]="getStatusSeverity(family.status)"
+          />
+        </td>
+        <td class="px-4 py-3">
+          <div class="flex items-center justify-end gap-1">
+            @if (family.status === 'UpdateAvailable' || family.status === 'LegacyMatch') {
+              <p-button
+                icon="pi pi-refresh"
+                [rounded]="true"
+                [text]="true"
+                severity="success"
+                pTooltip="Update from library"
+                (onClick)="onUpdateFamily(family)"
+              />
+            }
+            @if (family.status === 'LegacyMatch' || family.status === 'Unmatched') {
+              <p-button
+                icon="pi pi-tag"
+                [rounded]="true"
+                [text]="true"
+                severity="warn"
+                pTooltip="Stamp with role"
+                (onClick)="onStampFamily(family)"
+              />
+            }
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <!-- Empty state -->
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="6" class="px-4 py-12 text-center">
+          <div class="flex flex-col items-center gap-3">
+            <i class="pi pi-inbox text-4xl text-gray-300"></i>
+            <div>
+              <p class="text-gray-600 font-medium">No families found</p>
+              <p class="text-sm text-gray-400 mt-1">
+                Scan the project to see families
+              </p>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <!-- Loading skeleton -->
+    <ng-template #loadingbody>
+      @for (i of [1, 2, 3, 4, 5]; track i) {
+        <tr class="border-t border-gray-100" style="height: 48px">
+          <td class="px-4 py-3">
+            <div class="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="h-4 bg-gray-200 rounded animate-pulse w-1/3"></div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="h-6 bg-gray-200 rounded animate-pulse w-24"></div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="flex items-center justify-end">
+              <div class="h-8 w-8 bg-gray-200 rounded-full animate-pulse"></div>
+            </div>
+          </td>
+        </tr>
+      }
+    </ng-template>
+  </p-table>
+</div>

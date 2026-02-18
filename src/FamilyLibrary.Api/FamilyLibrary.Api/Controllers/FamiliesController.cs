@@ -158,18 +158,19 @@ public class FamiliesController(IFamilyService service) : BaseController
     }
 
     /// <summary>
-    /// Batch checks multiple hashes for existence.
+    /// Batch checks multiple families against the library.
+    /// Determines if families are up-to-date, need update, or are unmatched.
     /// </summary>
-    /// <param name="request">The request containing the list of hashes to check.</param>
+    /// <param name="request">The request containing families with role names and hashes.</param>
     /// <param name="ct">Cancellation token.</param>
-    /// <returns>List of family status results.</returns>
+    /// <returns>Batch check response with status for each family.</returns>
     [HttpPost("batch-check")]
-    [ProducesResponseType<List<FamilyStatusDto>>(StatusCodes.Status200OK)]
-    public async Task<ActionResult<List<FamilyStatusDto>>> BatchCheck(
+    [ProducesResponseType<BatchCheckResponse>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<BatchCheckResponse>> BatchCheck(
         [FromBody] BatchCheckRequest request,
         CancellationToken ct)
     {
-        var results = await service.BatchCheckAsync(request.Hashes, ct);
+        var results = await service.BatchCheckAsync(request, ct);
         return Ok(results);
     }
 
@@ -202,15 +203,4 @@ public record ValidateHashRequest
     /// The content hash to validate.
     /// </summary>
     public required string Hash { get; init; }
-}
-
-/// <summary>
-/// Request model for batch hash check.
-/// </summary>
-public record BatchCheckRequest
-{
-    /// <summary>
-    /// List of content hashes to check.
-    /// </summary>
-    public required List<string> Hashes { get; init; }
 }

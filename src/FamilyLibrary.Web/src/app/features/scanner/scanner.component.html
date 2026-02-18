@@ -1,0 +1,66 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-900">Update Families from Library</h1>
+      <p class="text-sm text-gray-500 mt-1">
+        Scan your project to find families that can be updated from the library
+      </p>
+    </div>
+    <p-button
+      label="Scan Project"
+      icon="pi pi-search"
+      [loading]="isScanning()"
+      (onClick)="scan()"
+    />
+  </div>
+
+  <!-- Scanning indicator -->
+  @if (isScanning()) {
+    <div class="flex items-center justify-center py-12">
+      <div class="flex flex-col items-center gap-3">
+        <i class="pi pi-spin pi-spinner text-4xl text-primary-500"></i>
+        <p class="text-gray-600">Scanning project families...</p>
+      </div>
+    </div>
+  }
+
+  <!-- Results section -->
+  @if (scanResult() && !isScanning()) {
+    <!-- Filters with summary -->
+    @if (summary(); as s) {
+      <app-scanner-filters
+        [summary]="s"
+        (filterChange)="onFilterChange($event)"
+      />
+    }
+
+    <!-- Results table -->
+    <app-scanner-table
+      [families]="filteredFamilies()"
+      [loading]="isScanning()"
+      (updateSelected)="onUpdateSelected($event)"
+      (stampSelected)="onStampSelected($event)"
+    />
+  }
+
+  <!-- Empty state before scan -->
+  @if (!scanResult() && !isScanning()) {
+    <div class="flex flex-col items-center justify-center py-16">
+      <i class="pi pi-search text-5xl text-gray-300 mb-4"></i>
+      <h3 class="text-lg font-medium text-gray-700 mb-2">No scan results yet</h3>
+      <p class="text-gray-500 text-center max-w-md">
+        Click "Scan Project" to analyze your Revit project and find families
+        that can be updated from the library.
+      </p>
+    </div>
+  }
+
+  <!-- Update progress modal -->
+  @if (isUpdating()) {
+    <app-update-progress
+      [progress]="updateProgress()"
+      [visible]="isUpdating()"
+    />
+  }
+</div>

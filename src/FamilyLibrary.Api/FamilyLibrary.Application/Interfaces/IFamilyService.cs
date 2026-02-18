@@ -58,10 +58,14 @@ public interface IFamilyService
     Task<bool> ValidateHashAsync(string hash, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Batch checks multiple hashes for existence.
+    /// Batch checks multiple families against the library by role name and hash.
+    /// Determines if families are up-to-date, need update, or are unmatched.
     /// </summary>
-    Task<List<FamilyStatusDto>> BatchCheckAsync(
-        List<string> hashes,
+    /// <param name="request">The batch check request with family items.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Batch check response with status for each family.</returns>
+    Task<BatchCheckResponse> BatchCheckAsync(
+        BatchCheckRequest request,
         CancellationToken cancellationToken = default);
 
     /// <summary>
