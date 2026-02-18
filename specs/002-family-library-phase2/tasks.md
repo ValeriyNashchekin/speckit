@@ -80,23 +80,23 @@
 ### Backend for US2
 
 - [X] T031 [US2] [BACKEND] Create ChangeDetectionService in src/FamilyLibrary.Infrastructure/Services/ChangeDetectionService.cs → Artifacts: [IChangeDetectionService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Interfaces/IChangeDetectionService.cs), [ChangeDetectionService.cs](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Services/ChangeDetectionService.cs)
-- [ ] T032 [US2] [BACKEND] Add GetChangesAsync to IFamilyService in src/FamilyLibrary.Application/Interfaces/IFamilyService.cs
-- [ ] T033 [US2] [BACKEND] Implement GetChangesAsync in FamilyService in src/FamilyLibrary.Infrastructure/Services/FamilyService.cs
-- [ ] T034 [US2] [BACKEND] Add changes endpoint to FamiliesController in src/FamilyLibrary.Api/Controllers/FamiliesController.cs
-- [ ] T035 [US2] [BACKEND] Add versions endpoint with changes to FamiliesController in src/FamilyLibrary.Api/Controllers/FamiliesController.cs
+- [X] T032 [US2] [BACKEND] Add GetChangesAsync to IFamilyService in src/FamilyLibrary.Application/Interfaces/IFamilyService.cs → Artifacts: [IFamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Interfaces/IFamilyService.cs)
+- [X] T033 [US2] [BACKEND] Implement GetChangesAsync in FamilyService in src/FamilyLibrary.Infrastructure/Services/FamilyService.cs → Artifacts: [FamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Services/FamilyService.cs)
+- [X] T034 [US2] [BACKEND] Add changes endpoint to FamiliesController in src/FamilyLibrary.Api/Controllers/FamiliesController.cs → Artifacts: [FamiliesController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/FamiliesController.cs)
+- [X] T035 [US2] [BACKEND] Add versions endpoint with changes to FamiliesController in src/FamilyLibrary.Api/Controllers/FamiliesController.cs → Artifacts: Already existed in FamiliesController.cs
 
 ### Plugin for US2
 
-- [ ] T036 [P] [US2] [PLUGIN] Create SnapshotService in src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/
-- [ ] T037 [US2] [PLUGIN] Create PluginChangeDetectionService in src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/
-- [ ] T038 [US2] [PLUGIN] Update FamilyPublisher to create SnapshotJSON on publish
+- [X] T036 [P] [US2] [PLUGIN] Create SnapshotService in src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/ → Artifacts: [FamilyScannerService.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/FamilyScannerService.cs) (SnapshotService class inside)
+- [X] T037 [US2] [PLUGIN] Create PluginChangeDetectionService in src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/ → Artifacts: [PluginChangeDetectionService.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/PluginChangeDetectionService.cs)
+- [X] T038 [US2] [PLUGIN] Update FamilyPublisher to create SnapshotJSON on publish → Artifacts: [PublishService.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/PublishService.cs), [PublishRequest.cs](src/FamilyLibrary.Plugin/Core/Entities/PublishRequest.cs)
 
 ### Frontend for US2
 
-- [ ] T039 [P] [US2] [FRONTEND] Create changelog.service.ts in src/FamilyLibrary.Web/src/app/features/library/services/
-- [ ] T040 [P] [US2] [FRONTEND] Create changelog.component.ts in src/FamilyLibrary.Web/src/app/features/library/components/changelog/
-- [ ] T041 [P] [US2] [FRONTEND] Create change-item.component.ts in src/FamilyLibrary.Web/src/app/features/library/components/changelog/
-- [ ] T042 [P] [US2] [FRONTEND] Create parameter-diff.component.ts in src/FamilyLibrary.Web/src/app/features/library/components/changelog/
+- [X] T039 [P] [US2] [FRONTEND] Create changelog.service.ts in src/FamilyLibrary.Web/src/app/features/library/services/ → Artifacts: [changelog.service.ts](src/FamilyLibrary.Web/src/app/features/library/services/changelog.service.ts)
+- [X] T040 [P] [US2] [FRONTEND] Create changelog.component.ts in src/FamilyLibrary.Web/src/app/features/library/components/changelog/ → Artifacts: [changelog.component.ts](src/FamilyLibrary.Web/src/app/features/library/components/changelog/changelog.component.ts), [changelog.component.html](src/FamilyLibrary.Web/src/app/features/library/components/changelog/changelog.component.html)
+- [X] T041 [P] [US2] [FRONTEND] Create change-item.component.ts in src/FamilyLibrary.Web/src/app/features/library/components/changelog/ → Artifacts: [change-item.component.ts](src/FamilyLibrary.Web/src/app/features/library/components/changelog/change-item.component.ts), [change-item.component.html](src/FamilyLibrary.Web/src/app/features/library/components/changelog/change-item.component.html)
+- [X] T042 [P] [US2] [FRONTEND] Create parameter-diff.component.ts in src/FamilyLibrary.Web/src/app/features/library/components/changelog/ → Artifacts: [parameter-diff.component.ts](src/FamilyLibrary.Web/src/app/features/library/components/changelog/parameter-diff.component.ts), [parameter-diff.component.html](src/FamilyLibrary.Web/src/app/features/library/components/changelog/parameter-diff.component.html)
 - [ ] T043 [US2] [FRONTEND] Add changelog section to family-detail.component in src/FamilyLibrary.Web/src/app/features/library/components/family-detail/
 
 **Checkpoint**: Changelog visible on family page with full diff

@@ -92,6 +92,27 @@ public class FamiliesController(IFamilyService service) : BaseController
     }
 
     /// <summary>
+    /// Gets changes between two versions of a family.
+    /// </summary>
+    /// <param name="id">The family ID.</param>
+    /// <param name="fromVersion">The source version number.</param>
+    /// <param name="toVersion">The target version number.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Change set describing the differences between versions.</returns>
+    [HttpGet("{id:guid}/changes")]
+    [ProducesResponseType<ChangeSetDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ChangeSetDto>> GetChanges(
+        Guid id,
+        [FromQuery] int fromVersion,
+        [FromQuery] int toVersion,
+        CancellationToken ct)
+    {
+        var result = await service.GetChangesAsync(id, fromVersion, toVersion, ct);
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Publishes a new family file.
     /// </summary>
     /// <param name="dto">The create DTO with family metadata.</param>

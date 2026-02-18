@@ -79,4 +79,18 @@ public interface IFamilyService
         Guid familyId,
         int? version,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the changes between two versions of a family.
+    /// </summary>
+    /// <param name="familyId">The family ID.</param>
+    /// <param name="fromVersion">The source version number.</param>
+    /// <param name="toVersion">The target version number.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Change set describing the differences between versions.</returns>
+    Task<ChangeSetDto> GetChangesAsync(
+        Guid familyId,
+        int fromVersion,
+        int toVersion,
+        CancellationToken cancellationToken = default);
 }

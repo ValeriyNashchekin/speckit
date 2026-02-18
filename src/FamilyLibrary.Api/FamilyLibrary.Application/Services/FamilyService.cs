@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text.Json;
 using FamilyLibrary.Application.Common;
 using FamilyLibrary.Application.DTOs;
 using FamilyLibrary.Application.Interfaces;
@@ -19,6 +20,7 @@ public class FamilyService : IFamilyService
     private readonly IFamilyVersionRepository _versionRepository;
     private readonly IFamilyRoleRepository _roleRepository;
     private readonly IBlobStorageService _blobStorageService;
+    private readonly IChangeDetectionService _changeDetectionService;
     private readonly IUnitOfWork _unitOfWork;
 
     private const string FamiliesContainer = "families";
@@ -28,12 +30,14 @@ public class FamilyService : IFamilyService
         IFamilyVersionRepository versionRepository,
         IFamilyRoleRepository roleRepository,
         IBlobStorageService blobStorageService,
+        IChangeDetectionService changeDetectionService,
         IUnitOfWork unitOfWork)
     {
         _familyRepository = familyRepository;
         _versionRepository = versionRepository;
         _roleRepository = roleRepository;
         _blobStorageService = blobStorageService;
+        _changeDetectionService = changeDetectionService;
         _unitOfWork = unitOfWork;
     }
 
@@ -332,6 +336,56 @@ public class FamilyService : IFamilyService
             Hash = versionEntity.Hash,
             Version = versionEntity.Version
         };
+    }
+
+    public async Task<ChangeSetDto> GetChangesAsync(
+        Guid familyId,
+        int fromVersion,
+        int toVersion,
+        CancellationToken cancellationToken = default)
+    {
+        // Verify family exists
+        var familyExists = await _familyRepository.ExistsAsync(familyId, cancellationToken);
+        if (!familyExists)
+        {
+            throw new NotFoundException(nameof(FamilyEntity), familyId);
+        }
+
+        // Get both versions in parallel
+        var fromVersionTask = _versionRepository.GetByVersionAsync(familyId, fromVersion, cancellationToken);
+        var toVersionTask = _versionRepository.GetByVersionAsync(familyId, toVersion, cancellationToken);
+
+        await Task.WhenAll(fromVersionTask, toVersionTask);
+
+        var fromVersionEntity = await fromVersionTask;
+        var toVersionEntity = await toVersionTask;
+
+        if (fromVersionEntity is null)
+        {
+            throw new NotFoundException("FamilyVersion", $"Version {fromVersion} not found for family {familyId}");
+        }
+
+        if (toVersionEntity is null)
+        {
+            throw new NotFoundException("FamilyVersion", $"Version {toVersion} not found for family {familyId}");
+        }
+
+        // Deserialize snapshots
+        var fromSnapshot = JsonSerializer.Deserialize<FamilySnapshot>(fromVersionEntity.SnapshotJson);
+        var toSnapshot = JsonSerializer.Deserialize<FamilySnapshot>(toVersionEntity.SnapshotJson);
+
+        if (fromSnapshot is null)
+        {
+            throw new ValidationException("SnapshotJson", $"Failed to deserialize snapshot for version {fromVersion}");
+        }
+
+        if (toSnapshot is null)
+        {
+            throw new ValidationException("SnapshotJson", $"Failed to deserialize snapshot for version {toVersion}");
+        }
+
+        // Detect changes using the change detection service
+        return _changeDetectionService.DetectChanges(fromSnapshot, toSnapshot);
     }
 
     private static async Task<string> CalculateHashAsync(Stream stream, CancellationToken cancellationToken)

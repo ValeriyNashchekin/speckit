@@ -12,4 +12,5 @@ public class PublishRequest
     public string ContentHash { get; set; } = string.Empty;
     public string? CommitMessage { get; set; }
     public string? CatalogFilePath { get; set; }
+    public string? SnapshotJson { get; set; }
 }
