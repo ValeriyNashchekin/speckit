@@ -225,3 +225,136 @@ export const UiEventTypes = {
   UI_NAVIGATE: 'ui:navigate',
   UI_LOG: 'ui:log',
 } as const;
+
+// ==================== PHASE 2: SCANNER & UPDATE EVENTS ====================
+// Phase 2 additions for family library update detection
+
+import type {
+  ScanResult,
+  ChangeSet,
+  FamilyScanStatus,
+} from './scanner.models';
+
+/**
+ * Plugin -> Frontend: Scan result with all families
+ */
+export interface ScanResultEvent {
+  type: 'revit:scan:result';
+  payload: ScanResult;
+}
+
+/**
+ * Plugin -> Frontend: Scan progress update
+ */
+export interface ScanProgressEvent {
+  type: 'revit:scan:progress';
+  payload: {
+    scanned: number;
+    total: number;
+    currentFamily: string;
+  };
+}
+
+/**
+ * Plugin -> Frontend: Family update progress
+ */
+export interface UpdateProgressEvent {
+  type: 'revit:update:progress';
+  payload: {
+    completed: number;
+    total: number;
+    currentFamily: string;
+    success: number;
+    failed: number;
+  };
+}
+
+/**
+ * Plugin -> Frontend: Update operation completed
+ */
+export interface UpdateCompleteEvent {
+  type: 'revit:update:complete';
+  payload: {
+    total: number;
+    success: number;
+    failed: number;
+    errors: Array<{
+      familyName: string;
+      error: string;
+    }>;
+  };
+}
+
+/**
+ * Plugin -> Frontend: Changes detected for a family
+ */
+export interface ChangesResultEvent {
+  type: 'revit:changes:result';
+  payload: {
+    familyUniqueId: string;
+    changes: ChangeSet;
+  };
+}
+
+/**
+ * UI -> Plugin: Request project scan
+ */
+export interface ScanProjectEvent {
+  type: 'ui:scan-project';
+  payload: {
+    includeSystemFamilies: boolean;
+  };
+}
+
+/**
+ * UI -> Plugin: Request family updates
+ */
+export interface UpdateFamiliesEvent {
+  type: 'ui:update-families';
+  payload: {
+    families: Array<{
+      uniqueId: string;
+      roleName?: string;
+    }>;
+    showPreview: boolean;
+  };
+}
+
+/**
+ * UI -> Plugin: Stamp families with legacy roles
+ */
+export interface StampLegacyEvent {
+  type: 'ui:stamp-legacy';
+  payload: {
+    families: Array<{
+      uniqueId: string;
+      roleName: string;
+    }>;
+  };
+}
+
+/**
+ * UI -> Plugin: Request changes detail for a family
+ */
+export interface GetChangesEvent {
+  type: 'ui:get-changes';
+  payload: {
+    uniqueId: string;
+  };
+}
+
+// Phase 2 Event Type Constants
+export const Phase2PluginEventTypes = {
+  REVIT_SCAN_RESULT: 'revit:scan:result',
+  REVIT_SCAN_PROGRESS: 'revit:scan:progress',
+  REVIT_UPDATE_PROGRESS: 'revit:update:progress',
+  REVIT_UPDATE_COMPLETE: 'revit:update:complete',
+  REVIT_CHANGES_RESULT: 'revit:changes:result',
+} as const;
+
+export const Phase2UiEventTypes = {
+  UI_SCAN_PROJECT: 'ui:scan-project',
+  UI_UPDATE_FAMILIES: 'ui:update-families',
+  UI_STAMP_LEGACY: 'ui:stamp-legacy',
+  UI_GET_CHANGES: 'ui:get-changes',
+} as const;

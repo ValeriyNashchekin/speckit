@@ -17,18 +17,18 @@
 
 **Purpose**: Shared infrastructure that MUST complete before user stories
 
-- [ ] T001 [P] [BACKEND] Create ChangeCategory enum in src/FamilyLibrary.Domain/Enums/ChangeCategory.cs
-- [ ] T002 [P] [BACKEND] Create FamilyScanStatus enum in src/FamilyLibrary.Domain/Enums/FamilyScanStatus.cs
-- [ ] T003 [P] [BACKEND] Create FamilySnapshot model in src/FamilyLibrary.Domain/Entities/FamilySnapshot.cs
-- [ ] T004 [P] [BACKEND] Create ChangeSet DTOs in src/FamilyLibrary.Application/DTOs/ChangeDetectionDtos.cs
-- [ ] T005 [P] [BACKEND] Create BatchCheckRequest/Response DTOs in src/FamilyLibrary.Application/DTOs/BatchCheckDtos.cs
-- [ ] T006 [P] [BACKEND] Create ScanResult DTOs in src/FamilyLibrary.Application/DTOs/ScanResultDtos.cs
-- [ ] T007 [P] [FRONTEND] Add ChangeCategory, FamilyScanStatus types in src/FamilyLibrary.Web/src/app/core/models/scanner.models.ts
-- [ ] T008 [P] [FRONTEND] Add Phase 2 WebView2 event interfaces in src/FamilyLibrary.Web/src/app/core/models/webview-events.model.ts
-- [ ] T009 [P] [PLUGIN] Create ChangeCategory enum in src/FamilyLibrary.Plugin/Core/Enums/ChangeCategory.cs
-- [ ] T010 [P] [PLUGIN] Create FamilyScanStatus enum in src/FamilyLibrary.Plugin/Core/Enums/FamilyScanStatus.cs
-- [ ] T011 [P] [PLUGIN] Create FamilySnapshot model in src/FamilyLibrary.Plugin/Core/Models/FamilySnapshot.cs
-- [ ] T012 [P] [PLUGIN] Create ChangeSet model in src/FamilyLibrary.Plugin/Core/Models/ChangeSet.cs
+- [X] T001 [P] [BACKEND] Create ChangeCategory enum → Artifacts: [ChangeCategory.cs](src/FamilyLibrary.Api/FamilyLibrary.Domain/Enums/ChangeCategory.cs)
+- [X] T002 [P] [BACKEND] Create FamilyScanStatus enum → Artifacts: [FamilyScanStatus.cs](src/FamilyLibrary.Api/FamilyLibrary.Domain/Enums/FamilyScanStatus.cs)
+- [X] T003 [P] [BACKEND] Create FamilySnapshot model → Artifacts: [FamilySnapshot.cs](src/FamilyLibrary.Api/FamilyLibrary.Domain/Entities/FamilySnapshot.cs)
+- [X] T004 [P] [BACKEND] Create ChangeSet DTOs → Artifacts: [ChangeDetectionDtos.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/DTOs/ChangeDetectionDtos.cs)
+- [X] T005 [P] [BACKEND] Create BatchCheckRequest/Response DTOs → Artifacts: [BatchCheckDtos.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/DTOs/BatchCheckDtos.cs)
+- [X] T006 [P] [BACKEND] Create ScanResult DTOs → Artifacts: [ScanResultDtos.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/DTOs/ScanResultDtos.cs)
+- [X] T007 [P] [FRONTEND] Add scanner models → Artifacts: [scanner.models.ts](src/FamilyLibrary.Web/src/app/core/models/scanner.models.ts)
+- [X] T008 [P] [FRONTEND] Add Phase 2 WebView2 events → Artifacts: [webview-events.model.ts](src/FamilyLibrary.Web/src/app/core/models/webview-events.model.ts)
+- [X] T009 [P] [PLUGIN] Create ChangeCategory enum → Artifacts: [ChangeCategory.cs](src/FamilyLibrary.Plugin/Core/Enums/ChangeCategory.cs)
+- [X] T010 [P] [PLUGIN] Create FamilyScanStatus enum → Artifacts: [FamilyScanStatus.cs](src/FamilyLibrary.Plugin/Core/Enums/FamilyScanStatus.cs)
+- [X] T011 [P] [PLUGIN] Create FamilySnapshot model → Artifacts: [FamilySnapshot.cs](src/FamilyLibrary.Plugin/Core/Models/FamilySnapshot.cs)
+- [X] T012 [P] [PLUGIN] Create ChangeSet model → Artifacts: [ChangeSet.cs](src/FamilyLibrary.Plugin/Core/Models/ChangeSet.cs)
 
 **Checkpoint**: Enums and DTOs ready - user story implementation can begin
 
