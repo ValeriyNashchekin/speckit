@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { PanelMenuModule } from 'primeng/panelmenu';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -13,8 +13,6 @@ type UserRole = 'designer' | 'bim_manager' | 'admin';
   selector: 'app-main-layout',
   imports: [
     RouterOutlet,
-    RouterLink,
-    RouterLinkActive,
     ButtonModule,
     PanelMenuModule,
     ToolbarModule,
