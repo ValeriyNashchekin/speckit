@@ -203,17 +203,17 @@ Based on plan.md structure:
 
 ### Plugin - US3 (Serializers)
 
-- [ ] T048 [P] [US3] [PLUGIN] Create RailingSerializer in `src/FamilyLibrary.Plugin/Services/RailingSerializer.cs`
-- [ ] T049 [P] [US3] [PLUGIN] Create CurtainSerializer in `src/FamilyLibrary.Plugin/Services/CurtainSerializer.cs`
-- [ ] T050 [P] [US3] [PLUGIN] Create StackedWallSerializer in `src/FamilyLibrary.Plugin/Services/StackedWallSerializer.cs`
+- [X] T048 [P] [US3] [PLUGIN] Create RailingSerializer in `src/FamilyLibrary.Plugin/Services/RailingSerializer.cs` → Artifacts: [RailingSerializer.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/RailingSerializer.cs), [RailingStructureJson.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Models/RailingStructureJson.cs)
+- [X] T049 [P] [US3] [PLUGIN] Create CurtainSerializer in `src/FamilyLibrary.Plugin/Services/CurtainSerializer.cs` → Artifacts: [CurtainSerializer.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/CurtainSerializer.cs), [CurtainWallJson.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Models/CurtainWallJson.cs)
+- [X] T050 [P] [US3] [PLUGIN] Create StackedWallSerializer in `src/FamilyLibrary.Plugin/Services/StackedWallSerializer.cs` → Artifacts: [StackedWallSerializer.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/StackedWallSerializer.cs), [StackedWallJson.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Models/StackedWallJson.cs)
 
 ### Plugin - US3 (Integration)
 
-- [ ] T051 [US3] [PLUGIN] Register Group C serializers in SystemFamilySerializerFactory in `src/FamilyLibrary.Plugin/Services/`
-- [ ] T052 [US3] [PLUGIN] Register Group D serializers in SystemFamilySerializerFactory in `src/FamilyLibrary.Plugin/Services/`
-- [ ] T053 [US3] [PLUGIN] Add dependency validation at Pull Update for Group C in `src/FamilyLibrary.Plugin/Commands/PullUpdateCommand/`
-- [ ] T054 [US3] [PLUGIN] Add dependency validation at Pull Update for Group D in `src/FamilyLibrary.Plugin/Commands/PullUpdateCommand/`
-- [ ] T055 [US3] [PLUGIN] Show error if StackedWall child types missing in `src/FamilyLibrary.Plugin/Commands/PullUpdateCommand/`
+- [X] T051 [US3] [PLUGIN] Register Group C serializers in SystemFamilySerializerFactory in `src/FamilyLibrary.Plugin/Services/` → Artifacts: [SystemFamilySerializerFactory.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/SystemFamilySerializerFactory.cs)
+- [X] T052 [US3] [PLUGIN] Register Group D serializers in SystemFamilySerializerFactory in `src/FamilyLibrary.Plugin/Services/` → Artifacts: [SystemFamilySerializerFactory.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/SystemFamilySerializerFactory.cs)
+- [X] T053 [US3] [PLUGIN] Add dependency validation at Pull Update for Group C in `src/FamilyLibrary.Plugin/Commands/PullUpdateCommand/` → Artifacts: [DependencyValidationService.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/DependencyValidationService.cs)
+- [X] T054 [US3] [PLUGIN] Add dependency validation at Pull Update for Group D in `src/FamilyLibrary.Plugin/Commands/PullUpdateCommand/` → Artifacts: [SystemTypePullService.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/SystemTypePullService.cs)
+- [X] T055 [US3] [PLUGIN] Show error if StackedWall child types missing in `src/FamilyLibrary.Plugin/Commands/PullUpdateCommand/` → Artifacts: [DependencyValidationService.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/DependencyValidationService.cs)
 
 **Checkpoint**: Railings, Curtain Walls, Stacked Walls сериализуются и Pull Update проверяет зависимости
 

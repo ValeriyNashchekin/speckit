@@ -14,7 +14,8 @@ namespace FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services
 {
     /// <summary>
     /// Service for pulling system types from backend API and applying to document.
-    /// Supports Group A (CompoundStructure), Group B (RoutingPreferences), and Group E (Parameters).
+    /// Supports Group A (CompoundStructure), Group B (RoutingPreferences), Group C (Railings),
+    /// Group D (Curtain/Stacked Walls), and Group E (Parameters).
     /// </summary>
     public class SystemTypePullService
     {
@@ -22,20 +23,24 @@ namespace FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services
         private readonly string _apiBaseUrl;
         private readonly RoutingPreferencesApplier _routingPreferencesApplier;
         private readonly CompoundStructureDeserializer _compoundStructureDeserializer;
+        private readonly DependencyValidationService _dependencyValidationService;
 
         public SystemTypePullService()
-            : this(new RoutingPreferencesApplier(), new CompoundStructureDeserializer())
+            : this(new RoutingPreferencesApplier(), new CompoundStructureDeserializer(), new DependencyValidationService())
         {
         }
 
         public SystemTypePullService(
             RoutingPreferencesApplier routingPreferencesApplier,
-            CompoundStructureDeserializer compoundStructureDeserializer)
+            CompoundStructureDeserializer compoundStructureDeserializer,
+            DependencyValidationService dependencyValidationService)
         {
             _routingPreferencesApplier = routingPreferencesApplier
                 ?? throw new ArgumentNullException(nameof(routingPreferencesApplier));
             _compoundStructureDeserializer = compoundStructureDeserializer
                 ?? throw new ArgumentNullException(nameof(compoundStructureDeserializer));
+            _dependencyValidationService = dependencyValidationService
+                ?? throw new ArgumentNullException(nameof(dependencyValidationService));
             _httpClient = new HttpClient();
             _apiBaseUrl = "https://localhost:5001/api";
         }
