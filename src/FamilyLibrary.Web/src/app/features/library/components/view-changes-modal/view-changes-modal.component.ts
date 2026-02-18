@@ -22,6 +22,7 @@ export class ViewChangesModalComponent {
 
   // Outputs
   publish = output<void>();
+  discard = output<void>();
   cancel = output<void>();
   visibleChange = output<boolean>();
 
@@ -42,13 +43,16 @@ export class ViewChangesModalComponent {
     return name ? `${name} - ${count} ${plural}` : `${count} ${plural}`;
   });
 
-  // Handle publish click
   protected onPublish(): void {
     this.publish.emit();
     this.visibleChange.emit(false);
   }
 
-  // Handle cancel click
+  protected onDiscard(): void {
+    this.discard.emit();
+    this.visibleChange.emit(false);
+  }
+
   protected onCancel(): void {
     this.cancel.emit();
     this.visibleChange.emit(false);

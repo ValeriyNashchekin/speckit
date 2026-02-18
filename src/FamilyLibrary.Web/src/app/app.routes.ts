@@ -8,18 +8,35 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: '/dashboard',
+        redirectTo: '/library',
         pathMatch: 'full',
       },
       {
-        path: 'dashboard',
-        loadComponent: () =>
-          import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+        path: 'library',
+        loadChildren: () =>
+          import('./features/library/library.routes').then(m => m.LIBRARY_ROUTES),
+      },
+      {
+        path: 'scanner',
+        loadChildren: () =>
+          import('./features/scanner/scanner.routes').then(m => m.SCANNER_ROUTES),
+      },
+      {
+        path: 'queue',
+        loadChildren: () =>
+          import('./features/queue/queue.routes').then(m => m.QUEUE_ROUTES),
       },
       {
         path: 'roles',
         loadChildren: () =>
           import('./features/roles/roles.routes').then(m => m.ROLES_ROUTES),
+      },
+      {
+        path: 'recognition-rules',
+        loadChildren: () =>
+          import('./features/recognition-rules/recognition-rules.routes').then(
+            m => m.RECOGNITION_RULES_ROUTES,
+          ),
       },
       {
         path: 'categories',
@@ -32,38 +49,6 @@ export const routes: Routes = [
           import('./features/tags/tags.routes').then(m => m.TAGS_ROUTES),
       },
       {
-        path: 'library',
-        loadChildren: () =>
-          import('./features/library/library.routes').then(m => m.LIBRARY_ROUTES),
-      },
-      {
-        path: 'families',
-        loadChildren: () =>
-          import('./features/families/families.routes').then(m => m.FAMILIES_ROUTES),
-      },
-      {
-        path: 'drafts',
-        loadChildren: () =>
-          import('./features/drafts/drafts.routes').then(m => m.DRAFTS_ROUTES),
-      },
-      {
-        path: 'recognition-rules',
-        loadChildren: () =>
-          import('./features/recognition-rules/recognition-rules.routes').then(
-            m => m.RECOGNITION_RULES_ROUTES,
-          ),
-      },
-      {
-        path: 'queue',
-        loadChildren: () =>
-          import('./features/queue/queue.routes').then(m => m.QUEUE_ROUTES),
-      },
-      {
-        path: 'scanner',
-        loadChildren: () =>
-          import('./features/scanner/scanner.routes').then((m) => m.SCANNER_ROUTES),
-      },
-      {
         path: 'settings',
         loadComponent: () =>
           import('./features/settings/settings.component').then(m => m.SettingsComponent),
@@ -72,6 +57,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: '/dashboard',
+    redirectTo: '/library',
   },
 ];

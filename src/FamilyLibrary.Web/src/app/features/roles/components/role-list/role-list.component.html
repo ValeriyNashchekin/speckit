@@ -1,47 +1,38 @@
-<div class="space-y-6">
-  <!-- Header -->
-  <div class="flex items-center justify-between">
-    <div>
-      <h1 class="text-2xl font-bold text-gray-900">Family Roles</h1>
-      <p class="text-sm text-gray-500 mt-1">Manage functional roles for families</p>
-    </div>
-    <div class="flex items-center gap-2">
-      <p-button
-        icon="pi pi-refresh"
-        [rounded]="true"
-        [text]="true"
-        severity="secondary"
-        pTooltip="Refresh"
-        [loading]="isLoading()"
-        (onClick)="refreshRoles()"
-      />
-      <p-button label="New Role" icon="pi pi-plus" severity="primary" (onClick)="createRole()" />
-    </div>
-  </div>
-
-  <!-- Search and Filters -->
-  <div class="flex items-center gap-4">
-    <span class="p-input-icon-left flex-1 max-w-md">
+<div class="p-5 space-y-4">
+  <div class="flex items-center gap-3">
+    <h1 class="text-lg font-semibold text-[var(--text-primary)]">Roles</h1>
+    <div class="flex-1"></div>
+    <span class="p-input-icon-left">
       <i class="pi pi-search"></i>
       <input
         type="text"
         pInputText
         [value]="searchTerm()"
         (input)="onSearch($event)"
-        placeholder="Search roles..."
-        class="w-full"
+        placeholder="Search..."
+        class="w-48"
       />
     </span>
-    @if (searchTerm()) {
-      <p-button
-        icon="pi pi-times"
-        [rounded]="true"
-        [text]="true"
-        severity="secondary"
-        pTooltip="Clear search"
-        (onClick)="clearSearch()"
-      />
+    <p-select
+      [options]="typeOptions"
+      [ngModel]="selectedType()"
+      (ngModelChange)="onTypeFilterChange($event)"
+      placeholder="All Types"
+      [showClear]="true"
+      optionLabel="label"
+      optionValue="value"
+      styleClass="w-32"
+    />
+    @if (searchTerm() || selectedType()) {
+      <button
+        type="button"
+        class="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+        (click)="clearSearch()"
+      >
+        Clear
+      </button>
     }
+    <p-button label="New Role" icon="pi pi-plus" severity="primary" size="small" (onClick)="createRole()" />
   </div>
 
   <!-- Table -->
@@ -88,7 +79,7 @@
               [severity]="getTagSeverity(role.type)"
             />
           </td>
-          <td class="px-4 py-3 text-gray-600">{{ role.categoryId ?? '-' }}</td>
+          <td class="px-4 py-3 text-gray-600">{{ getCategoryName(role.categoryId) }}</td>
           <td class="px-4 py-3 text-gray-600">
             <span class="line-clamp-2">{{ role.description ?? '-' }}</span>
           </td>

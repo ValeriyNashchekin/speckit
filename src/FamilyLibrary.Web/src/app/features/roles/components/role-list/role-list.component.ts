@@ -4,11 +4,13 @@ import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
+import { SelectModule } from 'primeng/select';
 import { TableModule, TableLazyLoadEvent } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
 import { Category, FamilyRole, CreateFamilyRoleRequest, Tag, UpdateFamilyRoleRequest } from '../../../../core/models';
+import { RoleType } from '../../../../core/models/family-role.model';
 import { ConfirmDialogService } from '../../../../shared/components/confirm-dialog/confirm-dialog.service';
 import { CategoriesService } from '../../../categories/services/categories.service';
 import { TagsService } from '../../../tags/services/tags.service';
@@ -23,6 +25,7 @@ import { RoleEditorComponent } from '../role-editor/role-editor.component';
     FormsModule,
     InputTextModule,
     RoleEditorComponent,
+    SelectModule,
     TableModule,
     TagModule,
     ToastModule,
@@ -42,8 +45,12 @@ export class RoleListComponent {
   protected readonly first = signal(0);
   protected readonly rows = signal(10);
 
-  // Filter state
   protected readonly searchTerm = signal('');
+  protected readonly selectedType = signal<RoleType | null>(null);
+  protected readonly typeOptions: { label: string; value: RoleType }[] = [
+    { label: 'Loadable', value: 'Loadable' },
+    { label: 'System', value: 'System' },
+  ];
 
   // Deletion state
   protected readonly isDeleting = signal<string | null>(null);
@@ -92,7 +99,14 @@ export class RoleListComponent {
       page: Math.floor(this.first() / this.rows()) + 1,
       pageSize: this.rows(),
       searchTerm: this.searchTerm() || undefined,
+      type: this.selectedType() || undefined,
     });
+  }
+
+  protected onTypeFilterChange(type: RoleType | null): void {
+    this.selectedType.set(type);
+    this.first.set(0);
+    this.loadRoles();
   }
 
   // Event handlers
@@ -113,6 +127,7 @@ export class RoleListComponent {
 
   protected clearSearch(): void {
     this.searchTerm.set('');
+    this.selectedType.set(null);
     this.first.set(0);
     this.loadRoles();
   }
@@ -195,5 +210,11 @@ export class RoleListComponent {
 
   protected getTagSeverity(type: 'Loadable' | 'System'): 'info' | 'warn' {
     return type === 'Loadable' ? 'info' : 'warn';
+  }
+
+  protected getCategoryName(categoryId: string | null): string {
+    if (!categoryId) return '-';
+    const cat = this.categories().find(c => c.id === categoryId);
+    return cat?.name ?? categoryId;
   }
 }

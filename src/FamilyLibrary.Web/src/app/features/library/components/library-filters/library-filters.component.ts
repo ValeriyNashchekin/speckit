@@ -5,7 +5,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { TooltipModule } from 'primeng/tooltip';
 import { Category } from '../../../../core/models/category.model';
-import { FamilyRole } from '../../../../core/models/family-role.model';
+import { FamilyRole, RoleType } from '../../../../core/models/family-role.model';
 import { Tag } from '../../../../core/models/tag.model';
 import { FamilyListRequest } from '../../../../core/models/family.model';
 import { TagMultiSelectComponent } from '../../../../shared/components/tag-multi-select/tag-multi-select.component';
@@ -17,11 +17,11 @@ import { TagMultiSelectComponent } from '../../../../shared/components/tag-multi
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LibraryFiltersComponent {
-  // Two-way bindings for filter values
   searchTerm = model<string>('');
   selectedRoleId = model<string | null>(null);
   selectedCategoryId = model<string | null>(null);
   selectedTagIds = model<string[]>([]);
+  selectedType = model<RoleType | null>(null);
 
   // Input data for dropdowns
   roles = input<FamilyRole[]>([]);
@@ -37,6 +37,10 @@ export class LibraryFiltersComponent {
   // Computed options for selects
   protected readonly roleOptions = signal<{ label: string; value: string }[]>([]);
   protected readonly categoryOptions = signal<{ label: string; value: string }[]>([]);
+  protected readonly typeOptions: { label: string; value: RoleType }[] = [
+    { label: 'Loadable', value: 'Loadable' },
+    { label: 'System', value: 'System' },
+  ];
 
   constructor() {
     // Update options when input data changes
@@ -80,12 +84,18 @@ export class LibraryFiltersComponent {
     this.emitFilterChange();
   }
 
+  protected onTypeChange(value: RoleType | null): void {
+    this.selectedType.set(value);
+    this.emitFilterChange();
+  }
+
   protected onClear(): void {
     this.searchTerm.set('');
     this.searchInputValue.set('');
     this.selectedRoleId.set(null);
     this.selectedCategoryId.set(null);
     this.selectedTagIds.set([]);
+    this.selectedType.set(null);
     this.emitFilterChange();
   }
 
@@ -94,7 +104,8 @@ export class LibraryFiltersComponent {
       this.searchTerm() ||
       this.selectedRoleId() ||
       this.selectedCategoryId() ||
-      this.selectedTagIds().length > 0
+      this.selectedTagIds().length > 0 ||
+      this.selectedType()
     );
   }
 
@@ -112,6 +123,9 @@ export class LibraryFiltersComponent {
     }
     if (this.selectedTagIds().length > 0) {
       filters.tagIds = this.selectedTagIds();
+    }
+    if (this.selectedType()) {
+      filters.type = this.selectedType();
     }
 
     this.filterChange.emit(filters);

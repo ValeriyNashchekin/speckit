@@ -1,68 +1,93 @@
-<div class="flex h-screen bg-gray-50">
-  <!-- Fixed Sidebar -->
-  <aside class="fixed left-0 top-0 h-screen w-64 bg-surface-900 text-white flex flex-col z-50">
-    <!-- Logo / Brand -->
-    <div class="flex items-center gap-3 px-6 h-16 border-b border-surface-700">
-      <i class="pi pi-box text-2xl text-primary-400"></i>
-      <span class="text-lg font-semibold">Family Library</span>
+<div class="flex h-screen overflow-hidden bg-[var(--surface-ground)]">
+  <aside
+    class="fixed left-0 top-0 h-screen flex flex-col z-50 bg-white border-r border-[var(--border-subtle)] transition-[width] duration-200 ease-out"
+    [style.width]="collapsed() ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)'"
+  >
+    <div
+      class="flex items-center h-12 border-b border-[var(--border-subtle)] shrink-0"
+      [class.justify-center]="collapsed()"
+      [class.px-4]="!collapsed()"
+      [class.gap-2.5]="!collapsed()"
+    >
+      <button
+        type="button"
+        class="w-7 h-7 flex items-center justify-center rounded-md hover:bg-gray-100 text-[var(--text-secondary)] transition-colors"
+        (click)="toggleSidebar()"
+        [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+      >
+        <i class="pi pi-bars text-sm"></i>
+      </button>
+      @if (!collapsed()) {
+        <span class="text-sm font-semibold text-[var(--text-primary)] tracking-tight whitespace-nowrap">
+          speckit
+        </span>
+      }
     </div>
 
-    <!-- Navigation -->
-    <nav class="flex-1 overflow-y-auto py-4" role="navigation" aria-label="Main navigation">
-      <ul class="space-y-1 px-3">
-        @for (item of navItems(); track item.route) {
-          <li>
-            <a
-              [routerLink]="item.route"
-              routerLinkActive="bg-primary-500 text-white"
-              [routerLinkActiveOptions]="{ exact: true }"
-              class="flex items-center gap-3 px-4 py-3 rounded-lg text-surface-200 hover:bg-surface-700 transition-colors"
-              [class.bg-primary-500]="false"
-              [class.text-white]="false"
-            >
-              <i [class]="item.icon" class="text-lg"></i>
-              <span>{{ item.label }}</span>
-            </a>
-          </li>
+    <nav class="flex-1 overflow-y-auto py-2" role="navigation" aria-label="Main navigation">
+      @for (group of navGroups(); track group.title) {
+        @if (group.title && !collapsed()) {
+          <div class="px-3 pt-4 pb-1">
+            <span class="text-[0.625rem] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+              {{ group.title }}
+            </span>
+          </div>
         }
-      </ul>
+        @if (group.title && collapsed()) {
+          <div class="mx-2 my-1 border-t border-[var(--border-subtle)]"></div>
+        }
+        <ul class="space-y-0.5 px-2">
+          @for (item of group.items; track item.route) {
+            <li>
+              <a
+                [routerLink]="item.route"
+                routerLinkActive="bg-[var(--accent-soft)] text-[var(--accent)]"
+                class="flex items-center gap-2.5 rounded-md text-[var(--text-secondary)] hover:bg-gray-50 transition-colors"
+                [class.px-2.5]="!collapsed()"
+                [class.py-1.5]="true"
+                [class.justify-center]="collapsed()"
+                [pTooltip]="collapsed() ? item.label : ''"
+                tooltipPosition="right"
+              >
+                <i [class]="item.icon" class="text-[0.9rem] w-5 text-center shrink-0"></i>
+                @if (!collapsed()) {
+                  <span class="text-[0.8125rem] font-medium truncate">{{ item.label }}</span>
+                }
+              </a>
+            </li>
+          }
+        </ul>
+      }
     </nav>
 
-    <!-- Footer -->
-    <div class="px-6 py-4 border-t border-surface-700">
-      <span class="text-xs text-surface-400">Family Library MVP v0.1.0</span>
+    <div class="shrink-0 border-t border-[var(--border-subtle)] py-2 px-2">
+      <a
+        routerLink="/settings"
+        routerLinkActive="bg-[var(--accent-soft)] text-[var(--accent)]"
+        class="flex items-center gap-2.5 rounded-md text-[var(--text-secondary)] hover:bg-gray-50 transition-colors"
+        [class.px-2.5]="!collapsed()"
+        [class.py-1.5]="true"
+        [class.justify-center]="collapsed()"
+        [pTooltip]="collapsed() ? 'Settings' : ''"
+        tooltipPosition="right"
+      >
+        <i class="pi pi-cog text-[0.9rem] w-5 text-center shrink-0"></i>
+        @if (!collapsed()) {
+          <span class="text-[0.8125rem] font-medium">Settings</span>
+        }
+      </a>
     </div>
   </aside>
 
-  <!-- Main Content Area -->
-  <div class="ml-64 flex-1 flex flex-col min-h-screen">
-    <!-- Header -->
-    <header class="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
-      <p-toolbar>
-        <ng-template #start>
-          <div class="flex items-center gap-4">
-            <span class="text-xl font-semibold text-gray-800">Family Library</span>
-          </div>
-        </ng-template>
-
-        <ng-template #end>
-          <div class="flex items-center gap-3">
-            <p-button icon="pi pi-bell" [rounded]="true" [text]="true" severity="secondary" aria-label="Notifications" />
-            <p-button icon="pi pi-question-circle" [rounded]="true" [text]="true" severity="secondary" aria-label="Help" />
-            <div class="w-px h-6 bg-gray-200"></div>
-            <p-button icon="pi pi-user" label="Admin" [text]="true" severity="secondary" />
-          </div>
-        </ng-template>
-      </p-toolbar>
-    </header>
-
-    <!-- Page Content -->
-    <main class="flex-1 p-6 overflow-auto">
+  <div
+    class="flex-1 flex flex-col min-h-screen transition-[margin-left] duration-200 ease-out"
+    [style.margin-left]="collapsed() ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)'"
+  >
+    <main class="flex-1 overflow-auto">
       <router-outlet />
     </main>
   </div>
 </div>
 
-<!-- Global Components -->
 <p-confirmdialog />
-<p-toast />
+<p-toast position="bottom-right" />

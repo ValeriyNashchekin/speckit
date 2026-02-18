@@ -1,15 +1,18 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { MenuModule } from 'primeng/menu';
-import { ToolbarModule } from 'primeng/toolbar';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
+import { TooltipModule } from 'primeng/tooltip';
 
 interface NavItem {
   label: string;
   icon: string;
   route: string;
+}
+
+interface NavGroup {
+  title: string;
+  items: NavItem[];
 }
 
 @Component({
@@ -18,26 +21,43 @@ interface NavItem {
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
-    ButtonModule,
-    MenuModule,
-    ToolbarModule,
     ConfirmDialogModule,
     ToastModule,
+    TooltipModule,
   ],
   templateUrl: './main-layout.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainLayoutComponent {
-  protected readonly navItems = signal<NavItem[]>([
-    { label: 'Dashboard', icon: 'pi pi-home', route: '/dashboard' },
-    { label: 'Queue', icon: 'pi pi-list', route: '/queue' },
-    { label: 'Scanner', icon: 'pi pi-search', route: '/scanner' },
-    { label: 'Library', icon: 'pi pi-folder-open', route: '/library' },
-    { label: 'Family Roles', icon: 'pi pi-tags', route: '/roles' },
-    { label: 'Categories', icon: 'pi pi-folder', route: '/categories' },
-    { label: 'Tags', icon: 'pi pi-label', route: '/tags' },
-    { label: 'Families', icon: 'pi pi-box', route: '/families' },
-    { label: 'Drafts', icon: 'pi pi-file-edit', route: '/drafts' },
-    { label: 'Settings', icon: 'pi pi-cog', route: '/settings' },
+  protected readonly collapsed = signal(false);
+
+  protected readonly navGroups = signal<NavGroup[]>([
+    {
+      title: '',
+      items: [
+        { label: 'Library', icon: 'pi pi-objects-column', route: '/library' },
+        { label: 'Scanner', icon: 'pi pi-sync', route: '/scanner' },
+      ],
+    },
+    {
+      title: 'Manage',
+      items: [
+        { label: 'Queue', icon: 'pi pi-inbox', route: '/queue' },
+        { label: 'Roles', icon: 'pi pi-id-card', route: '/roles' },
+        { label: 'Rules', icon: 'pi pi-microchip-ai', route: '/recognition-rules' },
+        { label: 'Name Mapping', icon: 'pi pi-link', route: '/name-mapping' },
+      ],
+    },
+    {
+      title: 'Configure',
+      items: [
+        { label: 'Categories', icon: 'pi pi-sitemap', route: '/categories' },
+        { label: 'Tags', icon: 'pi pi-hashtag', route: '/tags' },
+      ],
+    },
   ]);
+
+  protected toggleSidebar(): void {
+    this.collapsed.update(v => !v);
+  }
 }

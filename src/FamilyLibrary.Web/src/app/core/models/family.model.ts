@@ -38,6 +38,10 @@ export interface TypeCatalog {
 export interface FamilyDetail extends Family {
   versions: FamilyVersion[];
   typeCatalog?: TypeCatalog;
+  description?: string | null;
+  categoryName?: string | null;
+  tags?: Array<{ id: string; name: string }>;
+  type?: 'Loadable' | 'System';
 }
 
 export interface FamilyListRequest {
@@ -47,6 +51,7 @@ export interface FamilyListRequest {
   roleId?: string | null;
   categoryId?: string | null;
   tagIds?: string[];
+  type?: 'Loadable' | 'System' | null;
 }
 
 export interface PublishFamilyRequest {

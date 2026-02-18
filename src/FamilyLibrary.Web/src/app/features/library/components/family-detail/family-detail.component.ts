@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
@@ -41,6 +41,7 @@ interface RevitFamilyLoadedDetail {
 @Component({
   selector: 'app-family-detail',
   imports: [
+    RouterLink,
     CardModule,
     TableModule,
     TagModule,

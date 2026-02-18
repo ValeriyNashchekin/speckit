@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -41,6 +42,7 @@ export class LibraryComponent {
   private readonly rolesService = inject(RolesService);
   private readonly categoriesService = inject(CategoriesService);
   private readonly tagsService = inject(TagsService);
+  private readonly router = inject(Router);
 
   // State
   protected readonly families = signal<Family[]>([]);
@@ -122,7 +124,6 @@ export class LibraryComponent {
   }
 
   protected onFamilySelect(family: Family): void {
-    // TODO: Navigate to family details or open detail dialog
-    console.log('Selected family:', family);
+    this.router.navigate(['/library', family.id]);
   }
 }

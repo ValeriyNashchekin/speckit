@@ -30,6 +30,14 @@
             </span>
           }
           <p-button
+            label="Update All Available"
+            icon="pi pi-sync"
+            severity="primary"
+            [outlined]="true"
+            [disabled]="!hasAnyUpdatable()"
+            (onClick)="onUpdateAllAvailable()"
+          />
+          <p-button
             label="Update Selected"
             icon="pi pi-refresh"
             severity="success"

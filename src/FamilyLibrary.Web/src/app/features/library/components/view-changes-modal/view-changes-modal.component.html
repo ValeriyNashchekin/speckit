@@ -27,21 +27,31 @@
 
   <!-- Footer -->
   <ng-template pTemplate="footer">
-    <div class="flex justify-end gap-2">
+    <div class="flex justify-between">
       <p-button
-        label="Cancel"
-        severity="secondary"
-        outlined
-        (onClick)="onCancel()"
-        aria-label="Cancel publishing"
-      />
-      <p-button
-        label="Publish"
-        severity="primary"
+        label="Discard Changes"
+        severity="danger"
+        [outlined]="true"
         [disabled]="!hasChanges()"
-        (onClick)="onPublish()"
-        aria-label="Publish changes"
+        (onClick)="onDiscard()"
+        aria-label="Discard local changes"
       />
+      <div class="flex gap-2">
+        <p-button
+          label="Cancel"
+          severity="secondary"
+          outlined
+          (onClick)="onCancel()"
+          aria-label="Cancel publishing"
+        />
+        <p-button
+          label="Publish"
+          severity="primary"
+          [disabled]="!hasChanges()"
+          (onClick)="onPublish()"
+          aria-label="Publish changes"
+        />
+      </div>
     </div>
   </ng-template>
 </p-dialog>

@@ -165,6 +165,13 @@ export class ScannerComponent implements OnInit, OnDestroy {
   /**
    * Handle stamp selected families
    */
+  protected onUpdateAllAvailable(): void {
+    const allUpdatable = this.scannerService.filterByStatus('UpdateAvailable');
+    if (allUpdatable.length > 0) {
+      this.onUpdateSelected(allUpdatable);
+    }
+  }
+
   protected onStampSelected(families: ScannedFamily[]): void {
     const stamps = families
       .filter((f) => f.roleName)

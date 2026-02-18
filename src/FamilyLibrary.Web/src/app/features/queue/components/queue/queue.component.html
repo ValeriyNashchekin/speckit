@@ -1,28 +1,13 @@
 <p-toast />
-<div class="space-y-6">
-  <div>
-    <h1 class="text-2xl font-bold text-gray-900">Family Queue</h1>
-    <p class="text-sm text-gray-500 mt-1">Manage families, drafts, system types, and library status</p>
-  </div>
+<div class="p-5 space-y-4">
+  <h1 class="text-lg font-semibold text-[var(--text-primary)]">Queue</h1>
 
   <p-tabs [(value)]="activeTab">
     <p-tablist>
-      <p-tab value="0">
-        <i class="pi pi-box mr-2"></i>
-        All Families
-      </p-tab>
-      <p-tab value="1">
-        <i class="pi pi-file-edit mr-2"></i>
-        Draft Queue
-      </p-tab>
-      <p-tab value="2">
-        <i class="pi pi-building mr-2"></i>
-        System Types
-      </p-tab>
-      <p-tab value="3">
-        <i class="pi pi-chart-bar mr-2"></i>
-        Library Status
-      </p-tab>
+      <p-tab value="0">All Families</p-tab>
+      <p-tab value="1">Library Queue</p-tab>
+      <p-tab value="2">System Types</p-tab>
+      <p-tab value="3">Status</p-tab>
     </p-tablist>
 
     <p-tabpanels>

@@ -1,22 +1,8 @@
-<div class="space-y-6">
-  <!-- Header -->
-  <div class="flex items-center justify-between">
-    <div>
-      <h1 class="text-2xl font-bold text-gray-900">Recognition Rules</h1>
-      <p class="text-sm text-gray-500 mt-1">Configure rules for automatic family role recognition</p>
-    </div>
-    <div class="flex items-center gap-2">
-      <p-button
-        icon="pi pi-refresh"
-        [rounded]="true"
-        [text]="true"
-        severity="secondary"
-        pTooltip="Refresh"
-        [loading]="isLoading()"
-        (onClick)="refreshRules()"
-      />
-      <p-button label="New Rule" icon="pi pi-plus" severity="primary" (onClick)="createRule()" />
-    </div>
+<div class="p-5 space-y-4">
+  <div class="flex items-center gap-3">
+    <h1 class="text-lg font-semibold text-[var(--text-primary)]">Rules</h1>
+    <div class="flex-1"></div>
+    <p-button label="New Rule" icon="pi pi-plus" severity="primary" size="small" (onClick)="createRule()" />
   </div>
 
   <!-- Table -->

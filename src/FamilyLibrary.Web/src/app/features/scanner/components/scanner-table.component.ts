@@ -1,11 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
-import { ScannedFamily, FamilyScanStatus, ChangeItem } from '../../../core/models/scanner.models';
+import { ScannedFamily, FamilyScanStatus } from '../../../core/models/scanner.models';
 import { ViewChangesModalComponent, ChangeSet } from '../../library/components/view-changes-modal/view-changes-modal.component';
+import { ApiService } from '../../../core/api/api.service';
 
 /**
  * Table component for displaying scanned families with selection and actions.
@@ -17,12 +18,13 @@ import { ViewChangesModalComponent, ChangeSet } from '../../library/components/v
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScannerTableComponent {
-  // Inputs
+  private readonly apiService = inject(ApiService);
+
   families = input<ScannedFamily[]>([]);
   loading = input<boolean>(false);
 
-  // Outputs
   updateSelected = output<ScannedFamily[]>();
+  updateAllAvailable = output<void>();
   stampSelected = output<ScannedFamily[]>();
   familyAction = output<{ family: ScannedFamily; action: 'update' | 'stamp' }>();
 
@@ -44,6 +46,12 @@ export class ScannerTableComponent {
   protected readonly hasStampableSelected = computed(() =>
     this.selectedFamilies().some(
       (f) => f.status === 'LegacyMatch' || f.status === 'Unmatched'
+    )
+  );
+
+  protected readonly hasAnyUpdatable = computed(() =>
+    this.families().some(
+      (f) => f.status === 'UpdateAvailable'
     )
   );
 
@@ -83,6 +91,10 @@ export class ScannerTableComponent {
     if (stampable.length > 0) {
       this.stampSelected.emit(stampable);
     }
+  }
+
+  protected onUpdateAllAvailable(): void {
+    this.updateAllAvailable.emit();
   }
 
   /**
@@ -143,31 +155,28 @@ export class ScannerTableComponent {
     this.selectedFamilies.set([]);
   }
 
-  /**
-   * View changes for LocalModified family
-   * For now, shows mock data - in real implementation would fetch from API
-   */
   protected onViewChanges(family: ScannedFamily): void {
-    // TODO: In real implementation, fetch changes from API based on family.uniqueId
-    // For now, use mock data to demonstrate the modal
-    const mockChanges: ChangeItem[] = [
-      {
-        category: 'Parameters',
-        parameterChanges: [
-          { name: 'Width', previousValue: '100', currentValue: '120' },
-          { name: 'Height', previousValue: '50', currentValue: '60' },
-        ],
-      },
-      {
-        category: 'Types',
-        addedItems: ['Type A', 'Type B'],
-        removedItems: ['Old Type'],
-      },
-    ];
-
-    this.selectedChanges.set({ changes: mockChanges });
     this.selectedFamilyName.set(family.familyName);
     this.changesModalVisible.set(true);
+    this.selectedChanges.set(null);
+
+    if (family.localHash) {
+      this.apiService
+        .post<{ items: Array<{ category: string; previousValue?: string; currentValue?: string; addedItems?: string[]; removedItems?: string[]; parameterChanges?: Array<{ name: string; previousValue?: string; currentValue?: string }> }>; hasChanges: boolean }>(
+          `/families/${family.uniqueId}/local-changes`,
+          { localSnapshotJson: family.localHash },
+        )
+        .subscribe({
+          next: result => {
+            this.selectedChanges.set({ changes: result.items });
+          },
+          error: () => {
+            this.selectedChanges.set({ changes: [] });
+          },
+        });
+    } else {
+      this.selectedChanges.set({ changes: [] });
+    }
   }
 
   /**

@@ -1,43 +1,17 @@
-<p-card class="h-full">
-  <ng-template #header>
-    <div class="flex items-center justify-center h-24 bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-lg">
-        {{ getInitials(family().familyName) }}
-      </div>
-    </div>
-  </ng-template>
-  
-  <ng-template #title>
-    <span class="text-base font-semibold text-gray-900 line-clamp-1">
+<div
+  class="group bg-white rounded-lg border border-[var(--border-subtle)] hover:border-[var(--accent)] hover:shadow-sm transition-all cursor-pointer p-3.5"
+  (click)="onSelect()"
+  role="button"
+  [attr.aria-label]="'View ' + family().familyName"
+>
+  <div class="flex items-start justify-between gap-2 mb-2">
+    <span class="text-[0.8125rem] font-semibold text-[var(--text-primary)] leading-tight line-clamp-2">
       {{ family().familyName }}
     </span>
-  </ng-template>
-  
-  <ng-template #subtitle>
-    <span class="text-sm text-gray-500">
-      {{ family().roleName }}
+    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[0.625rem] font-medium bg-[var(--accent-soft)] text-[var(--accent)] shrink-0">
+      v{{ family().currentVersion }}
     </span>
-  </ng-template>
-  
-  <ng-template #content>
-    <div class="flex items-center justify-between">
-      <p-tag [value]="'v' + family().currentVersion" severity="info" />
-      <span class="text-xs text-gray-400">
-        Updated {{ family().updatedAt | date:'shortDate' }}
-      </span>
-    </div>
-  </ng-template>
-  
-  <ng-template #footer>
-    <div class="pt-2">
-      <p-button
-        label="View Details"
-        icon="pi pi-eye"
-        styleClass="w-full"
-        severity="secondary"
-        outlined
-        (onClick)="onSelect()"
-      />
-    </div>
-  </ng-template>
-</p-card>
+  </div>
+  <p class="text-[0.75rem] text-[var(--text-secondary)] truncate mb-2">{{ family().roleName }}</p>
+  <p class="text-[0.6875rem] text-[var(--text-muted)]">{{ family().updatedAt | date:'mediumDate' }}</p>
+</div>
