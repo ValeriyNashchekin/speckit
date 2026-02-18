@@ -9,9 +9,11 @@ import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TooltipModule } from 'primeng/tooltip';
 import { CheckboxModule } from 'primeng/checkbox';
+import { TabsModule } from 'primeng/tabs';
 import { MessageService } from 'primeng/api';
 import { LibraryService } from '../../services/library.service';
 import { FamilyDetail, FamilyVersion, TypeCatalogEntry } from '../../../../core/models/family.model';
+import { ChangelogComponent } from '../changelog/changelog.component';
 
 declare global {
   interface Window {
@@ -46,8 +48,10 @@ interface RevitFamilyLoadedDetail {
     SkeletonModule,
     TooltipModule,
     CheckboxModule,
+    TabsModule,
     FormsModule,
     DatePipe,
+    ChangelogComponent,
   ],
   templateUrl: './family-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -61,8 +65,14 @@ export class FamilyDetailComponent {
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
 
+  // Tab state
+  protected readonly activeTab = signal<string>('overview');
+
   // Type Catalog state
   protected readonly selectedTypes = signal<Set<number>>(new Set());
+
+  // Computed properties
+  protected readonly familyId = computed(() => this.family()?.id ?? '');
 
   // Type Catalog computed properties
   protected readonly hasTypeCatalog = computed(() => {
