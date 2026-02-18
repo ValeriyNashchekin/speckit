@@ -1,0 +1,137 @@
+{
+  "revitReady": {
+    "type": "revit:ready",
+    "payload": {
+      "version": "2024",
+      "pluginVersion": "1.0.0",
+      "documentType": "Project",
+      "documentPath": "C:\Projects\SampleProject.rvt"
+    },
+    "timestamp": 1708200000000
+  },
+  "familiesList": {
+    "type": "revit:families:list",
+    "payload": {
+      "families": [
+        {
+          "id": "abc123-def456-789",
+          "name": "FreeAxez_Desk_Adjustable_v1",
+          "categoryName": "Furniture",
+          "isSystemFamily": false,
+          "hasStamp": false
+        },
+        {
+          "id": "xyz789-abc123-456",
+          "name": "FreeAxez_Chair_Task_v2",
+          "categoryName": "Furniture",
+          "isSystemFamily": false,
+          "hasStamp": true,
+          "stampData": {
+            "roleId": "role-001-guid",
+            "roleName": "FreeAxez_TaskChair",
+            "stampedAt": "2026-02-15T10:30:00Z",
+            "stampedBy": "admin",
+            "contentHash": "a1b2c3d4e5f6"
+          }
+        },
+        {
+          "id": "sys001-wall-basic",
+          "name": "Basic Wall",
+          "categoryName": "Walls",
+          "isSystemFamily": true,
+          "hasStamp": false
+        }
+      ],
+      "scanDuration": 150,
+      "projectId": "project-unique-id-001"
+    },
+    "timestamp": 1708200100000
+  },
+  "stampResult": {
+    "type": "revit:stamp:result",
+    "payload": {
+      "success": true,
+      "familyId": "abc123-def456-789",
+      "familyName": "FreeAxez_Desk_Adjustable_v1",
+      "roleId": "role-002-guid",
+      "roleName": "FreeAxez_AdjustableDesk"
+    },
+    "timestamp": 1708200200000
+  },
+  "publishResult": {
+    "type": "revit:publish:result",
+    "payload": {
+      "success": true,
+      "familyId": "server-family-id-001",
+      "familyName": "FreeAxez_Desk_Adjustable_v1",
+      "version": 1
+    },
+    "timestamp": 1708200300000
+  },
+  "loadResult": {
+    "type": "revit:load:result",
+    "payload": {
+      "success": true,
+      "familyId": "server-family-id-001",
+      "familyName": "FreeAxez_Desk_Adjustable_v1",
+      "loadedSymbols": ["Desk_1200x600", "Desk_1400x700", "Desk_1600x800"]
+    },
+    "timestamp": 1708200400000
+  },
+  "scanComplete": {
+    "type": "revit:scan:complete",
+    "payload": {
+      "totalFamilies": 45,
+      "loadableCount": 38,
+      "systemCount": 7,
+      "stampedCount": 12,
+      "scanDuration": 250
+    },
+    "timestamp": 1708200050000
+  },
+  "error": {
+    "type": "revit:error",
+    "payload": {
+      "code": "TRANSACTION_FAILED",
+      "message": "Could not modify the element. It may be locked or part of a group.",
+      "details": "Element ID: 12345, Transaction: Stamp Family",
+      "recoverable": true
+    },
+    "timestamp": 1708200500000
+  },
+  "typeCatalogShow": {
+    "type": "revit:type-catalog:show",
+    "payload": {
+      "familyId": "catalog-family-001",
+      "familyName": "FreeAxez_Column_Steel",
+      "types": [
+        {
+          "typeName": "HSS6x6x1/4",
+          "parameters": {
+            "Width": "6\"",
+            "Depth": "6\"",
+            "WallThickness": "0.25\""
+          }
+        },
+        {
+          "typeName": "HSS8x8x3/8",
+          "parameters": {
+            "Width": "8\"",
+            "Depth": "8\"",
+            "WallThickness": "0.375\""
+          }
+        },
+        {
+          "typeName": "HSS10x10x1/2",
+          "parameters": {
+            "Width": "10\"",
+            "Depth": "10\"",
+            "WallThickness": "0.5\""
+          }
+        }
+      ],
+      "parameterHeaders": ["Width", "Depth", "WallThickness"]
+    },
+    "timestamp": 1708200600000
+  }
+}

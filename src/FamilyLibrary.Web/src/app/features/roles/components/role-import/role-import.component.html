@@ -1,0 +1,243 @@
+<p-dialog
+  [header]="dialogTitle()"
+  [visible]="visible()"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="true"
+  [resizable]="false"
+  [style]="{ width: '48rem' }"
+  (onHide)="onHide()"
+>
+  <!-- Step 1: Upload -->
+  @if (currentStep() === 'upload') {
+    <div class="space-y-4">
+      <p-message severity="info" text="Supported formats: Excel (.xlsx, .xls) and CSV files" />
+
+      <p-fileUpload
+        mode="advanced"
+        accept=".xlsx,.xls,.csv"
+        [maxFileSize]="10485760"
+        [multiple]="false"
+        [auto]="false"
+        [customUpload]="true"
+        (onSelect)="onFileSelect($event)"
+        chooseLabel="Select File"
+        uploadStyleClass="hidden"
+        cancelStyleClass="hidden"
+      >
+        <ng-template #empty>
+          <div class="flex flex-col items-center justify-center py-8 text-gray-500">
+            <i class="pi pi-cloud-upload text-4xl text-gray-300 mb-3"></i>
+            <span class="font-medium">Drag and drop files here</span>
+            <span class="text-sm">or click to browse</span>
+          </div>
+        </ng-template>
+      </p-fileUpload>
+
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h4 class="font-semibold text-gray-700 mb-2">File Requirements</h4>
+        <ul class="text-sm text-gray-600 space-y-1">
+          <li>- Column <strong>Name</strong> is required</li>
+          <li>- Column <strong>Type</strong> (Loadable/System), defaults to Loadable</li>
+          <li>- Columns <strong>Description</strong> and <strong>Category</strong> are optional</li>
+        </ul>
+      </div>
+
+      @if (isProcessing()) {
+        <div class="flex items-center justify-center py-4">
+          <i class="pi pi-spinner pi-spin text-2xl text-primary-500"></i>
+          <span class="ml-2 text-gray-600">Processing file...</span>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Step 2: Preview -->
+  @if (currentStep() === 'preview' && previewData()) {
+    <div class="space-y-4">
+      <!-- Summary -->
+      <div class="grid grid-cols-3 gap-4">
+        <div class="bg-green-50 rounded-lg p-4 text-center">
+          <div class="text-2xl font-bold text-green-600">{{ previewData()!.totalValid }}</div>
+          <div class="text-sm text-green-700">Valid items</div>
+        </div>
+        <div class="bg-yellow-50 rounded-lg p-4 text-center">
+          <div class="text-2xl font-bold text-yellow-600">{{ previewData()!.totalDuplicates }}</div>
+          <div class="text-sm text-yellow-700">Duplicates (skipped)</div>
+        </div>
+        <div class="bg-red-50 rounded-lg p-4 text-center">
+          <div class="text-2xl font-bold text-red-600">{{ previewData()!.totalInvalid }}</div>
+          <div class="text-sm text-red-700">Invalid items</div>
+        </div>
+      </div>
+
+      <!-- Valid Items Table -->
+      @if (validItems().length > 0) {
+        <div>
+          <h4 class="font-semibold text-gray-700 mb-2">Items to Import ({{ validItems().length }})</h4>
+          <div class="bg-white border border-gray-200 rounded-lg overflow-hidden max-h-48 overflow-y-auto">
+            <p-table [value]="validItems()" tableStyleClass="w-full text-sm">
+              <ng-template #header>
+                <tr class="bg-gray-50">
+                  <th class="px-3 py-2 text-left font-semibold text-gray-700">Name</th>
+                  <th class="px-3 py-2 text-left font-semibold text-gray-700">Type</th>
+                  <th class="px-3 py-2 text-left font-semibold text-gray-700">Category</th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-item>
+                <tr class="border-t border-gray-100 hover:bg-gray-50">
+                  <td class="px-3 py-2 font-medium text-gray-900">{{ item.name }}</td>
+                  <td class="px-3 py-2">
+                    <p-tag [value]="item.type" [severity]="getSeverity(item.type)" />
+                  </td>
+                  <td class="px-3 py-2 text-gray-600">{{ getCategoryName(item.categoryId) }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+      }
+
+      <!-- Duplicate Items -->
+      @if (duplicateItems().length > 0) {
+        <div>
+          <h4 class="font-semibold text-yellow-700 mb-2">
+            <i class="pi pi-exclamation-triangle mr-1"></i>
+            Duplicates ({{ duplicateItems().length }}) - will be skipped
+          </h4>
+          <div class="bg-yellow-50 border border-yellow-200 rounded-lg overflow-hidden max-h-32 overflow-y-auto">
+            <p-table [value]="duplicateItems()" tableStyleClass="w-full text-sm">
+              <ng-template #header>
+                <tr class="bg-yellow-100">
+                  <th class="px-3 py-2 text-left font-semibold text-yellow-800">Name</th>
+                  <th class="px-3 py-2 text-left font-semibold text-yellow-800">Reason</th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-item>
+                <tr class="border-t border-yellow-100">
+                  <td class="px-3 py-2 text-yellow-900">{{ item.name }}</td>
+                  <td class="px-3 py-2 text-yellow-700">Already exists</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+      }
+
+      <!-- Invalid Items -->
+      @if (invalidItems().length > 0) {
+        <div>
+          <h4 class="font-semibold text-red-700 mb-2">
+            <i class="pi pi-times-circle mr-1"></i>
+            Invalid Items ({{ invalidItems().length }})
+          </h4>
+          <div class="bg-red-50 border border-red-200 rounded-lg overflow-hidden max-h-32 overflow-y-auto">
+            <p-table [value]="invalidItems()" tableStyleClass="w-full text-sm">
+              <ng-template #header>
+                <tr class="bg-red-100">
+                  <th class="px-3 py-2 text-left font-semibold text-red-800">Name</th>
+                  <th class="px-3 py-2 text-left font-semibold text-red-800">Error</th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-item>
+                <tr class="border-t border-red-100">
+                  <td class="px-3 py-2 text-red-900">{{ item.name }}</td>
+                  <td class="px-3 py-2 text-red-700">{{ item.validationMessage }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Step 3: Result -->
+  @if (currentStep() === 'result' && importResult()) {
+    <div class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-green-50 rounded-lg p-6 text-center">
+          <i class="pi pi-check-circle text-4xl text-green-500 mb-2"></i>
+          <div class="text-3xl font-bold text-green-600">{{ importResult()!.imported }}</div>
+          <div class="text-sm text-green-700">Successfully imported</div>
+        </div>
+        <div class="bg-yellow-50 rounded-lg p-6 text-center">
+          <i class="pi pi-forward text-4xl text-yellow-500 mb-2"></i>
+          <div class="text-3xl font-bold text-yellow-600">{{ importResult()!.skipped }}</div>
+          <div class="text-sm text-yellow-700">Skipped</div>
+        </div>
+      </div>
+
+      @if (importResult()!.errors.length > 0) {
+        <div>
+          <h4 class="font-semibold text-red-700 mb-2">Import Errors</h4>
+          <ul class="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700 space-y-1">
+            @for (error of importResult()!.errors; track error) {
+              <li>- {{ error }}</li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Footer -->
+  <ng-template #footer>
+    <div class="flex justify-between">
+      <div>
+        @if (currentStep() === 'preview') {
+          <p-button
+            label="Back"
+            icon="pi pi-arrow-left"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="onBack()"
+          />
+        }
+      </div>
+
+      <div class="flex gap-2">
+        @if (currentStep() === 'upload') {
+          <p-button
+            label="Cancel"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="onCancel()"
+          />
+        }
+
+        @if (currentStep() === 'preview') {
+          <p-button
+            label="Cancel"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="onCancel()"
+          />
+          <p-button
+            label="Import"
+            icon="pi pi-upload"
+            severity="primary"
+            [disabled]="!hasValidItems()"
+            [loading]="isImporting()"
+            (onClick)="onConfirmImport()"
+          />
+        }
+
+        @if (currentStep() === 'result') {
+          <p-button
+            label="Close"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="onCancel()"
+          />
+          <p-button
+            label="Import More"
+            icon="pi pi-plus"
+            severity="primary"
+            (onClick)="onNewImport()"
+          />
+        }
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>

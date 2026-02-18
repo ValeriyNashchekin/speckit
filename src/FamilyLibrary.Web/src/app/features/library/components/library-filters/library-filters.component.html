@@ -1,0 +1,89 @@
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+  <div class="flex flex-wrap items-end gap-4">
+    <!-- Search Input -->
+    <div class="flex-1 min-w-[200px] max-w-md">
+      <label for="search" class="block text-sm font-medium text-gray-700 mb-1">
+        Search
+      </label>
+      <span class="p-input-icon-left w-full block">
+        <i class="pi pi-search"></i>
+        <input
+          type="text"
+          pInputText
+          id="search"
+          [value]="searchInputValue()"
+          (input)="onSearchInput($event)"
+          (keyup.enter)="onSearch()"
+          placeholder="Search families..."
+          class="w-full"
+        />
+      </span>
+    </div>
+
+    <!-- Role Filter -->
+    <div class="min-w-[180px]">
+      <label for="role" class="block text-sm font-medium text-gray-700 mb-1">
+        Role
+      </label>
+      <p-select
+        [options]="roleOptions()"
+        [ngModel]="selectedRoleId()"
+        (ngModelChange)="onRoleChange($event)"
+        placeholder="All roles"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="w-full"
+      />
+    </div>
+
+    <!-- Category Filter -->
+    <div class="min-w-[180px]">
+      <label for="category" class="block text-sm font-medium text-gray-700 mb-1">
+        Category
+      </label>
+      <p-select
+        [options]="categoryOptions()"
+        [ngModel]="selectedCategoryId()"
+        (ngModelChange)="onCategoryChange($event)"
+        placeholder="All categories"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="w-full"
+      />
+    </div>
+
+    <!-- Tags Filter -->
+    <div class="min-w-[220px]">
+      <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">
+        Tags
+      </label>
+      <app-tag-multi-select
+        [tags]="tags()"
+        [selectedTagIds]="selectedTagIds()"
+        (selectedTagIdsChange)="onTagsChange($event)"
+        placeholder="Select tags"
+      />
+    </div>
+
+    <!-- Search Button -->
+    <p-button
+      icon="pi pi-search"
+      label="Search"
+      severity="primary"
+      (onClick)="onSearch()"
+    />
+
+    <!-- Clear Button -->
+    @if (hasActiveFilters()) {
+      <p-button
+        icon="pi pi-times"
+        label="Clear"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="onClear()"
+      />
+    }
+  </div>
+</div>

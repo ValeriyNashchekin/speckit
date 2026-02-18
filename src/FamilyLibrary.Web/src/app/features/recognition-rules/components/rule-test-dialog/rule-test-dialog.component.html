@@ -1,0 +1,74 @@
+<p-dialog
+  header="Test Rule"
+  [visible]="visible()"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="true"
+  [resizable]="false"
+  [style]="{ width: '32rem' }"
+  (onHide)="onHide()"
+>
+  <div class="space-y-4">
+    <!-- Input -->
+    <div class="flex flex-col gap-2">
+      <label for="familyName" class="text-sm font-medium text-gray-700">
+        Family Name to Test
+      </label>
+      <div class="flex gap-2">
+        <input
+          pInputText
+          id="familyName"
+          type="text"
+          [(ngModel)]="familyName"
+          placeholder="Enter family name..."
+          class="flex-1"
+          (keydown.enter)="onTest()"
+        />
+        <p-button
+          label="Test"
+          icon="pi pi-play"
+          [loading]="isTesting()"
+          [disabled]="!canTest"
+          (onClick)="onTest()"
+        />
+      </div>
+    </div>
+
+    <!-- Result -->
+    @if (testResult()) {
+      <div class="mt-4 p-4 rounded-lg border" [class.border-green-200]="testResult()!.matches" [class.bg-green-50]="testResult()!.matches" [class.border-red-200]="!testResult()!.matches" [class.bg-red-50]="!testResult()!.matches">
+        <div class="flex items-center gap-2 mb-2">
+          @if (testResult()!.matches) {
+            <i class="pi pi-check-circle text-green-600 text-lg"></i>
+            <span class="font-medium text-green-700">Match Found!</span>
+          } @else {
+            <i class="pi pi-times-circle text-red-600 text-lg"></i>
+            <span class="font-medium text-red-700">No Match</span>
+          }
+        </div>
+        
+        @if (testResult()!.matchedConditions.length > 0) {
+          <div class="mt-2">
+            <p class="text-xs text-gray-500 mb-1">Matched patterns:</p>
+            <div class="flex flex-wrap gap-1">
+              @for (condition of testResult()!.matchedConditions; track condition) {
+                <p-tag [value]="condition" severity="success" size="small" />
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <ng-template #footer>
+    <div class="flex justify-end">
+      <p-button
+        label="Close"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="onHide()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>

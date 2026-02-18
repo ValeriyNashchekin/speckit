@@ -1,0 +1,187 @@
+<div class="space-y-4">
+  <!-- Basic Information Card -->
+  <p-card header="System Type Details" styleClass="shadow-sm">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <!-- Type Name -->
+      <div class="space-y-1">
+        <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Type Name</label>
+        <p class="text-sm font-semibold text-gray-900">{{ systemType().typeName }}</p>
+      </div>
+
+      <!-- Category -->
+      <div class="space-y-1">
+        <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Category</label>
+        <p class="text-sm text-gray-700">{{ systemType().category }}</p>
+      </div>
+
+      <!-- System Family -->
+      <div class="space-y-1">
+        <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">System Family</label>
+        <p class="text-sm text-gray-700">{{ systemType().systemFamily }}</p>
+      </div>
+
+      <!-- Version -->
+      <div class="space-y-1">
+        <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Version</label>
+        <p class="text-sm text-gray-700">v{{ systemType().currentVersion }}</p>
+      </div>
+    </div>
+  </p-card>
+
+  <!-- Compound Structure (GroupA) -->
+  @if (isCompoundStructure()) {
+    <p-card styleClass="shadow-sm">
+      <ng-template #header>
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900">Compound Structure Layers</h3>
+          @if (compoundStructure()) {
+            <span class="text-sm font-medium text-gray-600">
+              Total Thickness: {{ formatThickness(compoundStructure()!.totalThickness) }}
+            </span>
+          }
+        </div>
+      </ng-template>
+
+      @if (compoundStructure(); as structure) {
+        <p-table
+          [value]="structure.layers"
+          [tableStyle]="{ 'min-width': '40rem' }"
+          styleClass="p-datatable-sm"
+        >
+          <ng-template #header>
+            <tr>
+              <th style="width: 25%">Function</th>
+              <th style="width: 15%">Thickness</th>
+              <th style="width: 30%">Material</th>
+              <th style="width: 15%">Structural</th>
+              <th style="width: 15%">Priority</th>
+            </tr>
+          </ng-template>
+
+          <ng-template #body let-layer>
+            <tr [class]="layer.isStructural ? 'bg-green-50' : ''">
+              <td>
+                <span class="font-medium text-gray-900">{{ layer.function }}</span>
+              </td>
+              <td>
+                <span class="text-gray-700">{{ formatThickness(layer.thickness) }}</span>
+              </td>
+              <td>
+                <span class="text-gray-700">{{ layer.material }}</span>
+              </td>
+              <td>
+                <p-tag
+                  [value]="formatBooleanValue(layer.isStructural)"
+                  [severity]="getStructuralSeverity(layer.isStructural)"
+                  [rounded]="true"
+                />
+              </td>
+              <td>
+                <span class="text-gray-600">{{ layer.priority }}</span>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="5" class="text-center py-8">
+                <div class="flex flex-col items-center">
+                  <i class="pi pi-inbox text-3xl text-gray-300 mb-3"></i>
+                  <p class="text-gray-500">No layers defined</p>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      } @else {
+        <div class="flex flex-col items-center py-8">
+          <i class="pi pi-exclamation-triangle text-3xl text-yellow-500 mb-3"></i>
+          <p class="text-gray-500">Unable to parse compound structure data</p>
+        </div>
+      }
+    </p-card>
+  }
+
+  <!-- Routing Preferences (GroupB - Pipes, Ducts) -->
+  @if (isRoutingPreferences()) {
+    @if (routingPreferences(); as preferences) {
+      <app-routing-preferences-display [preferences]="preferences" />
+    } @else {
+      <p-card header="Routing Preferences" styleClass="shadow-sm">
+        <div class="flex flex-col items-center py-8">
+          <i class="pi pi-exclamation-triangle text-3xl text-yellow-500 mb-3"></i>
+          <p class="text-gray-500">Unable to parse routing preferences data</p>
+        </div>
+      </p-card>
+    }
+  }
+
+  <!-- Parameters (GroupE) -->
+  @if (isParameters()) {
+    <p-card header="Parameters" styleClass="shadow-sm">
+      @if (parameters(); as params) {
+        <p-table
+          [value]="params"
+          [tableStyle]="{ 'min-width': '30rem' }"
+          styleClass="p-datatable-sm"
+        >
+          <ng-template #header>
+            <tr>
+              <th style="width: 35%">Name</th>
+              <th style="width: 40%">Value</th>
+              <th style="width: 25%">Storage Type</th>
+            </tr>
+          </ng-template>
+
+          <ng-template #body let-param>
+            <tr>
+              <td>
+                <span class="font-medium text-gray-900">{{ param.name }}</span>
+              </td>
+              <td>
+                <span class="text-gray-700">{{ formatValue(param.value) }}</span>
+              </td>
+              <td>
+                <p-tag
+                  [value]="param.storageType"
+                  [severity]="getStorageTypeSeverity(param.storageType)"
+                  [rounded]="true"
+                />
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="3" class="text-center py-8">
+                <div class="flex flex-col items-center">
+                  <i class="pi pi-inbox text-3xl text-gray-300 mb-3"></i>
+                  <p class="text-gray-500">No parameters defined</p>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      } @else {
+        <div class="flex flex-col items-center py-8">
+          <i class="pi pi-exclamation-triangle text-3xl text-yellow-500 mb-3"></i>
+          <p class="text-gray-500">Unable to parse parameter data</p>
+        </div>
+      }
+    </p-card>
+  }
+
+  <!-- Other Groups (Fallback) -->
+  @if (!isCompoundStructure() && !isRoutingPreferences() && !isParameters()) {
+    <p-card header="JSON Data" styleClass="shadow-sm">
+      @if (parsedJson(); as data) {
+        <pre class="bg-gray-50 p-4 rounded-md overflow-x-auto text-sm text-gray-700 font-mono">{{ data | json }}</pre>
+      } @else {
+        <div class="flex flex-col items-center py-8">
+          <i class="pi pi-exclamation-triangle text-3xl text-yellow-500 mb-3"></i>
+          <p class="text-gray-500">No JSON data available</p>
+        </div>
+      }
+    </p-card>
+  }
+</div>

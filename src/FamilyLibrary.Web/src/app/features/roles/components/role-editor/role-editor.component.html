@@ -1,0 +1,137 @@
+<p-dialog
+  [header]="dialogTitle()"
+  [visible]="visible()"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="true"
+  [resizable]="false"
+  [style]="{ width: '32rem' }"
+  (onHide)="onHide()"
+>
+  <form [formGroup]="roleForm" class="space-y-4">
+    <!-- Name field -->
+    <div class="flex flex-col gap-2">
+      <label for="roleName" class="text-sm font-medium text-gray-700">
+        Name <span class="text-red-500">*</span>
+      </label>
+      <input
+        pInputText
+        id="roleName"
+        formControlName="name"
+        class="w-full"
+        [class.ng-invalid]="isFieldInvalid('name')"
+        [class.ng-dirty]="roleForm.get('name')?.dirty"
+        placeholder="Enter role name"
+        aria-describedby="nameError"
+      />
+      @if (isFieldInvalid('name')) {
+        <small id="nameError" class="text-red-500 text-xs">
+          @if (roleForm.get('name')?.errors?.['required']) {
+            Name is required
+          }
+          @if (roleForm.get('name')?.errors?.['minlength']) {
+            Name must be at least 1 character
+          }
+          @if (roleForm.get('name')?.errors?.['maxlength']) {
+            Name cannot exceed 100 characters
+          }
+        </small>
+      }
+      @if (isEditMode()) {
+        <small class="text-gray-500 text-xs">Name cannot be changed after creation</small>
+      }
+    </div>
+
+    <!-- Type field -->
+    <div class="flex flex-col gap-2">
+      <label for="roleType" class="text-sm font-medium text-gray-700">
+        Type <span class="text-red-500">*</span>
+      </label>
+      <p-select
+        formControlName="type"
+        [options]="typeOptions()"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Select type"
+        class="w-full"
+        inputId="roleType"
+        [invalid]="isFieldInvalid('type')"
+      />
+      @if (isFieldInvalid('type')) {
+        <small class="text-red-500 text-xs">Type is required</small>
+      }
+    </div>
+
+    <!-- Category field -->
+    <div class="flex flex-col gap-2">
+      <label for="roleCategory" class="text-sm font-medium text-gray-700">Category</label>
+      <p-select
+        formControlName="categoryId"
+        [options]="categoryOptions()"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Select category (optional)"
+        class="w-full"
+        inputId="roleCategory"
+        [showClear]="true"
+      />
+    </div>
+
+    <!-- Tags field -->
+    <div class="flex flex-col gap-2">
+      <label for="roleTags" class="text-sm font-medium text-gray-700">Tags</label>
+      <p-multiselect
+        formControlName="tagIds"
+        [options]="tagOptions()"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Select tags (optional)"
+        class="w-full"
+        inputId="roleTags"
+        [showClear]="true"
+        [showHeader]="true"
+        [filter]="true"
+        filterPlaceHolder="Search tags..."
+        [maxSelectedLabels]="3"
+        selectedItemsLabel="{0} tags selected"
+        display="chip"
+      />
+    </div>
+
+    <!-- Description field -->
+    <div class="flex flex-col gap-2">
+      <label for="roleDescription" class="text-sm font-medium text-gray-700">Description</label>
+      <textarea
+        pTextarea
+        id="roleDescription"
+        formControlName="description"
+        rows="3"
+        class="w-full"
+        [class.ng-invalid]="isFieldInvalid('description')"
+        placeholder="Enter description (optional)"
+        [maxlength]="500"
+        aria-describedby="descCounter"
+      ></textarea>
+      <small id="descCounter" class="text-gray-400 text-xs text-right">
+        {{ roleForm.get('description')?.value?.length || 0 }}/500
+      </small>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <div class="flex justify-end gap-2">
+      <p-button
+        label="Cancel"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="onCancel()"
+      />
+      <p-button
+        [label]="isEditMode() ? 'Update' : 'Create'"
+        severity="primary"
+        (onClick)="onSave()"
+        [disabled]="roleForm.invalid || isSubmitting()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>

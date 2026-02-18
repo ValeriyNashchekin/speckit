@@ -1,0 +1,68 @@
+<div class="flex h-screen bg-gray-50">
+  <!-- Fixed Sidebar -->
+  <aside class="fixed left-0 top-0 h-screen w-64 bg-surface-900 text-white flex flex-col z-50">
+    <!-- Logo / Brand -->
+    <div class="flex items-center gap-3 px-6 h-16 border-b border-surface-700">
+      <i class="pi pi-box text-2xl text-primary-400"></i>
+      <span class="text-lg font-semibold">Family Library</span>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 overflow-y-auto py-4" role="navigation" aria-label="Main navigation">
+      <ul class="space-y-1 px-3">
+        @for (item of navItems(); track item.route) {
+          <li>
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="bg-primary-500 text-white"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="flex items-center gap-3 px-4 py-3 rounded-lg text-surface-200 hover:bg-surface-700 transition-colors"
+              [class.bg-primary-500]="false"
+              [class.text-white]="false"
+            >
+              <i [class]="item.icon" class="text-lg"></i>
+              <span>{{ item.label }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t border-surface-700">
+      <span class="text-xs text-surface-400">Family Library MVP v0.1.0</span>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="ml-64 flex-1 flex flex-col min-h-screen">
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+      <p-toolbar>
+        <ng-template #start>
+          <div class="flex items-center gap-4">
+            <span class="text-xl font-semibold text-gray-800">Family Library</span>
+          </div>
+        </ng-template>
+
+        <ng-template #end>
+          <div class="flex items-center gap-3">
+            <p-button icon="pi pi-bell" [rounded]="true" [text]="true" severity="secondary" aria-label="Notifications" />
+            <p-button icon="pi pi-question-circle" [rounded]="true" [text]="true" severity="secondary" aria-label="Help" />
+            <div class="w-px h-6 bg-gray-200"></div>
+            <p-button icon="pi pi-user" label="Admin" [text]="true" severity="secondary" />
+          </div>
+        </ng-template>
+      </p-toolbar>
+    </header>
+
+    <!-- Page Content -->
+    <main class="flex-1 p-6 overflow-auto">
+      <router-outlet />
+    </main>
+  </div>
+</div>
+
+<!-- Global Components -->
+<p-confirmdialog />
+<p-toast />

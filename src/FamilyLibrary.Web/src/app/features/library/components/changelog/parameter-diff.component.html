@@ -1,0 +1,93 @@
+<div class="bg-white rounded-lg shadow-sm border border-gray-200">
+  @if (hasChanges()) {
+    <p-table
+      [value]="processedChanges()"
+      dataKey="name"
+      [rowHover]="true"
+      [showGridlines]="false"
+      tableStyleClass="w-full"
+    >
+      <ng-template #header>
+        <tr>
+          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 30%">
+            Parameter Name
+          </th>
+          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 35%">
+            Previous Value
+          </th>
+          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 35%">
+            Current Value
+          </th>
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-change>
+        <tr
+          class="border-t border-gray-100"
+          [class.bg-green-50]="change.changeType === 'added'"
+          [class.bg-red-50]="change.changeType === 'removed'"
+          [class.bg-amber-50]="change.changeType === 'changed'"
+        >
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-2">
+              @switch (change.changeType) {
+                @case ('added') {
+                  <p-tag value="Added" severity="success" class="text-xs" />
+                }
+                @case ('removed') {
+                  <p-tag value="Removed" severity="danger" class="text-xs" />
+                }
+                @case ('changed') {
+                  <p-tag value="Changed" severity="warn" class="text-xs" />
+                }
+              }
+              <span class="font-medium text-gray-900">{{ change.name }}</span>
+            </div>
+          </td>
+          <td class="px-4 py-3">
+            @if (change.previousValue !== undefined && change.previousValue !== null) {
+              <span
+                class="text-gray-600"
+                [class.line-through]="change.changeType === 'removed'"
+              >
+                {{ change.previousValue }}
+              </span>
+            } @else {
+              <span class="text-gray-400 italic">N/A</span>
+            }
+          </td>
+          <td class="px-4 py-3">
+            @if (change.currentValue !== undefined && change.currentValue !== null) {
+              <span
+                class="text-gray-900 font-medium"
+                [class.text-green-700]="change.changeType === 'added'"
+              >
+                {{ change.currentValue }}
+              </span>
+            } @else {
+              <span class="text-gray-400 italic">N/A</span>
+            }
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="3" class="px-4 py-8 text-center">
+            <div class="flex flex-col items-center gap-2">
+              <i class="pi pi-check-circle text-2xl text-green-400"></i>
+              <p class="text-gray-500">No parameter changes</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  } @else {
+    <div class="px-4 py-8 text-center">
+      <div class="flex flex-col items-center gap-2">
+        <i class="pi pi-check-circle text-2xl text-green-400"></i>
+        <p class="text-gray-500">No parameter changes to display</p>
+      </div>
+    </div>
+  }
+</div>

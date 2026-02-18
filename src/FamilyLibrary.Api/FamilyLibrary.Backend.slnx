@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="FamilyLibrary.Api/FamilyLibrary.Api.csproj" />
+  <Project Path="FamilyLibrary.Application/FamilyLibrary.Application.csproj" />
+  <Project Path="FamilyLibrary.Domain/FamilyLibrary.Domain.csproj" />
+  <Project Path="FamilyLibrary.Infrastructure/FamilyLibrary.Infrastructure.csproj" />
+</Solution>

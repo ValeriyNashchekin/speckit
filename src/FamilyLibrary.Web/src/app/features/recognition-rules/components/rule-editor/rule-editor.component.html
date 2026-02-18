@@ -1,0 +1,128 @@
+<p-dialog
+  [header]="dialogTitle()"
+  [visible]="visible()"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="true"
+  [resizable]="false"
+  [style]="{ width: '48rem' }"
+  (onHide)="onHide()"
+>
+  <div class="space-y-4">
+    <!-- Role Selection -->
+    <div class="flex flex-col gap-2">
+      <label for="ruleRole" class="text-sm font-medium text-gray-700">
+        Role <span class="text-red-500">*</span>
+      </label>
+      <p-select
+        [options]="roleOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="selectedRoleId()"
+        (ngModelChange)="onRoleChange($event)"
+        placeholder="Select a role..."
+        class="w-full"
+        inputId="ruleRole"
+        [disabled]="isEditMode()"
+      />
+      @if (isEditMode()) {
+        <small class="text-gray-500 text-xs">Role cannot be changed after creation</small>
+      }
+    </div>
+
+    <!-- Conflict Warnings (T090) -->
+    @if (hasConflicts()) {
+      <div class="space-y-2">
+        @for (conflict of conflicts(); track conflict.conflictingRuleId) {
+          <p-message 
+            severity="warn" 
+            [text]="conflict.conflictReason + ' (Rule: ' + conflict.conflictingRoleName + ')'"
+          />
+        }
+      </div>
+    }
+
+    <!-- Tabs -->
+    <div class="border-b border-gray-200">
+      <div class="flex gap-4">
+        <button
+          type="button"
+          class="px-4 py-2 text-sm font-medium border-b-2 transition-colors"
+          [class.border-blue-500]="activeTab() === 'visual'"
+          [class.text-blue-600]="activeTab() === 'visual'"
+          [class.border-transparent]="activeTab() !== 'visual'"
+          [class.text-gray-500]="activeTab() !== 'visual'"
+          [class.hover:text-gray-700]="activeTab() !== 'visual'"
+          (click)="activeTab.set('visual')"
+        >
+          <i class="pi pi-sitemap mr-2"></i>Visual Builder
+        </button>
+        <button
+          type="button"
+          class="px-4 py-2 text-sm font-medium border-b-2 transition-colors"
+          [class.border-blue-500]="activeTab() === 'formula'"
+          [class.text-blue-600]="activeTab() === 'formula'"
+          [class.border-transparent]="activeTab() !== 'formula'"
+          [class.text-gray-500]="activeTab() !== 'formula'"
+          [class.hover:text-gray-700]="activeTab() !== 'formula'"
+          (click)="activeTab.set('formula')"
+        >
+          <i class="pi pi-code mr-2"></i>Formula
+        </button>
+      </div>
+    </div>
+
+    <!-- Visual Tab -->
+    @if (activeTab() === 'visual') {
+      <app-rule-visual-builder
+        [rootNode]="rootNode()"
+        (rootNodeChange)="onRootNodeChange($event)"
+      />
+    }
+
+    <!-- Formula Tab -->
+    @if (activeTab() === 'formula') {
+      <div class="flex flex-col gap-2">
+        <label for="formula" class="text-sm font-medium text-gray-700">Formula</label>
+        <textarea
+          pTextarea
+          id="formula"
+          [ngModel]="formula()"
+          (ngModelChange)="onFormulaChange($event)"
+          rows="6"
+          class="w-full font-mono text-sm"
+          placeholder="CONTAINS(&quot;pattern&quot;) AND NOTCONTAINS(&quot;exclude&quot;)"
+        ></textarea>
+        <small class="text-gray-500 text-xs">
+          Use CONTAINS("pattern") and NOTCONTAINS("pattern") with AND / OR operators
+        </small>
+      </div>
+    }
+
+    <!-- Current Formula Preview -->
+    @if (formula()) {
+      <div class="bg-gray-50 rounded p-3 border border-gray-200">
+        <div class="text-xs font-medium text-gray-500 mb-1">Current Formula</div>
+        <code class="text-sm text-gray-800 break-all">{{ formula() }}</code>
+      </div>
+    }
+  </div>
+
+  <ng-template #footer>
+    <div class="flex justify-end gap-2">
+      <p-button
+        label="Cancel"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="onCancel()"
+      />
+      <p-button
+        [label]="isEditMode() ? 'Update' : 'Create'"
+        severity="primary"
+        (onClick)="onSave()"
+        [disabled]="!canSave || isSubmitting() || hasConflicts()"
+        [loading]="isSubmitting()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>

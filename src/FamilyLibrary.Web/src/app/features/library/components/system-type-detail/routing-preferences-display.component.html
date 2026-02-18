@@ -1,0 +1,95 @@
+<div class="space-y-4">
+  <!-- Segments Card -->
+  <p-card styleClass="shadow-sm">
+    <ng-template #header>
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900">Routing Segments</h3>
+        <span class="text-sm font-medium text-gray-600">
+          {{ segmentsCount() }} segment{{ segmentsCount() !== 1 ? 's' : '' }}
+        </span>
+      </div>
+    </ng-template>
+
+    @if (preferences().segments.length > 0) {
+      <p-table
+        [value]="preferences().segments"
+        [tableStyle]="{ 'min-width': '30rem' }"
+        styleClass="p-datatable-sm"
+      >
+        <ng-template #header>
+          <tr>
+            <th style="width: 50%">Material</th>
+            <th style="width: 50%">Schedule</th>
+          </tr>
+        </ng-template>
+
+        <ng-template #body let-segment>
+          <tr>
+            <td>
+              <span class="font-medium text-gray-900">{{ segment.materialName }}</span>
+            </td>
+            <td>
+              <span class="text-gray-700">{{ segment.scheduleType }}</span>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    } @else {
+      <div class="flex flex-col items-center py-8">
+        <i class="pi pi-inbox text-3xl text-gray-300 mb-3" aria-hidden="true"></i>
+        <p class="text-gray-500">No segments defined</p>
+      </div>
+    }
+  </p-card>
+
+  <!-- Fittings Card -->
+  <p-card styleClass="shadow-sm">
+    <ng-template #header>
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900">Routing Fittings</h3>
+        <span class="text-sm font-medium text-gray-600">
+          {{ fittingsCount() }} fitting{{ fittingsCount() !== 1 ? 's' : '' }}
+        </span>
+      </div>
+    </ng-template>
+
+    @if (preferences().fittings.length > 0) {
+      <p-table
+        [value]="preferences().fittings"
+        [tableStyle]="{ 'min-width': '40rem' }"
+        styleClass="p-datatable-sm"
+      >
+        <ng-template #header>
+          <tr>
+            <th style="width: 35%">Family</th>
+            <th style="width: 35%">Type</th>
+            <th style="width: 30%">Angle</th>
+          </tr>
+        </ng-template>
+
+        <ng-template #body let-fitting>
+          <tr>
+            <td>
+              <span class="font-medium text-gray-900">{{ fitting.familyName }}</span>
+            </td>
+            <td>
+              <span class="text-gray-700">{{ fitting.typeName }}</span>
+            </td>
+            <td>
+              @if (fitting.angleRange) {
+                <span class="text-gray-700">{{ fitting.angleRange }}</span>
+              } @else {
+                <span class="text-gray-400 italic">N/A</span>
+              }
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    } @else {
+      <div class="flex flex-col items-center py-8">
+        <i class="pi pi-inbox text-3xl text-gray-300 mb-3" aria-hidden="true"></i>
+        <p class="text-gray-500">No fittings defined</p>
+      </div>
+    }
+  </p-card>
+</div>

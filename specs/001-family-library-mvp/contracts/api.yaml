@@ -1,0 +1,1304 @@
+openapi: 3.0.3
+info:
+  title: Family Library API
+  description: Corporate family management system for FreeAxez Revit projects
+  version: 1.0.0
+  contact:
+    name: FreeAxez BIM Team
+
+servers:
+  - url: http://localhost:5000/api
+    description: Local development
+  - url: https://family-library.freeaxez.com/api
+    description: Production
+
+tags:
+  - name: Roles
+    description: Family role management
+  - name: Categories
+    description: Role categorization
+  - name: Tags
+    description: Role tagging
+  - name: RecognitionRules
+    description: Name recognition rules
+  - name: Families
+    description: Loadable family management
+  - name: SystemTypes
+    description: System family type management
+  - name: Drafts
+    description: Queue management
+
+paths:
+  # ========== ROLES ==========
+  /roles:
+    get:
+      tags: [Roles]
+      summary: List all roles
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [Loadable, System]
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: tagId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Paginated list of roles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedRoles'
+    post:
+      tags: [Roles]
+      summary: Create role(s)
+      description: Create single or multiple roles. Duplicates are silently skipped.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/CreateRoleRequest'
+                - $ref: '#/components/schemas/BatchCreateRolesRequest'
+      responses:
+        '201':
+          description: Roles created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchCreateRolesResponse'
+
+  /roles/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Roles]
+      summary: Get role by ID
+      responses:
+        '200':
+          description: Role details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FamilyRole'
+        '404':
+          description: Role not found
+    put:
+      tags: [Roles]
+      summary: Update role
+      description: Only Description, CategoryId, and Tags can be updated. Name and Type are read-only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRoleRequest'
+      responses:
+        '200':
+          description: Role updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FamilyRole'
+    delete:
+      tags: [Roles]
+      summary: Delete role
+      description: Fails if families are associated with the role.
+      responses:
+        '204':
+          description: Role deleted
+        '409':
+          description: Cannot delete - families associated
+
+  /roles/import:
+    post:
+      tags: [Roles]
+      summary: Import roles from Excel
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Import preview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportPreview'
+    post:
+      tags: [Roles]
+      summary: Confirm import
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmImportRequest'
+      responses:
+        '201':
+          description: Import completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchCreateRolesResponse'
+
+  # ========== CATEGORIES ==========
+  /categories:
+    get:
+      tags: [Categories]
+      summary: List all categories
+      responses:
+        '200':
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+    post:
+      tags: [Categories]
+      summary: Create category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategoryRequest'
+      responses:
+        '201':
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+
+  /categories/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags: [Categories]
+      summary: Update category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategoryRequest'
+      responses:
+        '200':
+          description: Category updated
+    delete:
+      tags: [Categories]
+      summary: Delete category
+      responses:
+        '204':
+          description: Category deleted
+
+  # ========== TAGS ==========
+  /tags:
+    get:
+      tags: [Tags]
+      summary: List all tags
+      responses:
+        '200':
+          description: List of tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+    post:
+      tags: [Tags]
+      summary: Create tag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTagRequest'
+      responses:
+        '201':
+          description: Tag created
+
+  /tags/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags: [Tags]
+      summary: Update tag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTagRequest'
+      responses:
+        '200':
+          description: Tag updated
+    delete:
+      tags: [Tags]
+      summary: Delete tag
+      responses:
+        '204':
+          description: Tag deleted
+
+  # ========== RECOGNITION RULES ==========
+  /recognition-rules:
+    get:
+      tags: [RecognitionRules]
+      summary: List all recognition rules
+      responses:
+        '200':
+          description: List of rules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecognitionRule'
+    post:
+      tags: [RecognitionRules]
+      summary: Create recognition rule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRecognitionRuleRequest'
+      responses:
+        '201':
+          description: Rule created
+
+  /recognition-rules/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags: [RecognitionRules]
+      summary: Update recognition rule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRecognitionRuleRequest'
+      responses:
+        '200':
+          description: Rule updated
+    delete:
+      tags: [RecognitionRules]
+      summary: Delete recognition rule
+      responses:
+        '204':
+          description: Rule deleted
+
+  /recognition-rules/validate:
+    post:
+      tags: [RecognitionRules]
+      summary: Validate formula syntax
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                formula:
+                  type: string
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResult'
+
+  /recognition-rules/test:
+    post:
+      tags: [RecognitionRules]
+      summary: Test rule against family name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                roleId:
+                  type: string
+                  format: uuid
+                testName:
+                  type: string
+      responses:
+        '200':
+          description: Test result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestResult'
+
+  /recognition-rules/check-conflicts:
+    post:
+      tags: [RecognitionRules]
+      summary: Check for rule conflicts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                excludeRoleId:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Conflict report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictReport'
+
+  # ========== FAMILIES ==========
+  /families:
+    get:
+      tags: [Families]
+      summary: Search families
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: tagId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: roleId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Paginated list of families
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedFamilies'
+
+  /families/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Families]
+      summary: Get family details
+      responses:
+        '200':
+          description: Family details with versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FamilyDetail'
+        '404':
+          description: Family not found
+
+  /families/{id}/versions:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Families]
+      summary: Get family version history
+      responses:
+        '200':
+          description: List of versions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FamilyVersion'
+
+  /families/{id}/download/{version}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: version
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [Families]
+      summary: Download family RFA file
+      responses:
+        '200':
+          description: RFA file
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Family or version not found
+
+  /families/publish:
+    post:
+      tags: [Families]
+      summary: Publish family to library
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                rfaFile:
+                  type: string
+                  format: binary
+                txtFile:
+                  type: string
+                  format: binary
+                metadata:
+                  type: object
+                  properties:
+                    roleId:
+                      type: string
+                      format: uuid
+                    familyName:
+                      type: string
+                    contentHash:
+                      type: string
+                    commitMessage:
+                      type: string
+      responses:
+        '201':
+          description: Family published
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FamilyVersion'
+
+  /families/validate-hash:
+    post:
+      tags: [Families]
+      summary: Check for hash duplicates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contentHash:
+                  type: string
+                excludeFamilyId:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Duplicate check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DuplicateCheckResult'
+
+  /families/batch-check:
+    post:
+      tags: [Families]
+      summary: Batch check family statuses
+      description: Check multiple families for updates available
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                families:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      roleName:
+                        type: string
+                      contentHash:
+                        type: string
+      responses:
+        '200':
+          description: Status for each family
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FamilyStatus'
+
+  # ========== SYSTEM TYPES ==========
+  /system-types:
+    get:
+      tags: [SystemTypes]
+      summary: List system types
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: group
+          in: query
+          schema:
+            type: string
+            enum: [A, B, C, D, E]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Paginated list of system types
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedSystemTypes'
+    post:
+      tags: [SystemTypes]
+      summary: Create/update system type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSystemTypeRequest'
+      responses:
+        '201':
+          description: System type created/updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemType'
+
+  /system-types/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [SystemTypes]
+      summary: Get system type details
+      responses:
+        '200':
+          description: System type details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemTypeDetail'
+    delete:
+      tags: [SystemTypes]
+      summary: Delete system type version
+      responses:
+        '204':
+          description: System type deleted
+
+  # ========== DRAFTS ==========
+  /drafts:
+    get:
+      tags: [Drafts]
+      summary: List drafts for template
+      parameters:
+        - name: templateId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [New, RoleSelected, Stamped, Published]
+      responses:
+        '200':
+          description: List of drafts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Draft'
+    post:
+      tags: [Drafts]
+      summary: Create draft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDraftRequest'
+      responses:
+        '201':
+          description: Draft created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Draft'
+
+  /drafts/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags: [Drafts]
+      summary: Update draft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDraftRequest'
+      responses:
+        '200':
+          description: Draft updated
+    delete:
+      tags: [Drafts]
+      summary: Delete draft
+      responses:
+        '204':
+          description: Draft deleted
+
+components:
+  schemas:
+    # ========== COMMON ==========
+    PagedResponse:
+      type: object
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalCount:
+          type: integer
+        totalPages:
+          type: integer
+
+    # ========== ROLES ==========
+    FamilyRole:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum: [Loadable, System]
+        description:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateRoleRequest:
+      type: object
+      required: [name, type]
+      properties:
+        name:
+          type: string
+          pattern: '^[A-Za-z][A-Za-z0-9_]*$'
+        type:
+          type: string
+          enum: [Loadable, System]
+        description:
+          type: string
+        categoryId:
+          type: string
+          format: uuid
+        tagIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    BatchCreateRolesRequest:
+      type: object
+      required: [roles]
+      properties:
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateRoleRequest'
+
+    BatchCreateRolesResponse:
+      type: object
+      properties:
+        created:
+          type: integer
+        skipped:
+          type: integer
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/FamilyRole'
+
+    UpdateRoleRequest:
+      type: object
+      properties:
+        description:
+          type: string
+        categoryId:
+          type: string
+          format: uuid
+          nullable: true
+        tagIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    PagedRoles:
+      allOf:
+        - $ref: '#/components/schemas/PagedResponse'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/FamilyRole'
+
+    ImportPreview:
+      type: object
+      properties:
+        roles:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              type:
+                type: string
+              description:
+                type: string
+              categoryName:
+                type: string
+              tagNames:
+                type: array
+                items:
+                  type: string
+              status:
+                type: string
+                enum: [New, Duplicate]
+        newCategories:
+          type: array
+          items:
+            type: string
+        newTags:
+          type: array
+          items:
+            type: string
+
+    ConfirmImportRequest:
+      type: object
+      properties:
+        createCategories:
+          type: boolean
+          default: true
+        createTags:
+          type: boolean
+          default: true
+
+    # ========== CATEGORIES ==========
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        sortOrder:
+          type: integer
+
+    CreateCategoryRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        sortOrder:
+          type: integer
+
+    UpdateCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        sortOrder:
+          type: integer
+
+    # ========== TAGS ==========
+    Tag:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        color:
+          type: string
+
+    CreateTagRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        color:
+          type: string
+
+    UpdateTagRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        color:
+          type: string
+
+    # ========== RECOGNITION RULES ==========
+    RecognitionRule:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        roleId:
+          type: string
+          format: uuid
+        roleName:
+          type: string
+        formula:
+          type: string
+        rootNode:
+          $ref: '#/components/schemas/RecognitionNode'
+
+    RecognitionNode:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [group, condition]
+        operator:
+          type: string
+          enum: [AND, OR, Contains, NotContains]
+        value:
+          type: string
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecognitionNode'
+
+    CreateRecognitionRuleRequest:
+      type: object
+      required: [roleId, formula, rootNode]
+      properties:
+        roleId:
+          type: string
+          format: uuid
+        formula:
+          type: string
+        rootNode:
+          $ref: '#/components/schemas/RecognitionNode'
+
+    UpdateRecognitionRuleRequest:
+      type: object
+      properties:
+        formula:
+          type: string
+        rootNode:
+          $ref: '#/components/schemas/RecognitionNode'
+
+    ValidationResult:
+      type: object
+      properties:
+        isValid:
+          type: boolean
+        errors:
+          type: array
+          items:
+            type: string
+
+    TestResult:
+      type: object
+      properties:
+        matches:
+          type: boolean
+        testName:
+          type: string
+
+    ConflictReport:
+      type: object
+      properties:
+        hasConflicts:
+          type: boolean
+        conflicts:
+          type: array
+          items:
+            type: object
+            properties:
+              roleName:
+                type: string
+              overlappingNames:
+                type: array
+                items:
+                  type: string
+
+    # ========== FAMILIES ==========
+    Family:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        roleId:
+          type: string
+          format: uuid
+        roleName:
+          type: string
+        familyName:
+          type: string
+        currentVersion:
+          type: integer
+        hasCatalog:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    FamilyDetail:
+      allOf:
+        - $ref: '#/components/schemas/Family'
+        - type: object
+          properties:
+            versions:
+              type: array
+              items:
+                $ref: '#/components/schemas/FamilyVersion'
+            types:
+              type: array
+              items:
+                $ref: '#/components/schemas/FamilyType'
+
+    FamilyVersion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        familyId:
+          type: string
+          format: uuid
+        version:
+          type: integer
+        hash:
+          type: string
+        previousHash:
+          type: string
+        originalFileName:
+          type: string
+        originalCatalogName:
+          type: string
+        commitMessage:
+          type: string
+        publishedAt:
+          type: string
+          format: date-time
+        publishedBy:
+          type: string
+
+    FamilyType:
+      type: object
+      properties:
+        name:
+          type: string
+        parameters:
+          type: object
+          additionalProperties:
+            type: string
+
+    PagedFamilies:
+      allOf:
+        - $ref: '#/components/schemas/PagedResponse'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Family'
+
+    DuplicateCheckResult:
+      type: object
+      properties:
+        isDuplicate:
+          type: boolean
+        existingFamily:
+          $ref: '#/components/schemas/Family'
+
+    FamilyStatus:
+      type: object
+      properties:
+        roleName:
+          type: string
+        contentHash:
+          type: string
+        status:
+          type: string
+          enum: [UpToDate, UpdateAvailable, LegacyMatch, NotInLibrary]
+        libraryVersion:
+          type: integer
+          nullable: true
+
+    # ========== SYSTEM TYPES ==========
+    SystemType:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        roleId:
+          type: string
+          format: uuid
+        roleName:
+          type: string
+        typeName:
+          type: string
+        category:
+          type: string
+        systemFamily:
+          type: string
+        group:
+          type: string
+          enum: [A, B, C, D, E]
+        currentVersion:
+          type: integer
+        hash:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+
+    SystemTypeDetail:
+      allOf:
+        - $ref: '#/components/schemas/SystemType'
+        - type: object
+          properties:
+            json:
+              type: object
+            versions:
+              type: array
+              items:
+                type: object
+                properties:
+                  version:
+                    type: integer
+                  hash:
+                    type: string
+                  updatedAt:
+                    type: string
+                    format: date-time
+
+    CreateSystemTypeRequest:
+      type: object
+      required: [roleId, typeName, category, systemFamily, group, json, hash]
+      properties:
+        roleId:
+          type: string
+          format: uuid
+        typeName:
+          type: string
+        category:
+          type: string
+        systemFamily:
+          type: string
+        group:
+          type: string
+          enum: [A, B, C, D, E]
+        json:
+          type: object
+        hash:
+          type: string
+
+    PagedSystemTypes:
+      allOf:
+        - $ref: '#/components/schemas/PagedResponse'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/SystemType'
+
+    # ========== DRAFTS ==========
+    Draft:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        familyName:
+          type: string
+        familyUniqueId:
+          type: string
+        selectedRoleId:
+          type: string
+          format: uuid
+          nullable: true
+        selectedRoleName:
+          type: string
+          nullable: true
+        templateId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [New, RoleSelected, Stamped, Published]
+        contentHash:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        lastSeen:
+          type: string
+          format: date-time
+
+    CreateDraftRequest:
+      type: object
+      required: [familyName, familyUniqueId, templateId]
+      properties:
+        familyName:
+          type: string
+        familyUniqueId:
+          type: string
+        templateId:
+          type: string
+          format: uuid
+
+    UpdateDraftRequest:
+      type: object
+      properties:
+        selectedRoleId:
+          type: string
+          format: uuid
+          nullable: true
+        status:
+          type: string
+          enum: [New, RoleSelected, Stamped, Published]
+        contentHash:
+          type: string

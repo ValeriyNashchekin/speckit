@@ -1,0 +1,78 @@
+<p-dialog
+  [header]="dialogTitle()"
+  [visible]="visible()"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="true"
+  [resizable]="false"
+  [style]="{ width: '28rem' }"
+  (onHide)="onHide()"
+>
+  <form [formGroup]="tagForm" class="space-y-4">
+    <!-- Name field -->
+    <div class="flex flex-col gap-2">
+      <label for="tagName" class="text-sm font-medium text-gray-700">
+        Name <span class="text-red-500">*</span>
+      </label>
+      <input
+        pInputText
+        id="tagName"
+        formControlName="name"
+        class="w-full"
+        [class.ng-invalid]="isFieldInvalid('name')"
+        [class.ng-dirty]="tagForm.get('name')?.dirty"
+        placeholder="Enter tag name"
+        aria-describedby="nameError"
+      />
+      @if (isFieldInvalid('name')) {
+        <small id="nameError" class="text-red-500 text-xs">
+          @if (tagForm.get('name')?.errors?.['required']) {
+            Name is required
+          }
+          @if (tagForm.get('name')?.errors?.['minlength']) {
+            Name must be at least 1 character
+          }
+          @if (tagForm.get('name')?.errors?.['maxlength']) {
+            Name cannot exceed 50 characters
+          }
+        </small>
+      }
+    </div>
+
+    <!-- Color field -->
+    <div class="flex flex-col gap-2">
+      <label for="tagColor" class="text-sm font-medium text-gray-700">Color</label>
+      <div class="flex items-center gap-3">
+        <p-colorPicker
+          formControlName="color"
+          format="hex"
+          inputId="tagColor"
+          (onChange)="onColorChange($event)"
+        />
+        <div
+          class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200"
+          [style.background-color]="'#' + colorValue()"
+        >
+          <span class="text-white text-sm font-medium drop-shadow-sm">{{ tagForm.get('name')?.value || 'Preview' }}</span>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <div class="flex justify-end gap-2">
+      <p-button
+        label="Cancel"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="onCancel()"
+      />
+      <p-button
+        [label]="isEditMode() ? 'Update' : 'Create'"
+        severity="primary"
+        (onClick)="onSave()"
+        [disabled]="tagForm.invalid || isSubmitting()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>
