@@ -1,0 +1,192 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Family Library</h1>
+      <p class="text-sm text-gray-500 mt-1">Browse and manage Revit families</p>
+    </div>
+    
+    <!-- View Toggle -->
+    <p-selectbutton
+      [options]="viewModeOptions"
+      [(ngModel)]="viewMode"
+      optionLabel="label"
+      optionValue="value"
+      ariaLabel="View mode"
+    >
+      <ng-template #item let-option>
+        <i [class]="option.icon" class="mr-2"></i>
+        <span>{{ option.label }}</span>
+      </ng-template>
+    </p-selectbutton>
+  </div>
+
+  <!-- Filters -->
+  <p-card>
+    <ng-template #content>
+      <div class="flex flex-col sm:flex-row gap-4">
+        <div class="flex-1">
+          <label class="block text-sm font-medium text-gray-700 mb-1" for="search">
+            Search
+          </label>
+          <input
+            type="text"
+            id="search"
+            [value]="searchTerm()"
+            (input)="onSearchInputChange($event)"
+            (keyup.enter)="applyFilters()"
+            placeholder="Search by family name..."
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+        <div class="w-full sm:w-48">
+          <label class="block text-sm font-medium text-gray-700 mb-1" for="role-filter">
+            Role
+          </label>
+          <select
+            id="role-filter"
+            [value]="selectedRoleId() ?? ''"
+            (change)="onRoleChange($event)"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">All Roles</option>
+          </select>
+        </div>
+        <div class="w-full sm:w-48">
+          <label class="block text-sm font-medium text-gray-700 mb-1" for="category-filter">
+            Category
+          </label>
+          <select
+            id="category-filter"
+            [value]="selectedCategoryId() ?? ''"
+            (change)="onCategoryChange($event)"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">All Categories</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <p-button
+            label="Apply Filters"
+            icon="pi pi-filter"
+            (onClick)="applyFilters()"
+            severity="primary"
+          />
+        </div>
+      </div>
+    </ng-template>
+  </p-card>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex items-center justify-center py-12">
+      <i class="pi pi-spin pi-spinner text-3xl text-blue-600"></i>
+      <span class="ml-3 text-gray-500">Loading families...</span>
+    </div>
+  }
+
+  <!-- Cards View -->
+  @if (!loading() && viewMode() === 'cards') {
+    @if (families().length > 0) {
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        @for (family of families(); track family.id) {
+          <app-family-card
+            [family]="family"
+            (select)="onFamilySelect($event)"
+          />
+        }
+      </div>
+    } @else {
+      <div class="flex flex-col items-center justify-center py-12 text-center">
+        <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+          <i class="pi pi-box text-3xl text-gray-400"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">No families found</h3>
+        <p class="text-gray-500 text-sm max-w-md">
+          No families match your current filters. Try adjusting your search criteria.
+        </p>
+      </div>
+    }
+  }
+
+  <!-- Table View (Placeholder) -->
+  @if (!loading() && viewMode() === 'table') {
+    @if (families().length > 0) {
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Family Name
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Role
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Version
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Updated
+              </th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            @for (family of families(); track family.id) {
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="text-sm font-medium text-gray-900">{{ family.familyName }}</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="text-sm text-gray-500">{{ family.roleName }}</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    v{{ family.currentVersion }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ family.updatedAt | date:'shortDate' }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <p-button
+                    icon="pi pi-eye"
+                    severity="secondary"
+                    text
+                    (onClick)="onFamilySelect(family)"
+                    ariaLabel="View details"
+                  />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="flex flex-col items-center justify-center py-12 text-center">
+        <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+          <i class="pi pi-box text-3xl text-gray-400"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">No families found</h3>
+        <p class="text-gray-500 text-sm max-w-md">
+          No families match your current filters. Try adjusting your search criteria.
+        </p>
+      </div>
+    }
+  }
+
+  <!-- Pagination -->
+  @if (!loading() && totalRecords() > rowsPerPage()) {
+    <p-paginator
+      [first]="first()"
+      [rows]="rowsPerPage()"
+      [totalRecords]="totalRecords()"
+      [rowsPerPageOptions]="[10, 20, 50, 100]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} families"
+      (onPageChange)="onPageChange($event)"
+    />
+  }
+</div>

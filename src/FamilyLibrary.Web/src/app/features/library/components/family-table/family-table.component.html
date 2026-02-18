@@ -1,0 +1,107 @@
+<div class="bg-white rounded-lg shadow-sm border border-gray-200">
+  <p-table
+    [value]="families()"
+    [lazy]="true"
+    [loading]="loading()"
+    [totalRecords]="totalRecords()"
+    [first]="first()"
+    [rows]="rows"
+    [scrollable]="true"
+    scrollHeight="600px"
+    [virtualScroll]="true"
+    [virtualScrollItemSize]="virtualScrollItemSize"
+    dataKey="id"
+    [rowHover]="true"
+    [showGridlines]="false"
+    [stripedRows]="true"
+    tableStyleClass="w-full"
+    (onLazyLoad)="onLazyLoad($event)"
+  >
+    <ng-template #header>
+      <tr>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 35%">
+          Name
+        </th>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 25%">
+          Role
+        </th>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 12%">
+          Version
+        </th>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 18%">
+          Updated
+        </th>
+        <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700" style="width: 10%">
+          Actions
+        </th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-family>
+      <tr class="border-t border-gray-100" style="height: 48px">
+        <td class="px-4 py-3">
+          <span class="font-medium text-gray-900">{{ family.familyName }}</span>
+        </td>
+        <td class="px-4 py-3 text-gray-600">
+          {{ family.roleName }}
+        </td>
+        <td class="px-4 py-3">
+          <p-tag [value]="'v' + family.currentVersion" severity="info" />
+        </td>
+        <td class="px-4 py-3 text-gray-600">
+          {{ family.updatedAt | date: 'mediumDate' }}
+        </td>
+        <td class="px-4 py-3">
+          <div class="flex items-center justify-end gap-2">
+            <p-button
+              icon="pi pi-eye"
+              [rounded]="true"
+              [text]="true"
+              severity="secondary"
+              pTooltip="View details"
+              (onClick)="onSelectFamily(family)"
+            />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="5" class="px-4 py-12 text-center">
+          <div class="flex flex-col items-center gap-3">
+            <i class="pi pi-inbox text-4xl text-gray-300"></i>
+            <div>
+              <p class="text-gray-600 font-medium">No families found</p>
+              <p class="text-sm text-gray-400 mt-1">Adjust your filters or add families to the library</p>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #loadingbody>
+      @for (i of [1, 2, 3, 4, 5]; track i) {
+        <tr class="border-t border-gray-100" style="height: 48px">
+          <td class="px-4 py-3">
+            <div class="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="h-6 bg-gray-200 rounded animate-pulse w-12"></div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="flex items-center justify-end">
+              <div class="h-8 w-8 bg-gray-200 rounded-full animate-pulse"></div>
+            </div>
+          </td>
+        </tr>
+      }
+    </ng-template>
+  </p-table>
+</div>
