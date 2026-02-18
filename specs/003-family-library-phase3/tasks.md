@@ -229,29 +229,29 @@ Based on plan.md structure:
 
 ### Backend - US4
 
-- [ ] T056 [US4] [BACKEND] Create MaterialMappingsController in `src/FamilyLibrary.Api/Controllers/MaterialMappingsController.cs`
-- [ ] T057 [US4] [BACKEND] Implement ListAsync (filter by projectId) in MaterialMappingService in `src/FamilyLibrary.Application/Services/MaterialMappingService.cs`
-- [ ] T058 [US4] [BACKEND] Implement CreateAsync in MaterialMappingService in `src/FamilyLibrary.Application/Services/MaterialMappingService.cs`
-- [ ] T059 [US4] [BACKEND] Implement UpdateAsync in MaterialMappingService in `src/FamilyLibrary.Application/Services/MaterialMappingService.cs`
-- [ ] T060 [US4] [BACKEND] Implement DeleteAsync with confirmation check in MaterialMappingService in `src/FamilyLibrary.Application/Services/MaterialMappingService.cs`
-- [ ] T061 [US4] [BACKEND] Implement LookupAsync for Pull Update in MaterialMappingService in `src/FamilyLibrary.Application/Services/MaterialMappingService.cs`
+- [X] T056 [US4] [BACKEND] Create MaterialMappingsController in `src/FamilyLibrary.Api/Controllers/MaterialMappingsController.cs` → Artifacts: [MaterialMappingsController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/MaterialMappingsController.cs)
+- [X] T057 [US4] [BACKEND] Implement ListAsync (filter by projectId) in MaterialMappingService in `src/FamilyLibrary.Application/Services/MaterialMappingService.cs` → Artifacts: [MaterialMappingService.cs](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Services/MaterialMappingService.cs)
+- [X] T058 [US4] [BACKEND] Implement CreateAsync in MaterialMappingService in `src/FamilyLibrary.Application/Services/MaterialMappingService.cs` → Artifacts: [MaterialMappingService.cs](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Services/MaterialMappingService.cs)
+- [X] T059 [US4] [BACKEND] Implement UpdateAsync in MaterialMappingService in `src/FamilyLibrary.Application/Services/MaterialMappingService.cs` → Artifacts: [MaterialMappingService.cs](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Services/MaterialMappingService.cs)
+- [X] T060 [US4] [BACKEND] Implement DeleteAsync with confirmation check in MaterialMappingService in `src/FamilyLibrary.Application/Services/MaterialMappingService.cs` → Artifacts: [MaterialMappingService.cs](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Services/MaterialMappingService.cs)
+- [X] T061 [US4] [BACKEND] Implement LookupAsync for Pull Update in MaterialMappingService in `src/FamilyLibrary.Application/Services/MaterialMappingService.cs` → Artifacts: [MaterialMappingService.cs](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Services/MaterialMappingService.cs)
 
 ### Plugin - US4
 
-- [ ] T062 [US4] [PLUGIN] Create MaterialMappingClient in `src/FamilyLibrary.Plugin/Services/MaterialMappingClient.cs`
-- [ ] T063 [US4] [PLUGIN] Integrate mapping lookup in Pull Update flow in `src/FamilyLibrary.Plugin/Commands/PullUpdateCommand/`
-- [ ] T064 [US4] [PLUGIN] Send revit:material:fallback event when mapping not found in `src/FamilyLibrary.Plugin/Commands/PullUpdateCommand/`
-- [ ] T065 [US4] [PLUGIN] Handle ui:material-mapping:save event from UI in `src/FamilyLibrary.Plugin/Services/MaterialMappingClient.cs`
+- [X] T062 [US4] [PLUGIN] Create MaterialMappingClient in `src/FamilyLibrary.Plugin/Services/MaterialMappingClient.cs` → Artifacts: [MaterialMappingClient.cs](src/FamilyLibrary.Plugin/Services/MaterialMappingClient.cs)
+- [X] T063 [US4] [PLUGIN] Integrate mapping lookup in Pull Update flow in `src/FamilyLibrary.Plugin/Commands/PullUpdateCommand/` → Artifacts: [MaterialMappingIntegration.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/MaterialMappingIntegration.cs)
+- [X] T064 [US4] [PLUGIN] Send revit:material:fallback event when mapping not found in `src/FamilyLibrary.Plugin/Commands/PullUpdateCommand/` → Artifacts: [MaterialMappingEvents.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Models/MaterialMappingEvents.cs)
+- [X] T065 [US4] [PLUGIN] Handle ui:material-mapping:save event from UI in `src/FamilyLibrary.Plugin/Services/MaterialMappingClient.cs` → Artifacts: [RevitBridge.cs](src/FamilyLibrary.Plugin/Infrastructure/WebView2/RevitBridge.cs)
 
 ### Frontend - US4
 
-- [ ] T066 [P] [US4] [FRONTEND] Create material-mapping.service.ts in `src/FamilyLibrary.Web/src/app/core/services/`
-- [ ] T067 [US4] [FRONTEND] Create material-mappings-list component in `src/FamilyLibrary.Web/src/app/features/settings/components/material-mappings/`
-- [ ] T068 [US4] [FRONTEND] Create material-mapping-editor dialog in `src/FamilyLibrary.Web/src/app/features/settings/components/material-mappings/`
-- [ ] T069 [US4] [FRONTEND] Add Material Mappings route to Settings in `src/FamilyLibrary.Web/src/app/features/settings/`
-- [ ] T070 [US4] [FRONTEND] Create material-fallback-dialog component in `src/FamilyLibrary.Web/src/app/features/scanner/components/`
-- [ ] T071 [US4] [FRONTEND] Handle revit:material:fallback event in scanner in `src/FamilyLibrary.Web/src/app/features/scanner/`
-- [ ] T072 [US4] [FRONTEND] Send ui:material-mapping:save with "Remember" option in `src/FamilyLibrary.Web/src/app/features/scanner/components/material-fallback-dialog/`
+- [X] T066 [P] [US4] [FRONTEND] Create material-mapping.service.ts in `src/FamilyLibrary.Web/src/app/core/services/` → Artifacts: [material-mapping.service.ts](src/FamilyLibrary.Web/src/app/core/services/material-mapping.service.ts)
+- [X] T067 [US4] [FRONTEND] Create material-mappings-list component in `src/FamilyLibrary.Web/src/app/features/settings/components/material-mappings/` → Artifacts: [material-mappings-list.component.ts](src/FamilyLibrary.Web/src/app/features/settings/components/material-mappings-list/material-mappings-list.component.ts)
+- [X] T068 [US4] [FRONTEND] Create material-mapping-editor dialog in `src/FamilyLibrary.Web/src/app/features/settings/components/material-mappings/` → Artifacts: [material-mapping-editor.component.ts](src/FamilyLibrary.Web/src/app/features/settings/components/material-mapping-editor/material-mapping-editor.component.ts)
+- [X] T069 [US4] [FRONTEND] Add Material Mappings route to Settings in `src/FamilyLibrary.Web/src/app/features/settings/` → Artifacts: [settings.routes.ts](src/FamilyLibrary.Web/src/app/features/settings/settings.routes.ts), [settings.component.ts](src/FamilyLibrary.Web/src/app/features/settings/settings.component.ts)
+- [X] T070 [US4] [FRONTEND] Create material-fallback-dialog component in `src/FamilyLibrary.Web/src/app/features/scanner/components/` → Artifacts: [material-fallback-dialog.component.ts](src/FamilyLibrary.Web/src/app/features/scanner/components/material-fallback-dialog.component.ts)
+- [X] T071 [US4] [FRONTEND] Handle revit:material:fallback event in scanner in `src/FamilyLibrary.Web/src/app/features/scanner/` → Artifacts: [scanner.component.ts](src/FamilyLibrary.Web/src/app/features/scanner/scanner.component.ts)
+- [X] T072 [US4] [FRONTEND] Send ui:material-mapping:save with "Remember" option in `src/FamilyLibrary.Web/src/app/features/scanner/components/material-fallback-dialog/` → Artifacts: [material-fallback-dialog.component.ts](src/FamilyLibrary.Web/src/app/features/scanner/components/material-fallback-dialog.component.ts)
 
 **Checkpoint**: Material Mapping работает автоматически при Pull Update, CRUD UI работает
 

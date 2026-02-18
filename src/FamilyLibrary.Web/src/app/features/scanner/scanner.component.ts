@@ -17,7 +17,10 @@ import { ScannerTableComponent } from './components/scanner-table.component';
 import { ScannerFiltersComponent } from './components/scanner-filters.component';
 import { UpdateProgressComponent } from './components/update-progress.component';
 import { PreUpdatePreviewComponent } from './components/pre-update-preview.component';
+import { MaterialFallbackDialogComponent, MaterialFallbackResult } from './components/material-fallback-dialog.component';
 import { ScannedFamily, FamilyScanStatus } from '../../core/models/scanner.models';
+import { RevitBridgeService } from '../../core/services/revit-bridge.service';
+import { MaterialFallbackEvent } from '../../core/models/webview-events.model';
 
 type FilterStatus = FamilyScanStatus | 'All';
 
@@ -38,6 +41,7 @@ const ERROR_LIFE = 5000;
     ScannerFiltersComponent,
     UpdateProgressComponent,
     PreUpdatePreviewComponent,
+    MaterialFallbackDialogComponent,
   ],
   templateUrl: './scanner.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,6 +49,7 @@ const ERROR_LIFE = 5000;
 export class ScannerComponent implements OnInit, OnDestroy {
   protected readonly scannerService = inject(ScannerService);
   private readonly messageService = inject(MessageService);
+  private readonly revitBridge = inject(RevitBridgeService);
   private readonly destroy$ = new Subject<void>();
 
   // Current filter state
@@ -66,6 +71,11 @@ export class ScannerComponent implements OnInit, OnDestroy {
   protected readonly previewData = this.scannerService.previewData;
   protected readonly isFetchingPreview = this.scannerService.isFetchingPreview;
 
+  // Material fallback dialog state
+  protected readonly materialFallbackVisible = signal(false);
+  protected readonly materialFallbackEvent = signal<MaterialFallbackEvent['payload'] | null>(null);
+  protected readonly currentProjectId = signal<string>('');
+
   /**
    * Initialize component with auto-scan and notification subscription
    */
@@ -74,6 +84,11 @@ export class ScannerComponent implements OnInit, OnDestroy {
     this.scannerService.notification$
       .pipe(takeUntil(this.destroy$))
       .subscribe((notification) => this.showNotification(notification));
+
+    // Subscribe to material fallback events from Revit
+    this.revitBridge.onMaterialFallback()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((payload) => this.handleMaterialFallback(payload));
 
     // Auto-scan on load
     this.scan();
@@ -176,5 +191,47 @@ export class ScannerComponent implements OnInit, OnDestroy {
     if (stamps.length > 0) {
       this.scannerService.stampLegacy(stamps);
     }
+  }
+
+  /**
+   * Handle material fallback event from Revit plugin
+   */
+  private handleMaterialFallback(payload: MaterialFallbackEvent['payload']): void {
+    this.materialFallbackEvent.set(payload);
+    this.materialFallbackVisible.set(true);
+  }
+
+  /**
+   * Handle material fallback resolved by user
+   */
+  protected onMaterialFallbackResolved(result: MaterialFallbackResult): void {
+    console.log('[Scanner] Material fallback resolved:', result);
+    this.materialFallbackVisible.set(false);
+    this.materialFallbackEvent.set(null);
+
+    // Show notification about the resolution
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Material Selected',
+      detail: `Using "${result.projectMaterialName}" for the update`,
+      life: 3000,
+    });
+
+    // The mapping is already sent to plugin if rememberMapping was checked
+  }
+
+  /**
+   * Handle material fallback dialog closed without selection
+   */
+  protected onMaterialFallbackClosed(): void {
+    this.materialFallbackVisible.set(false);
+    this.materialFallbackEvent.set(null);
+
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Update Cancelled',
+      detail: 'Material selection was cancelled',
+      life: 3000,
+    });
   }
 }

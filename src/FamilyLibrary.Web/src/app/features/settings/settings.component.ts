@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
 
+/**
+ * Settings container component with navigation tabs.
+ */
 @Component({
   selector: 'app-settings',
-  template: `
-    <div class="space-y-6">
-      <h1 class="text-2xl font-bold text-gray-900">Settings</h1>
-      <p class="text-gray-600">Application settings will be available here.</p>
-    </div>
-  `,
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, ButtonModule, TooltipModule],
+  templateUrl: './settings.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsComponent {}

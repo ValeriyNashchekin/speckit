@@ -12,6 +12,7 @@ using FamilyLibrary.Plugin.Core.Enums;
 using FamilyLibrary.Plugin.Core.Interfaces;
 using FamilyLibrary.Plugin.Core.Models;
 using FamilyLibrary.Plugin.Services;
+using FamilyLibrary.Plugin.Commands.StampFamilyCommand.Models;
 
 namespace FamilyLibrary.Plugin.Infrastructure.WebView2;
 
@@ -29,6 +30,9 @@ public class RevitBridge : IWebViewBridge
     // TaskCompletionSource for async UI confirmation
     private TaskCompletionSource<bool>? _updateConfirmationTcs;
     private static readonly TimeSpan ConfirmationTimeout = TimeSpan.FromMinutes(5);
+
+    // T063-T065: Material mapping integration
+    private MaterialMappingIntegration? _materialMappingIntegration;
 
     public RevitBridge(WebViewHost webViewHost)
     {
@@ -179,6 +183,11 @@ public class RevitBridge : IWebViewBridge
 
             case "ui:load-preview":
                 HandleLoadPreviewAsync(message.Payload as JObject).ConfigureAwait(false);
+                break;
+
+            // T065: Material mapping save event from UI
+            case "ui:material-mapping:save":
+                HandleMaterialMappingSaveAsync(message.Payload as JObject).ConfigureAwait(false);
                 break;
         }
     }
@@ -829,6 +838,65 @@ public class RevitBridge : IWebViewBridge
                 errorMessage = o.ErrorMessage
             })
         });
+    }
+
+    #endregion
+
+    #region T065 - Material Mapping Event Handling
+
+    /// <summary>
+    /// T065: Handles ui:material-mapping:save event from UI.
+    /// Saves mapping via MaterialMappingClient and applies to current update if requested.
+    /// </summary>
+    private async System.Threading.Tasks.Task HandleMaterialMappingSaveAsync(JObject payload)
+    {
+        try
+        {
+            var mappingEvent = payload?.ToObject<MaterialMappingSaveEvent>();
+            if (mappingEvent == null)
+            {
+                System.Diagnostics.Debug.WriteLine("Invalid material-mapping:save payload");
+                return;
+            }
+
+            // Initialize integration if needed
+            if (_materialMappingIntegration == null)
+            {
+                _materialMappingIntegration = new MaterialMappingIntegration(this);
+            }
+
+            // Handle the mapping save
+            await _materialMappingIntegration.HandleMappingSaveEventAsync(mappingEvent).ConfigureAwait(false);
+
+            // Send confirmation to UI
+            SendEvent("revit:material-mapping:saved", new
+            {
+                success = true,
+                templateMaterialName = mappingEvent.TemplateMaterialName,
+                projectMaterialName = mappingEvent.ProjectMaterialName
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(string.Format("Material mapping save error: {0}", ex.Message));
+            SendEvent("revit:material-mapping:saved", new
+            {
+                success = false,
+                error = ex.Message
+            });
+        }
+    }
+
+    /// <summary>
+    /// Gets or creates the MaterialMappingIntegration instance.
+    /// </summary>
+    public MaterialMappingIntegration GetMaterialMappingIntegration()
+    {
+        if (_materialMappingIntegration == null)
+        {
+            _materialMappingIntegration = new MaterialMappingIntegration(this);
+        }
+        return _materialMappingIntegration;
     }
 
     #endregion

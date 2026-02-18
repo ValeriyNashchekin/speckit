@@ -86,4 +86,13 @@
       [visible]="isUpdating()"
     />
   }
+
+  <!-- Material fallback dialog -->
+  <app-material-fallback-dialog
+    [visible]="materialFallbackVisible()"
+    [fallbackEvent]="materialFallbackEvent()"
+    [projectId]="currentProjectId()"
+    (resolved)="onMaterialFallbackResolved($event)"
+    (closed)="onMaterialFallbackClosed()"
+  />
 </div>
