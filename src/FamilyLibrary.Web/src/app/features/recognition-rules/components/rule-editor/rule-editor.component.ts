@@ -78,6 +78,7 @@ export class RuleEditorComponent {
   private readonly rulesService = inject(RulesService);
 
   constructor() {
+    // Effect to sync rule input to form state (runs once when rule changes)
     effect(() => {
       const rule = this.rule();
       if (rule) {
@@ -87,23 +88,10 @@ export class RuleEditorComponent {
       } else {
         this.resetForm();
       }
-    });
+    }, { allowSignalWrites: true });
 
-    effect(() => {
-      const currentFormula = this.formula();
-      const currentRoot = this.rootNode();
-
-      if (this.activeTab() === 'formula') {
-        try {
-          const parsed = this.parseFormula(currentFormula);
-          if (parsed && JSON.stringify(parsed) !== JSON.stringify(currentRoot)) {
-            this.rootNode.set(parsed);
-          }
-        } catch {
-          // Invalid formula, keep current tree
-        }
-      }
-    });
+    // Note: Removed the problematic effect that was causing infinite loop.
+    // Formula parsing is now handled in onFormulaChange() which is event-driven.
   }
 
   protected onRootNodeChange(newRoot: RecognitionGroup): void {

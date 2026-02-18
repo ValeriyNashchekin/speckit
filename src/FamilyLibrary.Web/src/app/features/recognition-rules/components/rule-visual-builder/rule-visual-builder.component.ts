@@ -88,11 +88,14 @@ export class RuleVisualBuilderComponent {
 
   constructor() {
     // Sync tree when rootNode changes
+    // Reset ID counter before conversion to ensure stable keys
     effect(() => {
       const root = this.rootNode();
+      // Reset the counter for consistent key generation
+      this.nextId.set(0);
       const nodes = this.convertToTreeNodes(root, 'root');
       this.treeNodes.set(nodes);
-    });
+    }, { allowSignalWrites: true });
   }
 
   protected selectNode(key: string): void {
