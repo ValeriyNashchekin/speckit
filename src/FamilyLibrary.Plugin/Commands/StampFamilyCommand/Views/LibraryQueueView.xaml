@@ -105,9 +105,10 @@
                               Style="{StaticResource DataGridStyle}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Binding="{Binding FamilyName}" Header="Family Name" Width="*"/>
-                            <DataGridTextColumn Binding="{Binding CategoryName}" Header="Category" Width="150"/>
+                            <DataGridTextColumn Binding="{Binding CategoryName}" Header="Category" Width="120"/>
                             <DataGridTextColumn Binding="{Binding Status}" Header="Status" Width="80"/>
-                            <DataGridTextColumn Binding="{Binding ErrorMessage}" Header="Error" Width="150"/>
+                            <DataGridCheckBoxColumn Binding="{Binding HasLocalChanges}" Header="Modified" Width="70"/>
+                            <DataGridTextColumn Binding="{Binding ErrorMessage}" Header="Error" Width="120"/>
                         </DataGrid.Columns>
                     </DataGrid>
 

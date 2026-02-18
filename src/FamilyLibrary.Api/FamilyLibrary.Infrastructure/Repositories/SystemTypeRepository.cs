@@ -32,4 +32,13 @@ public class SystemTypeRepository : Repository<SystemTypeEntity>, ISystemTypeRep
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyList<SystemTypeEntity>> GetByCategoryAsync(string category, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(s => s.Role)
+            .Where(s => s.Category == category)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
 }

@@ -110,4 +110,25 @@ public class SystemTypesController(ISystemTypeService service) : BaseController
         var result = await service.GetByRoleIdAsync(roleId, ct);
         return Ok(result);
     }
+
+    /// <summary>
+    /// Gets all system types for a specific category.
+    /// Useful for Group A categories (Walls, Floors, Roofs, Ceilings, StructuralFoundation) that use CompoundStructure.
+    /// </summary>
+    /// <param name="category">The category name (e.g., "Walls", "Floors", "Roofs", "Ceilings", "StructuralFoundation").</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>List of system types for the category.</returns>
+    [HttpGet("by-category/{category}")]
+    [ProducesResponseType<IReadOnlyList<SystemTypeDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<IReadOnlyList<SystemTypeDto>>> GetByCategory(string category, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(category))
+        {
+            return BadRequest("Category cannot be null or empty.");
+        }
+
+        var result = await service.GetByCategoryAsync(category, ct);
+        return Ok(result);
+    }
 }

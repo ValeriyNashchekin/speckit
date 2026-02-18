@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Autodesk.Revit.DB;
+using FamilyLibrary.Plugin.Core.Models;
 using FamilyLibrary.Plugin.Infrastructure.Http;
 using Newtonsoft.Json;
 
@@ -18,21 +19,54 @@ namespace FamilyLibrary.Plugin.Commands.UpdateFamiliesCommand.Services
         private readonly HttpClient _httpClient;
         private readonly string _apiBaseUrl;
         private readonly string _tempFolder;
+        private readonly UpdatePreviewService? _previewService;
 
-        public FamilyUpdaterService()
+        public FamilyUpdaterService() : this(null)
         {
+        }
+
+        public FamilyUpdaterService(UpdatePreviewService? previewService)
+        {
+            _previewService = previewService;
             _httpClient = new HttpClient();
             _apiBaseUrl = "https://localhost:5001/api";
             _tempFolder = Path.Combine(Path.GetTempPath(), "FamilyLibrary", "Updates");
             Directory.CreateDirectory(_tempFolder);
         }
 
-        public FamilyUpdaterService(HttpClient httpClient, string apiBaseUrl)
+        public FamilyUpdaterService(HttpClient httpClient, string apiBaseUrl, UpdatePreviewService? previewService = null)
         {
             _httpClient = httpClient;
             _apiBaseUrl = apiBaseUrl;
+            _previewService = previewService;
             _tempFolder = Path.Combine(Path.GetTempPath(), "FamilyLibrary", "Updates");
             Directory.CreateDirectory(_tempFolder);
+        }
+
+        /// <summary>
+        /// Computes a preview of changes before updating a family.
+        /// </summary>
+        /// <param name="document">The Revit document.</param>
+        /// <param name="uniqueId">The unique ID of the family to update.</param>
+        /// <param name="librarySnapshot">The library snapshot to compare against.</param>
+        /// <returns>ChangeSet with detected modifications, or null if preview service not available.</returns>
+        public ChangeSet? ComputeUpdatePreview(Document document, string uniqueId, FamilySnapshot librarySnapshot)
+        {
+            if (_previewService == null)
+                return null;
+
+            if (document == null)
+                throw new ArgumentNullException(nameof(document));
+
+            var family = new FilteredElementCollector(document)
+                .OfClass(typeof(Family))
+                .Cast<Family>()
+                .FirstOrDefault(f => f.UniqueId == uniqueId);
+
+            if (family == null)
+                return null;
+
+            return _previewService.ComputePreview(family, document, librarySnapshot);
         }
 
         public async Task<UpdateResult> UpdateFamilyAsync(

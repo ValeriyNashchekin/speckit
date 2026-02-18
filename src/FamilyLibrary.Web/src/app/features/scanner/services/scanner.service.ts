@@ -4,6 +4,7 @@ import {
   ScanResult,
   ScannedFamily,
   FamilyScanStatus,
+  ChangeSet,
 } from '../../../core/models/scanner.models';
 import {
   Phase2PluginEventTypes,
@@ -22,6 +23,16 @@ interface UpdateProgressPayload {
 }
 
 /**
+ * Preview data for a single family update
+ */
+export interface FamilyPreviewData {
+  uniqueId: string;
+  familyName: string;
+  roleName?: string;
+  changes: ChangeSet;
+}
+
+/**
  * Service for managing scanner operations and state.
  * Handles communication with Revit plugin for scanning and updating families.
  */
@@ -34,12 +45,19 @@ export class ScannerService {
   private readonly _isScanning = signal(false);
   private readonly _updateProgress = signal<UpdateProgressPayload | null>(null);
   private readonly _isUpdating = signal(false);
+  private readonly _previewData = signal<FamilyPreviewData | null>(null);
+  private readonly _isFetchingPreview = signal(false);
+
+  // Pending updates queue for batch processing with preview
+  private pendingUpdates: Array<{ uniqueId: string; roleName?: string }> = [];
 
   // Public readonly signals
   readonly scanResult = this._scanResult.asReadonly();
   readonly isScanning = this._isScanning.asReadonly();
   readonly updateProgress = this._updateProgress.asReadonly();
   readonly isUpdating = this._isUpdating.asReadonly();
+  readonly previewData = this._previewData.asReadonly();
+  readonly isFetchingPreview = this._isFetchingPreview.asReadonly();
 
   // Computed values
   readonly summary = computed(() => this._scanResult()?.summary);
@@ -76,7 +94,34 @@ export class ScannerService {
       .subscribe(() => {
         this._isUpdating.set(false);
         this._updateProgress.set(null);
+        this.pendingUpdates = [];
       });
+
+    // Handle changes result for preview
+    this.revitBridge
+      .on<{ familyUniqueId: string; changes: ChangeSet }>(
+        Phase2PluginEventTypes.REVIT_CHANGES_RESULT
+      )
+      .subscribe((result) => {
+        this._isFetchingPreview.set(false);
+        const pendingItem = this.pendingUpdates[0];
+        if (pendingItem) {
+          const family = this.findFamilyById(pendingItem.uniqueId);
+          this._previewData.set({
+            uniqueId: pendingItem.uniqueId,
+            familyName: family?.familyName ?? 'Unknown',
+            roleName: pendingItem.roleName,
+            changes: result.changes,
+          });
+        }
+      });
+  }
+
+  /**
+   * Find family by uniqueId in scan results
+   */
+  private findFamilyById(uniqueId: string): ScannedFamily | undefined {
+    return this._scanResult()?.families.find((f) => f.uniqueId === uniqueId);
   }
 
   /**
@@ -91,17 +136,102 @@ export class ScannerService {
   }
 
   /**
-   * Request family updates from Revit
+   * Request preview for families before update.
+   * Processes one family at a time.
+   */
+  requestPreview(
+    families: Array<{ uniqueId: string; roleName?: string }>
+  ): void {
+    if (families.length === 0) return;
+
+    // Store pending updates and clear previous preview
+    this.pendingUpdates = [...families];
+    this._previewData.set(null);
+
+    // Request changes for first family
+    const first = families[0];
+    this._isFetchingPreview.set(true);
+    this.revitBridge.send(Phase2UiEventTypes.UI_GET_CHANGES, {
+      uniqueId: first.uniqueId,
+    });
+  }
+
+  /**
+   * Confirm current preview and proceed with update.
+   * After update, if more families pending, request next preview.
+   */
+  confirmPreviewAndUpdate(): void {
+    const preview = this._previewData();
+    if (!preview) return;
+
+    // Clear preview and start update for current family
+    this._previewData.set(null);
+    this._isUpdating.set(true);
+
+    // Remove processed item from queue
+    this.pendingUpdates.shift();
+
+    // Send update for confirmed family
+    this.revitBridge.send(Phase2UiEventTypes.UI_UPDATE_FAMILIES, {
+      families: [{ uniqueId: preview.uniqueId, roleName: preview.roleName }],
+      showPreview: false,
+    });
+  }
+
+  /**
+   * Cancel preview and clear pending updates
+   */
+  cancelPreview(): void {
+    this._previewData.set(null);
+    this.pendingUpdates = [];
+  }
+
+  /**
+   * Skip current family and request preview for next
+   */
+  skipCurrentAndShowNext(): void {
+    this._previewData.set(null);
+    this.pendingUpdates.shift();
+
+    if (this.pendingUpdates.length > 0) {
+      const next = this.pendingUpdates[0];
+      this._isFetchingPreview.set(true);
+      this.revitBridge.send(Phase2UiEventTypes.UI_GET_CHANGES, {
+        uniqueId: next.uniqueId,
+      });
+    }
+  }
+
+  /**
+   * Check if there are more pending updates after current
+   */
+  hasPendingUpdates(): boolean {
+    return this.pendingUpdates.length > 1;
+  }
+
+  /**
+   * Get count of pending updates
+   */
+  getPendingCount(): number {
+    return this.pendingUpdates.length;
+  }
+
+  /**
+   * Request family updates from Revit (without preview)
    */
   updateFamilies(
     families: Array<{ uniqueId: string; roleName?: string }>,
     showPreview = true
   ): void {
-    this._isUpdating.set(true);
-    this.revitBridge.send(Phase2UiEventTypes.UI_UPDATE_FAMILIES, {
-      families,
-      showPreview,
-    });
+    if (showPreview) {
+      this.requestPreview(families);
+    } else {
+      this._isUpdating.set(true);
+      this.revitBridge.send(Phase2UiEventTypes.UI_UPDATE_FAMILIES, {
+        families,
+        showPreview: false,
+      });
+    }
   }
 
   /**

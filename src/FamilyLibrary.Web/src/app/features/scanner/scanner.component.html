@@ -25,6 +25,16 @@
     </div>
   }
 
+  <!-- Fetching preview indicator -->
+  @if (isFetchingPreview()) {
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 flex flex-col items-center gap-3">
+        <i class="pi pi-spin pi-spinner text-2xl text-primary-500"></i>
+        <p class="text-gray-600">Loading preview...</p>
+      </div>
+    </div>
+  }
+
   <!-- Results section -->
   @if (scanResult() && !isScanning()) {
     <!-- Filters with summary -->
@@ -54,6 +64,17 @@
         that can be updated from the library.
       </p>
     </div>
+  }
+
+  <!-- Pre-update preview dialog -->
+  @if (previewData(); as preview) {
+    <app-pre-update-preview
+      [visible]="true"
+      [changes]="preview.changes"
+      [familyName]="preview.familyName"
+      (confirm)="onPreviewConfirm()"
+      (cancel)="onPreviewCancel()"
+    />
   }
 
   <!-- Update progress modal -->

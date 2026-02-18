@@ -113,6 +113,28 @@ public class FamiliesController(IFamilyService service) : BaseController
     }
 
     /// <summary>
+    /// Gets a preview of changes that will occur when updating a family.
+    /// US4: Pre-Update Preview - designers see what will change before confirming update.
+    /// </summary>
+    /// <param name="id">The family ID.</param>
+    /// <param name="currentVersion">The current local version of the family.</param>
+    /// <param name="targetVersion">The target library version to update to.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Change set describing what will change after the update.</returns>
+    [HttpGet("{id:guid}/update-preview")]
+    [ProducesResponseType<ChangeSetDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ChangeSetDto>> GetUpdatePreview(
+        Guid id,
+        [FromQuery] int currentVersion,
+        [FromQuery] int targetVersion,
+        CancellationToken ct)
+    {
+        var result = await service.GetUpdatePreviewAsync(id, currentVersion, targetVersion, ct);
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Publishes a new family file.
     /// </summary>
     /// <param name="dto">The create DTO with family metadata.</param>
@@ -213,6 +235,26 @@ public class FamiliesController(IFamilyService service) : BaseController
         var result = await service.GetDownloadUrlAsync(id, version, ct);
         return Ok(result);
     }
+
+    /// <summary>
+    /// Detects local changes by comparing a local snapshot with the latest library version.
+    /// </summary>
+    /// <param name="id">The family ID.</param>
+    /// <param name="request">The request containing the local snapshot JSON.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Change set describing the differences between local and library versions.</returns>
+    [HttpPost("{id:guid}/local-changes")]
+    [ProducesResponseType<ChangeSetDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ChangeSetDto>> DetectLocalChanges(
+        Guid id,
+        [FromBody] DetectLocalChangesRequest request,
+        CancellationToken ct)
+    {
+        var result = await service.DetectLocalChangesAsync(id, request.LocalSnapshotJson, ct);
+        return Ok(result);
+    }
 }
 
 /// <summary>
@@ -224,4 +266,15 @@ public record ValidateHashRequest
     /// The content hash to validate.
     /// </summary>
     public required string Hash { get; init; }
+}
+
+/// <summary>
+/// Request model for detecting local changes.
+/// </summary>
+public record DetectLocalChangesRequest
+{
+    /// <summary>
+    /// JSON-serialized local snapshot of the family.
+    /// </summary>
+    public required string LocalSnapshotJson { get; init; }
 }

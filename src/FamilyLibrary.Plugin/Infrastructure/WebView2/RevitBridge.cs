@@ -6,6 +6,7 @@ using FamilyLibrary.Plugin.Commands.LoadFamilyCommand;
 using FamilyLibrary.Plugin.Commands.UpdateFamiliesCommand.Services;
 using FamilyLibrary.Plugin.Core.Enums;
 using FamilyLibrary.Plugin.Core.Interfaces;
+using FamilyLibrary.Plugin.Core.Models;
 
 namespace FamilyLibrary.Plugin.Infrastructure.WebView2;
 
@@ -291,15 +292,61 @@ public class RevitBridge : IWebViewBridge
         try
         {
             var familiesArray = payload?["families"] as JArray;
+            var showPreview = payload?.Value<bool?>("showPreview") ?? false;
+
             if (familiesArray == null || familiesArray.Count == 0)
             {
                 SendUpdateResult(false, "No families to update", new List<UpdateResult>());
                 return;
             }
 
-            var updaterService = new FamilyUpdaterService();
+            var previewService = new UpdatePreviewService();
+            var updaterService = new FamilyUpdaterService(previewService);
             var results = new List<UpdateResult>();
+            var previews = new List<UpdatePreviewItem>();
 
+            // Compute previews for all families if requested
+            if (showPreview)
+            {
+                foreach (var item in familiesArray)
+                {
+                    var uniqueId = item["uniqueId"]?.ToString();
+                    var roleName = item["roleName"]?.ToString();
+                    var targetVersion = item.Value<int?>("targetVersion");
+                    var librarySnapshotToken = item["librarySnapshot"] as JObject;
+
+                    if (string.IsNullOrEmpty(uniqueId) || string.IsNullOrEmpty(roleName))
+                        continue;
+
+                    FamilySnapshot? librarySnapshot = null;
+                    if (librarySnapshotToken != null)
+                    {
+                        librarySnapshot = librarySnapshotToken.ToObject<FamilySnapshot>();
+                    }
+
+                    var changeSet = updaterService.ComputeUpdatePreview(
+                        _activeDocument, uniqueId, librarySnapshot);
+
+                    previews.Add(new UpdatePreviewItem
+                    {
+                        UniqueId = uniqueId,
+                        FamilyName = GetFamilyNameByUniqueId(uniqueId),
+                        RoleName = roleName,
+                        TargetVersion = targetVersion,
+                        ChangeSet = changeSet
+                    });
+                }
+
+                // Send preview event to UI
+                SendEvent("revit:update:preview", new
+                {
+                    previews,
+                    totalCount = previews.Count,
+                    hasChanges = previews.Any(p => p.ChangeSet?.HasChanges == true)
+                });
+            }
+
+            // Proceed with updates
             foreach (var item in familiesArray)
             {
                 var uniqueId = item["uniqueId"]?.ToString();
@@ -308,6 +355,16 @@ public class RevitBridge : IWebViewBridge
 
                 if (string.IsNullOrEmpty(uniqueId) || string.IsNullOrEmpty(roleName) || !targetVersion.HasValue)
                     continue;
+
+                // Send progress update
+                SendEvent("revit:update:progress", new
+                {
+                    completed = results.Count,
+                    total = familiesArray.Count,
+                    currentFamily = roleName,
+                    success = results.Count(r => r.Success),
+                    failed = results.Count(r => !r.Success)
+                });
 
                 var result = await updaterService.UpdateFamilyAsync(
                     _activeDocument, uniqueId, roleName, targetVersion.Value).ConfigureAwait(false);
@@ -327,6 +384,28 @@ public class RevitBridge : IWebViewBridge
             System.Diagnostics.Debug.WriteLine($"Update error: {ex.Message}");
             SendUpdateResult(false, ex.Message, new List<UpdateResult>());
         }
+    }
+
+    private string GetFamilyNameByUniqueId(string uniqueId)
+    {
+        if (_activeDocument == null || string.IsNullOrEmpty(uniqueId))
+            return string.Empty;
+
+        var family = new FilteredElementCollector(_activeDocument)
+            .OfClass(typeof(Family))
+            .Cast<Family>()
+            .FirstOrDefault(f => f.UniqueId == uniqueId);
+
+        return family?.Name ?? string.Empty;
+    }
+
+    private class UpdatePreviewItem
+    {
+        public string UniqueId { get; set; } = string.Empty;
+        public string FamilyName { get; set; } = string.Empty;
+        public string RoleName { get; set; } = string.Empty;
+        public int? TargetVersion { get; set; }
+        public ChangeSet? ChangeSet { get; set; }
     }
 
     private async System.Threading.Tasks.Task HandleStampLegacyAsync(JObject? payload)

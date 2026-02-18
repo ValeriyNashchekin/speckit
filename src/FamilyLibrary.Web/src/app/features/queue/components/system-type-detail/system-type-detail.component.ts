@@ -4,6 +4,10 @@ import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { SystemType } from '../../../../core/models/system-type.model';
+import {
+  RoutingPreferencesDisplayComponent,
+  RoutingPreferencesJson,
+} from '../../../library/components/system-type-detail/routing-preferences-display.component';
 
 // Interfaces for parsed JSON structures
 interface CompoundStructureLayer {
@@ -29,7 +33,7 @@ type TagSeverity = 'secondary' | 'info' | 'warn' | 'success' | 'danger' | 'contr
 
 @Component({
   selector: 'app-system-type-detail',
-  imports: [CardModule, TableModule, TagModule, JsonPipe],
+  imports: [CardModule, TableModule, TagModule, JsonPipe, RoutingPreferencesDisplayComponent],
   templateUrl: './system-type-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -116,9 +120,44 @@ export class SystemTypeDetailComponent {
     return this.systemType().group === 'GroupA';
   });
 
+  // Check if this is a GroupB (Routing Preferences) type
+  protected readonly isRoutingPreferences = computed(() => {
+    return this.systemType().group === 'GroupB';
+  });
+
   // Check if this is a GroupE (Simple Parameters) type
   protected readonly isParameters = computed(() => {
     return this.systemType().group === 'GroupE';
+  });
+
+  // Computed signal for Routing Preferences (GroupB)
+  protected readonly routingPreferences = computed((): RoutingPreferencesJson | null => {
+    const data = this.parsedJson();
+    if (!data || this.systemType().group !== 'GroupB') {
+      return null;
+    }
+
+    // Parse segments array
+    const segments = Array.isArray(data['segments'])
+      ? data['segments'].map((seg: Record<string, unknown>) => ({
+          materialName: String(seg['materialName'] ?? seg['MaterialName'] ?? ''),
+          scheduleType: String(seg['scheduleType'] ?? seg['ScheduleType'] ?? ''),
+        }))
+      : [];
+
+    // Parse fittings array
+    const fittings = Array.isArray(data['fittings'])
+      ? data['fittings'].map((fit: Record<string, unknown>) => {
+          const angleValue = fit['angleRange'] ?? fit['AngleRange'];
+          return {
+            familyName: String(fit['familyName'] ?? fit['FamilyName'] ?? ''),
+            typeName: String(fit['typeName'] ?? fit['TypeName'] ?? ''),
+            angleRange: angleValue != null ? String(angleValue) : null,
+          };
+        })
+      : [];
+
+    return { segments, fittings };
   });
 
   // Format thickness value

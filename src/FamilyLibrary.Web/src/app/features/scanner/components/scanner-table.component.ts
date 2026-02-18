@@ -1,17 +1,18 @@
-import { ChangeDetectionStrategy, Component, input, output, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
-import { ScannedFamily, FamilyScanStatus } from '../../../core/models/scanner.models';
+import { ScannedFamily, FamilyScanStatus, ChangeItem } from '../../../core/models/scanner.models';
+import { ViewChangesModalComponent, ChangeSet } from '../../library/components/view-changes-modal/view-changes-modal.component';
 
 /**
  * Table component for displaying scanned families with selection and actions.
  */
 @Component({
   selector: 'app-scanner-table',
-  imports: [CommonModule, TableModule, ButtonModule, TagModule, TooltipModule],
+  imports: [CommonModule, TableModule, ButtonModule, TagModule, TooltipModule, ViewChangesModalComponent],
   templateUrl: './scanner-table.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -27,6 +28,11 @@ export class ScannerTableComponent {
 
   // Selection state
   protected readonly selectedFamilies = signal<ScannedFamily[]>([]);
+
+  // View changes modal state
+  protected readonly changesModalVisible = signal(false);
+  protected readonly selectedChanges = signal<ChangeSet | null>(null);
+  protected readonly selectedFamilyName = signal('');
 
   // Computed values for button states
   protected readonly hasUpdatableSelected = computed(() =>
@@ -135,5 +141,58 @@ export class ScannerTableComponent {
    */
   protected clearSelection(): void {
     this.selectedFamilies.set([]);
+  }
+
+  /**
+   * View changes for LocalModified family
+   * For now, shows mock data - in real implementation would fetch from API
+   */
+  protected onViewChanges(family: ScannedFamily): void {
+    // TODO: In real implementation, fetch changes from API based on family.uniqueId
+    // For now, use mock data to demonstrate the modal
+    const mockChanges: ChangeItem[] = [
+      {
+        category: 'Parameters',
+        parameterChanges: [
+          { name: 'Width', previousValue: '100', currentValue: '120' },
+          { name: 'Height', previousValue: '50', currentValue: '60' },
+        ],
+      },
+      {
+        category: 'Types',
+        addedItems: ['Type A', 'Type B'],
+        removedItems: ['Old Type'],
+      },
+    ];
+
+    this.selectedChanges.set({ changes: mockChanges });
+    this.selectedFamilyName.set(family.familyName);
+    this.changesModalVisible.set(true);
+  }
+
+  /**
+   * Handle modal visibility change
+   */
+  protected onChangesModalVisibleChange(visible: boolean): void {
+    this.changesModalVisible.set(visible);
+    if (!visible) {
+      this.selectedChanges.set(null);
+      this.selectedFamilyName.set('');
+    }
+  }
+
+  /**
+   * Handle publish from modal
+   */
+  protected onPublishChanges(): void {
+    // TODO: Implement publish logic
+    this.onChangesModalVisibleChange(false);
+  }
+
+  /**
+   * Handle cancel from modal
+   */
+  protected onCancelChanges(): void {
+    this.onChangesModalVisibleChange(false);
   }
 }

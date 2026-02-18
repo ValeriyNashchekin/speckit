@@ -18,4 +18,10 @@ public class SystemTypeInfo
     public ElementId ElementId { get; set; } = ElementId.InvalidElementId;
     public bool HasStamp { get; set; }
     public EsStampData? StampData { get; set; }
+
+    /// <summary>
+    /// JSON snapshot of CompoundStructure for Group A types.
+    /// Null for non-GroupA types or if structure is not available.
+    /// </summary>
+    public string? CompoundStructureSnapshot { get; set; }
 }

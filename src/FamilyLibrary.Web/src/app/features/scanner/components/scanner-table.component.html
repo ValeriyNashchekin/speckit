@@ -102,6 +102,16 @@
         </td>
         <td class="px-4 py-3">
           <div class="flex items-center justify-end gap-1">
+            @if (family.status === 'LocalModified') {
+              <p-button
+                icon="pi pi-eye"
+                [rounded]="true"
+                [text]="true"
+                severity="info"
+                pTooltip="View changes"
+                (onClick)="onViewChanges(family)"
+              />
+            }
             @if (family.status === 'UpdateAvailable' || family.status === 'LegacyMatch') {
               <p-button
                 icon="pi pi-refresh"
@@ -172,4 +182,14 @@
       }
     </ng-template>
   </p-table>
+
+  <!-- View Changes Modal -->
+  <app-view-changes-modal
+    [changes]="selectedChanges()"
+    [familyName]="selectedFamilyName()"
+    [visible]="changesModalVisible()"
+    (publish)="onPublishChanges()"
+    (cancel)="onCancelChanges()"
+    (visibleChange)="onChangesModalVisibleChange($event)"
+  />
 </div>

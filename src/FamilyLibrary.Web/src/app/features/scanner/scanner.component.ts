@@ -5,6 +5,7 @@ import { ScannerService } from './services/scanner.service';
 import { ScannerTableComponent } from './components/scanner-table.component';
 import { ScannerFiltersComponent } from './components/scanner-filters.component';
 import { UpdateProgressComponent } from './components/update-progress.component';
+import { PreUpdatePreviewComponent } from './components/pre-update-preview.component';
 import { ScannedFamily, FamilyScanStatus } from '../../core/models/scanner.models';
 
 type FilterStatus = FamilyScanStatus | 'All';
@@ -20,6 +21,7 @@ type FilterStatus = FamilyScanStatus | 'All';
     ScannerTableComponent,
     ScannerFiltersComponent,
     UpdateProgressComponent,
+    PreUpdatePreviewComponent,
   ],
   templateUrl: './scanner.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,6 +43,10 @@ export class ScannerComponent implements OnInit {
   protected readonly updateProgress = this.scannerService.updateProgress;
   protected readonly scanResult = this.scannerService.scanResult;
   protected readonly summary = this.scannerService.summary;
+
+  // Preview states
+  protected readonly previewData = this.scannerService.previewData;
+  protected readonly isFetchingPreview = this.scannerService.isFetchingPreview;
 
   /**
    * Initialize component with auto-scan
@@ -66,14 +72,28 @@ export class ScannerComponent implements OnInit {
   }
 
   /**
-   * Handle update selected families
+   * Handle update selected families - shows preview first
    */
   protected onUpdateSelected(families: ScannedFamily[]): void {
     const updates = families.map((f) => ({
       uniqueId: f.uniqueId,
       roleName: f.roleName,
     }));
-    this.scannerService.updateFamilies(updates, true);
+    this.scannerService.requestPreview(updates);
+  }
+
+  /**
+   * Handle preview confirmation - proceed with update
+   */
+  protected onPreviewConfirm(): void {
+    this.scannerService.confirmPreviewAndUpdate();
+  }
+
+  /**
+   * Handle preview cancellation
+   */
+  protected onPreviewCancel(): void {
+    this.scannerService.cancelPreview();
   }
 
   /**
@@ -86,7 +106,7 @@ export class ScannerComponent implements OnInit {
         uniqueId: f.uniqueId,
         roleName: f.roleName!,
       }));
-    
+
     if (stamps.length > 0) {
       this.scannerService.stampLegacy(stamps);
     }

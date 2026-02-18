@@ -1,8 +1,11 @@
 ﻿using System.Collections.ObjectModel;
+using System.Net.Http;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FamilyLibrary.Plugin.Commands.StampFamilyCommand.Models;
 using FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services;
+using Newtonsoft.Json;
 
 namespace FamilyLibrary.Plugin.Commands.StampFamilyCommand.ViewModels;
 
@@ -15,6 +18,10 @@ public sealed partial class LibraryQueueViewModel : ObservableObject
     private readonly FamilyScannerService _scannerService;
     private readonly StampService _stampService;
     private readonly PublishService _publishService;
+    private readonly LocalChangeDetector _changeDetector;
+    private readonly SnapshotService _snapshotService;
+    private readonly HttpClient _httpClient;
+    private readonly string _apiBaseUrl;
 
     [ObservableProperty]
     private ObservableCollection<FamilyQueueItem> _families = new ObservableCollection<FamilyQueueItem>();
@@ -62,6 +69,10 @@ public sealed partial class LibraryQueueViewModel : ObservableObject
         _scannerService = new FamilyScannerService();
         _stampService = new StampService();
         _publishService = new PublishService();
+        _changeDetector = new LocalChangeDetector();
+        _snapshotService = new SnapshotService();
+        _httpClient = new HttpClient();
+        _apiBaseUrl = "https://localhost:5001/api";
 
         _isFamilyEditorMode = isFamilyEditorMode;
 
@@ -145,7 +156,7 @@ public sealed partial class LibraryQueueViewModel : ObservableObject
         var selected = Families.Where(f => f.IsSelected && !QueueItems.Any(q => q.UniqueId == f.UniqueId));
         foreach (var item in selected)
         {
-            QueueItems.Add(new FamilyQueueItem
+            var queueItem = new FamilyQueueItem
             {
                 UniqueId = item.UniqueId,
                 FamilyName = item.FamilyName,
@@ -154,9 +165,128 @@ public sealed partial class LibraryQueueViewModel : ObservableObject
                 HasStamp = item.HasStamp,
                 StampData = item.StampData,
                 Status = QueueItemStatus.Pending
-            });
+            };
+
+            // Detect local modifications for stamped families
+            if (_document != null && item.HasStamp && item.StampData?.RoleId != Guid.Empty)
+            {
+                queueItem.HasLocalChanges = DetectLocalChangesAsync(item).Result;
+            }
+
+            QueueItems.Add(queueItem);
         }
     }
+
+    /// <summary>
+    /// Detects local modifications by comparing current family state with library snapshot.
+    /// Uses API to fetch library snapshot for comparison.
+    /// </summary>
+    private async Task<bool> DetectLocalChangesAsync(FamilyQueueItem item)
+    {
+        if (_document == null || item.StampData?.RoleId == null || item.StampData.RoleId == Guid.Empty)
+            return false;
+
+        try
+        {
+            // Get family element from document
+            var element = _document.GetElement(item.UniqueId);
+            if (!(element is Autodesk.Revit.DB.Family family))
+                return false;
+
+            // Create current local snapshot
+            var localSnapshot = _snapshotService.CreateSnapshot(family, _document);
+
+            // Fetch library snapshot via API
+            var librarySnapshot = await FetchLibrarySnapshotAsync(item.StampData.RoleName);
+            if (librarySnapshot == null)
+            {
+                // If no library snapshot available, cannot detect changes
+                return false;
+            }
+
+            // Use local change detector to compare
+            return _changeDetector.HasLocalChanges(family, _document, librarySnapshot);
+        }
+        catch
+        {
+            // If detection fails, assume no changes
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Fetches the latest family snapshot from the library API.
+    /// Uses existing API endpoint to get family details including latest version.
+    /// </summary>
+    private async Task<Core.Models.FamilySnapshot?> FetchLibrarySnapshotAsync(string roleName)
+    {
+        if (string.IsNullOrEmpty(roleName))
+            return null;
+
+        try
+        {
+            // Find family by role name
+            var response = await _httpClient.GetAsync(
+                $"{_apiBaseUrl}/families?searchTerm={Uri.EscapeDataString(roleName)}&pageSize=1");
+
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            var json = await response.Content.ReadAsStringAsync();
+            var pagedResult = JsonConvert.DeserializeObject<PagedFamilyResult>(json);
+
+            if (pagedResult?.Items == null || pagedResult.Items.Count == 0)
+                return null;
+
+            var familyId = pagedResult.Items[0].Id;
+
+            // Get family details with versions
+            var detailResponse = await _httpClient.GetAsync($"{_apiBaseUrl}/families/{familyId}");
+            if (!detailResponse.IsSuccessStatusCode)
+                return null;
+
+            var detailJson = await detailResponse.Content.ReadAsStringAsync();
+            var familyDetail = JsonConvert.DeserializeObject<FamilyDetailResponse>(detailJson);
+
+            // MVP: API doesn't expose SnapshotJson in version DTO yet
+            // Return null for now - when API is enhanced, fetch actual snapshot
+            return null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    #region API DTOs
+
+    private class PagedFamilyResult
+    {
+        [JsonProperty("items")]
+        public List<FamilyResult>? Items { get; set; }
+    }
+
+    private class FamilyResult
+    {
+        public Guid Id { get; set; }
+        public string RoleName { get; set; } = string.Empty;
+    }
+
+    private class FamilyDetailResponse
+    {
+        public Guid Id { get; set; }
+        public string RoleName { get; set; } = string.Empty;
+        public int CurrentVersion { get; set; }
+        public List<FamilyVersionDto>? Versions { get; set; }
+    }
+
+    private class FamilyVersionDto
+    {
+        public int Version { get; set; }
+        public string? Hash { get; set; }
+    }
+
+    #endregion
 
     [RelayCommand]
     private void Stamp()

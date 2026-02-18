@@ -43,4 +43,10 @@ public interface ISystemTypeService
     /// Gets all system types for a specific role.
     /// </summary>
     Task<IReadOnlyList<SystemTypeDto>> GetByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets all system types for a specific category (e.g., "Walls", "Floors", "Roofs", "Ceilings", "StructuralFoundation").
+    /// Useful for Group A categories that use CompoundStructure.
+    /// </summary>
+    Task<IReadOnlyList<SystemTypeDto>> GetByCategoryAsync(string category, CancellationToken cancellationToken = default);
 }

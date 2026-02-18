@@ -13,6 +13,7 @@ namespace FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services;
 public class SystemTypeScannerService
 {
     private readonly IEsService _esService;
+    private readonly CompoundStructureSerializer _compoundStructureSerializer;
 
     // GroupA categories: CompoundStructure support
     private static readonly BuiltInCategory[] GroupACategories =
@@ -33,11 +34,12 @@ public class SystemTypeScannerService
         BuiltInCategory.OST_BuildingPad
     };
 
-    public SystemTypeScannerService() : this(new EsService()) { }
+    public SystemTypeScannerService() : this(new EsService(), new CompoundStructureSerializer()) { }
 
-    public SystemTypeScannerService(IEsService esService)
+    public SystemTypeScannerService(IEsService esService, CompoundStructureSerializer compoundStructureSerializer)
     {
         _esService = esService;
+        _compoundStructureSerializer = compoundStructureSerializer;
     }
 
     /// <summary>
@@ -64,7 +66,7 @@ public class SystemTypeScannerService
             var bic = (BuiltInCategory)GetElementIdValue(category.Id);
             if (!categorySet.Contains(bic)) continue;
 
-            var info = CreateSystemTypeInfo(elementType, bic);
+            var info = CreateSystemTypeInfo(document, elementType, bic);
             if (info != null)
                 result.Add(info);
         }
@@ -179,10 +181,17 @@ public class SystemTypeScannerService
         return ScanSystemTypes(document, allCategories);
     }
 
-    private SystemTypeInfo? CreateSystemTypeInfo(Element elementType, BuiltInCategory category)
+    private SystemTypeInfo? CreateSystemTypeInfo(Document document, Element elementType, BuiltInCategory category)
     {
         var stampData = _esService.ReadStamp(elementType);
         var group = GetGroupForCategory(category);
+        string? compoundStructureSnapshot = null;
+
+        // Serialize CompoundStructure for Group A types
+        if (group == SystemFamilyGroup.GroupA)
+        {
+            compoundStructureSnapshot = TrySerializeCompoundStructure(document, elementType);
+        }
 
         return new SystemTypeInfo
         {
@@ -193,8 +202,33 @@ public class SystemTypeScannerService
             Group = group,
             ElementId = elementType.Id,
             HasStamp = stampData?.IsValid == true,
-            StampData = stampData
+            StampData = stampData,
+            CompoundStructureSnapshot = compoundStructureSnapshot
         };
+    }
+
+    /// <summary>
+    /// Tries to serialize CompoundStructure from a HostObjAttributes element.
+    /// Returns null if the element does not support CompoundStructure.
+    /// </summary>
+    private string? TrySerializeCompoundStructure(Document document, Element elementType)
+    {
+        if (!(elementType is HostObjAttributes hostAttributes))
+            return null;
+
+        try
+        {
+            var structure = hostAttributes.GetCompoundStructure();
+            if (structure == null)
+                return null;
+
+            return _compoundStructureSerializer.Serialize(structure, document);
+        }
+        catch
+        {
+            // Some types may not support CompoundStructure
+            return null;
+        }
     }
 
     private SystemTypeInfo? CreateSystemTypeInfoFromElement(
@@ -225,6 +259,7 @@ public class SystemTypeScannerService
             FloorType _ => "Floor",
             RoofType _ => "Roof",
             CeilingType _ => "Ceiling",
+            WallFoundationType _ => "Foundation",
             _ => elementType.Category?.Name ?? "Unknown"
         };
     }
