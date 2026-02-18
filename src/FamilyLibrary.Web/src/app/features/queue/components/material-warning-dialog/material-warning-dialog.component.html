@@ -1,0 +1,125 @@
+<p-dialog
+  header="Missing Materials Warning"
+  [visible]="visible()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [closable]="true"
+  [style]="{ width: '50vw', 'max-width': '800px' }"
+  [blockScroll]="true"
+  [focusTrap]="true"
+  (onHide)="onHide()"
+  (onShow)="onShow()"
+>
+  <!-- Warning Message -->
+  <div class="flex items-start gap-4 mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+    <i class="pi pi-exclamation-triangle text-amber-500 text-2xl flex-shrink-0" aria-hidden="true"></i>
+    <div>
+      <h3 class="text-lg font-semibold text-amber-800 mb-2">Some materials are missing</h3>
+      <p class="text-amber-700 text-sm">
+        The following materials referenced in the system type layers do not exist in your library.
+        Choose an action for each material before proceeding.
+      </p>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="flex items-center gap-4 mb-4">
+    <span class="text-sm text-gray-600">
+      Total: {{ materials().length }} materials
+    </span>
+    @if (createCount() > 0) {
+      <span class="text-sm text-green-600">
+        <i class="pi pi-check-circle mr-1"></i>{{ createCount() }} to create
+      </span>
+    }
+    @if (skipCount() > 0) {
+      <span class="text-sm text-gray-500">
+        <i class="pi pi-forward mr-1"></i>{{ skipCount() }} to skip
+      </span>
+    }
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="flex items-center gap-2 mb-4">
+    <span class="text-sm text-gray-500">Set all:</span>
+    <p-button
+      label="Create All"
+      size="small"
+      severity="secondary"
+      outlined
+      (onClick)="setAllActions('create')"
+    />
+    <p-button
+      label="Skip All"
+      size="small"
+      severity="secondary"
+      outlined
+      (onClick)="setAllActions('skip')"
+    />
+  </div>
+
+  <!-- Materials Table -->
+  <p-table
+    [value]="internalMaterials()"
+    [tableStyle]="{ 'min-width': '100%' }"
+    styleClass="p-table-sm"
+    dataKey="name"
+  >
+    <ng-template #header>
+      <tr>
+        <th style="width: 40%">Material Name</th>
+        <th style="width: 30%">Used In Layer</th>
+        <th style="width: 30%">Action</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-material>
+      <tr>
+        <td>
+          <span class="font-medium text-gray-900">{{ material.name }}</span>
+        </td>
+        <td>
+          <span class="text-gray-600">{{ material.layerFunction }}</span>
+        </td>
+        <td>
+          <p-select
+            [ngModel]="material.action"
+            (ngModelChange)="onActionChange(material, $event)"
+            [options]="actionOptions"
+            optionLabel="label"
+            optionValue="value"
+            [style]="{ 'width': '100%' }"
+            styleClass="w-full"
+            aria-label="Select action for {{ material.name }}"
+          />
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="3" class="text-center py-4">
+          <span class="text-gray-500">No missing materials</span>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <!-- Footer -->
+  <ng-template #footer>
+    <div class="flex items-center justify-end gap-3">
+      <p-button
+        label="Cancel"
+        severity="secondary"
+        outlined
+        (onClick)="onCancel()"
+      />
+      <p-button
+        [label]="hasCreateAction() ? 'Proceed & Create Materials' : 'Proceed Anyway'"
+        severity="warn"
+        (onClick)="onProceed()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>

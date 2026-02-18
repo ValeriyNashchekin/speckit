@@ -1,0 +1,43 @@
+<p-card class="h-full">
+  <ng-template #header>
+    <div class="flex items-center justify-center h-24 bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-lg">
+        {{ getInitials(family().familyName) }}
+      </div>
+    </div>
+  </ng-template>
+  
+  <ng-template #title>
+    <span class="text-base font-semibold text-gray-900 line-clamp-1">
+      {{ family().familyName }}
+    </span>
+  </ng-template>
+  
+  <ng-template #subtitle>
+    <span class="text-sm text-gray-500">
+      {{ family().roleName }}
+    </span>
+  </ng-template>
+  
+  <ng-template #content>
+    <div class="flex items-center justify-between">
+      <p-tag [value]="'v' + family().currentVersion" severity="info" />
+      <span class="text-xs text-gray-400">
+        Updated {{ family().updatedAt | date:'shortDate' }}
+      </span>
+    </div>
+  </ng-template>
+  
+  <ng-template #footer>
+    <div class="pt-2">
+      <p-button
+        label="View Details"
+        icon="pi pi-eye"
+        styleClass="w-full"
+        severity="secondary"
+        outlined
+        (onClick)="onSelect()"
+      />
+    </div>
+  </ng-template>
+</p-card>

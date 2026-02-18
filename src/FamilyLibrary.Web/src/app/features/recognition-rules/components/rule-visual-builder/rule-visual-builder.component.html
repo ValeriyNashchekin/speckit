@@ -1,0 +1,140 @@
+<div class="space-y-4">
+  <!-- Tree View -->
+  <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+    <div class="text-sm font-medium text-gray-700 mb-3">Rule Structure</div>
+    
+    <div class="space-y-1">
+      @for (node of treeNodes(); track node.key) {
+        <ng-container [ngTemplateOutlet]="nodeTemplate" [ngTemplateOutletContext]="{ $implicit: node, level: 0 }"></ng-container>
+      }
+    </div>
+  </div>
+
+  <!-- Selected Node Editor -->
+  @if (selectedNode()) {
+    <div class="bg-white rounded-lg p-4 border border-blue-200 shadow-sm">
+      <div class="text-sm font-medium text-blue-700 mb-3">Edit Selected</div>
+      
+      @if (isCondition(selectedNode())) {
+        <div class="space-y-3">
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-medium text-gray-600">Operator</label>
+            <p-select
+              [options]="operatorOptions()"
+              optionLabel="label"
+              optionValue="value"
+              [ngModel]="selectedCondition()?.operator"
+              (ngModelChange)="updateConditionOperator($event)"
+              class="w-full"
+              size="small"
+            />
+          </div>
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-medium text-gray-600">Pattern</label>
+            <input
+              pInputText
+              type="text"
+              [ngModel]="selectedCondition()?.value"
+              (ngModelChange)="updateConditionValue($event)"
+              placeholder="Enter pattern to match..."
+              class="w-full"
+              size="small"
+            />
+          </div>
+          <p-button
+            label="Remove Condition"
+            icon="pi pi-trash"
+            severity="danger"
+            size="small"
+            [text]="true"
+            (onClick)="removeNode(selectedNodeKey()!)"
+          />
+        </div>
+      }
+      
+      @if (isGroup(selectedNode())) {
+        <div class="space-y-3">
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-medium text-gray-600">Logical Operator</label>
+            <p-select
+              [options]="logicalOperatorOptions()"
+              optionLabel="label"
+              optionValue="value"
+              [ngModel]="selectedGroup()?.operator"
+              (ngModelChange)="updateGroupOperator($event)"
+              class="w-full"
+              size="small"
+            />
+          </div>
+          <div class="flex gap-2">
+            <p-button
+              label="Add Condition"
+              icon="pi pi-plus"
+              size="small"
+              severity="secondary"
+              (onClick)="addCondition()"
+            />
+            <p-button
+              label="Add Group"
+              icon="pi pi-folder-plus"
+              size="small"
+              severity="secondary"
+              (onClick)="addGroup()"
+            />
+          </div>
+          @if (selectedNodeKey() !== 'root-0') {
+            <p-button
+              label="Remove Group"
+              icon="pi pi-trash"
+              severity="danger"
+              size="small"
+              [text]="true"
+              (onClick)="removeNode(selectedNodeKey()!)"
+            />
+          }
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 text-center">
+      <p class="text-sm text-gray-500">Click on a node in the tree to edit it</p>
+      <p class="text-xs text-gray-400 mt-1">Select the root group to add conditions or nested groups</p>
+    </div>
+  }
+</div>
+
+<!-- Node Template (Recursive) -->
+<ng-template #nodeTemplate let-node let-level="level">
+  <div 
+    class="flex items-center gap-2 py-1.5 px-2 rounded cursor-pointer transition-colors"
+    [class.bg-blue-100]="selectedNodeKey() === node.key"
+    [class.hover:bg-gray-100]="selectedNodeKey() !== node.key"
+    [style.padding-left.px]="level * 16"
+    (click)="selectNode(node.key)"
+  >
+    @if (isGroup(node)) {
+      <button
+        type="button"
+        class="text-gray-400 hover:text-gray-600 p-0.5"
+        (click)="toggleNode(node.key); $event.stopPropagation()"
+      >
+        <i [class]="node.expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" class="text-xs"></i>
+      </button>
+      <i class="pi pi-folder text-yellow-500 text-sm"></i>
+      <span class="text-sm font-medium text-gray-700">{{ node.label }}</span>
+      <span class="text-xs text-gray-400">({{ node.data.children.length }} items)</span>
+    }
+    
+    @if (isCondition(node)) {
+      <span class="w-4"></span>
+      <i class="pi pi-tag text-blue-500 text-sm"></i>
+      <span class="text-sm text-gray-600">{{ node.label }}</span>
+    }
+  </div>
+  
+  @if (isGroup(node) && node.expanded && node.children) {
+    @for (child of node.children; track child.key) {
+      <ng-container [ngTemplateOutlet]="nodeTemplate" [ngTemplateOutletContext]="{ $implicit: child, level: level + 1 }"></ng-container>
+    }
+  }
+</ng-template>

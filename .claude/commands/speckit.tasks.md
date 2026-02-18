@@ -75,7 +75,7 @@ The tasks.md should be immediately executable - each task must be specific enoug
 Every task MUST strictly follow this format:
 
 ```text
-- [ ] [TaskID] [P?] [Story?] Description with file path
+- [ ] [TaskID] [P?] [Story?] [Component?] Description with file path
 ```
 
 **Format Components**:
@@ -86,21 +86,34 @@ Every task MUST strictly follow this format:
 4. **[Story] label**: REQUIRED for user story phase tasks only
    - Format: [US1], [US2], [US3], etc. (maps to user stories from spec.md)
    - Setup phase: NO story label
-   - Foundational phase: NO story label  
+   - Foundational phase: NO story label
    - User Story phases: MUST have story label
    - Polish phase: NO story label
-5. **Description**: Clear action with exact file path
+5. **[Component] marker**: REQUIRED for implementation tasks
+   - [BACKEND] - Tasks in src/FamilyLibrary.Api/ (Backend .NET)
+   - [FRONTEND] - Tasks in src/FamilyLibrary.Web/ (Angular)
+   - [PLUGIN] - Tasks in src/FamilyLibrary.Plugin/ (Revit)
+   - Setup/Foundational phase: NO component marker (shared)
+6. **Description**: Clear action with exact file path
 
 **Examples**:
 
 - ✅ CORRECT: `- [ ] T001 Create project structure per implementation plan`
-- ✅ CORRECT: `- [ ] T005 [P] Implement authentication middleware in src/middleware/auth.py`
-- ✅ CORRECT: `- [ ] T012 [P] [US1] Create User model in src/models/user.py`
-- ✅ CORRECT: `- [ ] T014 [US1] Implement UserService in src/services/user_service.py`
-- ❌ WRONG: `- [ ] Create User model` (missing ID and Story label)
+- ✅ CORRECT: `- [ ] T005 [P] [BACKEND] Implement authentication middleware in src/FamilyLibrary.Api/FamilyLibrary.Api/Middleware/`
+- ✅ CORRECT: `- [ ] T012 [P] [US1] [BACKEND] Create User entity in src/FamilyLibrary.Api/FamilyLibrary.Domain/Entities/`
+- ✅ CORRECT: `- [ ] T014 [US1] [FRONTEND] Create UserService in src/FamilyLibrary.Web/src/app/services/`
+- ✅ CORRECT: `- [ ] T089 [US3] [PLUGIN] Create StampFamilyCommand in src/FamilyLibrary.Plugin/FamilyLibrary.Plugin/Commands/`
+- ❌ WRONG: `- [ ] Create User model` (missing ID, Story label, Component)
 - ❌ WRONG: `T001 [US1] Create model` (missing checkbox)
 - ❌ WRONG: `- [ ] [US1] Create User model` (missing Task ID)
 - ❌ WRONG: `- [ ] T001 [US1] Create model` (missing file path)
+
+**Component Auto-Detection for Parallel Execution**:
+
+When generating tasks, automatically assign component markers based on file paths:
+- Paths containing `FamilyLibrary.Api/` → [BACKEND]
+- Paths containing `FamilyLibrary.Web/` → [FRONTEND]
+- Paths containing `FamilyLibrary.Plugin/` → [PLUGIN]
 
 ### Task Organization
 
