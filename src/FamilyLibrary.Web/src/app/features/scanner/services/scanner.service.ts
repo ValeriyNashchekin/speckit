@@ -10,6 +10,7 @@ import {
   Phase2PluginEventTypes,
   Phase2UiEventTypes,
 } from '../../../core/models/webview-events.model';
+import { Subject, Observable } from 'rxjs';
 
 /**
  * Progress payload from Revit during family updates
@@ -33,6 +34,16 @@ export interface FamilyPreviewData {
 }
 
 /**
+ * Operation result notification for toast messages
+ */
+export interface OperationNotification {
+  type: 'success' | 'error';
+  operation: 'scan' | 'update' | 'preview';
+  message: string;
+  details?: string;
+}
+
+/**
  * Service for managing scanner operations and state.
  * Handles communication with Revit plugin for scanning and updating families.
  */
@@ -48,6 +59,9 @@ export class ScannerService {
   private readonly _previewData = signal<FamilyPreviewData | null>(null);
   private readonly _isFetchingPreview = signal(false);
 
+  // Notification stream for toast messages
+  private readonly _notification$ = new Subject<OperationNotification>();
+
   // Pending updates queue for batch processing with preview
   private pendingUpdates: Array<{ uniqueId: string; roleName?: string }> = [];
 
@@ -58,6 +72,10 @@ export class ScannerService {
   readonly isUpdating = this._isUpdating.asReadonly();
   readonly previewData = this._previewData.asReadonly();
   readonly isFetchingPreview = this._isFetchingPreview.asReadonly();
+
+  // Observable for operation notifications
+  readonly notification$: Observable<OperationNotification> =
+    this._notification$.asObservable();
 
   // Computed values
   readonly summary = computed(() => this._scanResult()?.summary);
@@ -73,10 +91,28 @@ export class ScannerService {
   private setupEventListeners(): void {
     // Handle scan result
     this.revitBridge
-      .on<ScanResult>(Phase2PluginEventTypes.REVIT_SCAN_RESULT)
+      .on<ScanResult & { errors?: Array<{ familyName: string; error: string }> }>(
+        Phase2PluginEventTypes.REVIT_SCAN_RESULT
+      )
       .subscribe((result) => {
         this._scanResult.set(result);
         this._isScanning.set(false);
+
+        // Check for errors in scan result
+        if (result.errors && result.errors.length > 0) {
+          this._notification$.next({
+            type: 'error',
+            operation: 'scan',
+            message: 'Scan completed with errors',
+            details: result.errors.map((e) => e.error).join('; '),
+          });
+        } else {
+          this._notification$.next({
+            type: 'success',
+            operation: 'scan',
+            message: `Scan completed: ${result.families.length} families found`,
+          });
+        }
       });
 
     // Handle update progress
@@ -88,22 +124,56 @@ export class ScannerService {
 
     // Handle update complete
     this.revitBridge
-      .on<{ total: number; success: number; failed: number }>(
-        Phase2PluginEventTypes.REVIT_UPDATE_COMPLETE
-      )
-      .subscribe(() => {
+      .on<{
+        total: number;
+        success: number;
+        failed: number;
+        errors?: Array<{ familyName: string; error: string }>;
+      }>(Phase2PluginEventTypes.REVIT_UPDATE_COMPLETE)
+      .subscribe((result) => {
         this._isUpdating.set(false);
         this._updateProgress.set(null);
         this.pendingUpdates = [];
+
+        // Send notification based on result
+        if (result.failed > 0) {
+          const errorDetails =
+            result.errors?.map((e) => `${e.familyName}: ${e.error}`).join('; ') ||
+            `${result.failed} update(s) failed`;
+          this._notification$.next({
+            type: 'error',
+            operation: 'update',
+            message: 'Update completed with errors',
+            details: errorDetails,
+          });
+        } else {
+          this._notification$.next({
+            type: 'success',
+            operation: 'update',
+            message: `Update completed: ${result.success} family(ies) updated`,
+          });
+        }
       });
 
     // Handle changes result for preview
     this.revitBridge
-      .on<{ familyUniqueId: string; changes: ChangeSet }>(
+      .on<{ familyUniqueId: string; changes: ChangeSet; error?: string }>(
         Phase2PluginEventTypes.REVIT_CHANGES_RESULT
       )
       .subscribe((result) => {
         this._isFetchingPreview.set(false);
+
+        // Check for preview error
+        if (result.error) {
+          this._notification$.next({
+            type: 'error',
+            operation: 'preview',
+            message: 'Failed to load preview',
+            details: result.error,
+          });
+          return;
+        }
+
         const pendingItem = this.pendingUpdates[0];
         if (pendingItem) {
           const family = this.findFamilyById(pendingItem.uniqueId);

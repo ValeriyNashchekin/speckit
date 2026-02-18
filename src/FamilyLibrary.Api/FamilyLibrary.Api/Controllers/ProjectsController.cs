@@ -1,5 +1,6 @@
 using FamilyLibrary.Application.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace FamilyLibrary.Api.Controllers;
 
@@ -12,6 +13,7 @@ public class ProjectsController : BaseController
 {
     /// <summary>
     /// Scans project families and returns comparison with library.
+    /// Rate limited to 100 requests per minute per user.
     /// </summary>
     /// <param name="id">The project ID.</param>
     /// <param name="ct">Cancellation token.</param>
@@ -21,7 +23,9 @@ public class ProjectsController : BaseController
     /// which calls the batch-check endpoint directly.
     /// </remarks>
     [HttpPost("{id}/scan")]
+    [EnableRateLimiting("ScanPolicy")]
     [ProducesResponseType<ScanResultDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public async Task<ActionResult<ScanResultDto>> ScanProject(
         Guid id,
         CancellationToken ct)

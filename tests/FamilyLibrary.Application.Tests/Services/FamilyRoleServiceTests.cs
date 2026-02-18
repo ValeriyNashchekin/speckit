@@ -13,12 +13,14 @@ namespace FamilyLibrary.Application.Tests.Services;
 public class FamilyRoleServiceTests
 {
     private readonly Mock<IFamilyRoleRepository> _repositoryMock;
+    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly FamilyRoleService _sut;
 
     public FamilyRoleServiceTests()
     {
         _repositoryMock = new Mock<IFamilyRoleRepository>();
-        _sut = new FamilyRoleService(_repositoryMock.Object);
+        _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _sut = new FamilyRoleService(_repositoryMock.Object, _unitOfWorkMock.Object);
     }
 
     #region GetAllAsync Tests

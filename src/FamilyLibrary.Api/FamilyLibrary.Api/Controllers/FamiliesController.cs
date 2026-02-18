@@ -2,6 +2,7 @@ using FamilyLibrary.Application.Common;
 using FamilyLibrary.Application.DTOs;
 using FamilyLibrary.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace FamilyLibrary.Api.Controllers;
 
@@ -203,12 +204,15 @@ public class FamiliesController(IFamilyService service) : BaseController
     /// <summary>
     /// Batch checks multiple families against the library.
     /// Determines if families are up-to-date, need update, or are unmatched.
+    /// Rate limited to 100 requests per minute per user.
     /// </summary>
     /// <param name="request">The request containing families with role names and hashes.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>Batch check response with status for each family.</returns>
     [HttpPost("batch-check")]
+    [EnableRateLimiting("ScanPolicy")]
     [ProducesResponseType<BatchCheckResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public async Task<ActionResult<BatchCheckResponse>> BatchCheck(
         [FromBody] BatchCheckRequest request,
         CancellationToken ct)

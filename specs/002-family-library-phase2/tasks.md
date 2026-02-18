@@ -194,15 +194,15 @@
 
 **Purpose**: Performance, testing, documentation
 
-- [ ] T074 [P] [BACKEND] Add database index for batch check optimization
-- [ ] T075 [P] [BACKEND] Add rate limiting for scan endpoints
-- [ ] T076 [P] [PLUGIN] Implement recognition rules caching in LegacyRecognitionService
-- [ ] T077 [P] [FRONTEND] Add virtual scroll to scanner table
-- [ ] T078 [FRONTEND] Add error handling and toast messages for scan operations
-- [ ] T079 [P] [BACKEND] Create unit tests for ChangeDetectionService in tests/FamilyLibrary.Application.Tests/
-- [ ] T080 [P] [PLUGIN] Create unit tests for SnapshotService in tests/FamilyLibrary.Plugin.Tests/
-- [ ] T081 [P] [PLUGIN] Create unit tests for LegacyRecognitionService in tests/FamilyLibrary.Plugin.Tests/
-- [ ] T082 Update quickstart.md with Phase 2 features
+- [X] T074 [P] [BACKEND] Add database index for batch check optimization → Artifacts: Already exists (migration 20260218092310)
+- [X] T075 [P] [BACKEND] Add rate limiting for scan endpoints → Artifacts: [Program.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Program.cs), [FamiliesController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/FamiliesController.cs), [ProjectsController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/ProjectsController.cs)
+- [X] T076 [P] [PLUGIN] Implement recognition rules caching in LegacyRecognitionService → Artifacts: [LegacyRecognitionService.cs](src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/Services/LegacyRecognitionService.cs)
+- [X] T077 [P] [FRONTEND] Add virtual scroll to scanner table → Artifacts: [scanner-table.component.html](src/FamilyLibrary.Web/src/app/features/scanner/components/scanner-table.component.html)
+- [X] T078 [FRONTEND] Add error handling and toast messages for scan operations → Artifacts: [scanner.component.ts](src/FamilyLibrary.Web/src/app/features/scanner/scanner.component.ts), [scanner.service.ts](src/FamilyLibrary.Web/src/app/features/scanner/services/scanner.service.ts)
+- [X] T079 [P] [BACKEND] Create unit tests for ChangeDetectionService in tests/FamilyLibrary.Application.Tests/ → Artifacts: [ChangeDetectionServiceTests.cs](tests/FamilyLibrary.Application.Tests/Services/ChangeDetectionServiceTests.cs)
+- [X] T080 [P] [PLUGIN] Create unit tests for SnapshotService in tests/FamilyLibrary.Plugin.Tests/ → Artifacts: [SnapshotServiceTests.cs](tests/FamilyLibrary.Plugin.Tests/Services/SnapshotServiceTests.cs)
+- [X] T081 [P] [PLUGIN] Create unit tests for LegacyRecognitionService in tests/FamilyLibrary.Plugin.Tests/ → Artifacts: [LegacyRecognitionServiceTests.cs](tests/FamilyLibrary.Application.Tests/Services/LegacyRecognitionServiceTests.cs)
+- [X] T082 Update quickstart.md with Phase 2 features → Artifacts: [quickstart.md](specs/002-family-library-phase2/quickstart.md)
 - [ ] T083 Run quickstart.md validation scenarios
 
 ---

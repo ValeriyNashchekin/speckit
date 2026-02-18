@@ -14,13 +14,15 @@ public class RecognitionRuleServiceTests
 {
     private readonly Mock<IRecognitionRuleRepository> _repositoryMock;
     private readonly Mock<IFamilyRoleRepository> _roleRepositoryMock;
+    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly RecognitionRuleService _sut;
 
     public RecognitionRuleServiceTests()
     {
         _repositoryMock = new Mock<IRecognitionRuleRepository>();
         _roleRepositoryMock = new Mock<IFamilyRoleRepository>();
-        _sut = new RecognitionRuleService(_repositoryMock.Object, _roleRepositoryMock.Object);
+        _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _sut = new RecognitionRuleService(_repositoryMock.Object, _roleRepositoryMock.Object, _unitOfWorkMock.Object);
     }
 
     #region ValidateFormulaAsync Tests

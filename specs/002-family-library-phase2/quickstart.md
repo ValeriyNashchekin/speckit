@@ -57,6 +57,16 @@ Content-Type: application/json
 }
 ```
 
+### FamilyScanStatus Values
+
+| Status | Description |
+|--------|-------------|
+| UpToDate | Family matches library version |
+| UpdateAvailable | Newer version exists in library |
+| LocalModified | Local changes detected (not in library) |
+| NotInLibrary | Family not found in library |
+| LegacyMatch | Matched by legacy rules |
+
 ### Scanner Flow
 
 ```
@@ -65,6 +75,7 @@ Content-Type: application/json
 3. User selects families → ui:update-families
 4. Plugin updates families → revit:update:progress
 5. Update complete → revit:update:complete
+6. View changes result → revit:changes:result
 ```
 
 ---
@@ -115,6 +126,65 @@ GET /api/families/{id}/changes?fromVersion=2&toVersion=3
     }
   ],
   "hasChanges": true
+}
+```
+
+**Pre-Update Preview:**
+```http
+GET /api/families/{id}/update-preview?currentVersion=1&targetVersion=3
+```
+
+**Response:**
+```json
+{
+  "familyId": "abc123",
+  "currentVersion": 1,
+  "targetVersion": 3,
+  "breakingChanges": false,
+  "changesSummary": {
+    "name": "FreeAxez_Table_v1 → FreeAxez_Table_v3",
+    "typesAdded": 2,
+    "typesRemoved": 1,
+    "parametersChanged": 4,
+    "geometryChanged": true
+  },
+  "warnings": [
+    "Type 'Type_Old' will be removed"
+  ]
+}
+```
+
+**Local Changes Detection:**
+```http
+POST /api/families/{id}/local-changes
+Content-Type: application/json
+
+{
+  "localSnapshotJson": "{\"familyName\":\"FreeAxez_Table\",\"types\":[\"Type_A\",\"Type_B\"],\"parameters\":[{\"name\":\"Height\",\"value\":\"900\"}]}"
+}
+```
+
+**Response:**
+```json
+{
+  "hasLocalChanges": true,
+  "changes": [
+    {
+      "category": "Parameters",
+      "parameterChanges": [
+        {
+          "name": "Height",
+          "libraryValue": "800",
+          "localValue": "900"
+        }
+      ]
+    },
+    {
+      "category": "Types",
+      "addedItems": ["Type_C"],
+      "removedItems": []
+    }
+  ]
 }
 ```
 
