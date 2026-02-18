@@ -35,7 +35,7 @@ export class RolesService {
     filters?: FamilyRoleListRequest,
   ): Observable<PagedResult<FamilyRole>> {
     const params: Record<string, string | number | boolean> = {
-      page,
+      pageNumber: page,
       pageSize,
     };
 
@@ -53,8 +53,8 @@ export class RolesService {
       .get<PaginatedResponse<FamilyRole>>('/roles', { params })
       .pipe(
         map(response => ({
-          data: response.data,
-          page: response.page,
+          data: response.items,
+          page: response.pageNumber,
           pageSize: response.pageSize,
           totalCount: response.totalCount,
           totalPages: response.totalPages,

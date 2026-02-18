@@ -53,7 +53,7 @@ export class QueueService {
     filters?: FamilyListRequest,
   ): Observable<PagedResult<Family>> {
     const params: Record<string, string | number | boolean> = {
-      page,
+      pageNumber: page,
       pageSize,
     };
 
@@ -68,8 +68,8 @@ export class QueueService {
       .get<PaginatedResponse<Family>>('/families', { params })
       .pipe(
         map(response => ({
-          data: response.data,
-          page: response.page,
+          data: response.items,
+          page: response.pageNumber,
           pageSize: response.pageSize,
           totalCount: response.totalCount,
           totalPages: response.totalPages,
@@ -84,7 +84,7 @@ export class QueueService {
     filters?: DraftListRequest,
   ): Observable<PagedResult<Draft>> {
     const params: Record<string, string | number | boolean> = {
-      page,
+      pageNumber: page,
       pageSize,
     };
 
@@ -99,8 +99,8 @@ export class QueueService {
       .get<PaginatedResponse<Draft>>('/drafts', { params })
       .pipe(
         map(response => ({
-          data: response.data,
-          page: response.page,
+          data: response.items,
+          page: response.pageNumber,
           pageSize: response.pageSize,
           totalCount: response.totalCount,
           totalPages: response.totalPages,
@@ -138,7 +138,7 @@ export class QueueService {
     filters?: SystemTypeListRequest,
   ): Observable<PagedResult<SystemType>> {
     const params: Record<string, string | number | boolean> = {
-      page,
+      pageNumber: page,
       pageSize,
     };
 
@@ -156,8 +156,8 @@ export class QueueService {
       .get<PaginatedResponse<SystemType>>('/system-types', { params })
       .pipe(
         map(response => ({
-          data: response.data,
-          page: response.page,
+          data: response.items,
+          page: response.pageNumber,
           pageSize: response.pageSize,
           totalCount: response.totalCount,
           totalPages: response.totalPages,

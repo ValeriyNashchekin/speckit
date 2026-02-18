@@ -34,11 +34,11 @@ export class RolesStore {
     try {
       const queryParams = params ? this.toQueryParams(params) : undefined;
       const response = await this.api
-        .get<{ data: FamilyRole[]; totalCount: number }>(this.endpoint, { params: queryParams })
+        .get<{ items: FamilyRole[]; totalCount: number }>(this.endpoint, { params: queryParams })
         .toPromise();
 
       if (response) {
-        this.roles.set(response.data);
+        this.roles.set(response.items);
         this.totalCount.set(response.totalCount);
       }
     } catch (err) {
@@ -134,7 +134,7 @@ export class RolesStore {
 
   private toQueryParams(params: FamilyRoleListRequest): Record<string, string | number | boolean> {
     const queryParams: Record<string, string | number | boolean> = {};
-    if (params.page !== undefined) queryParams['page'] = params.page;
+    if (params.page !== undefined) queryParams['pageNumber'] = params.page;
     if (params.pageSize !== undefined) queryParams['pageSize'] = params.pageSize;
     if (params.searchTerm) queryParams['searchTerm'] = params.searchTerm;
     if (params.categoryId) queryParams['categoryId'] = params.categoryId;

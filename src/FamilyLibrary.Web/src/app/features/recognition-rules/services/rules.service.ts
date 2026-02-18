@@ -55,7 +55,7 @@ export class RulesService {
     filters?: RecognitionRuleListRequest,
   ): Observable<PagedResult<RecognitionRule>> {
     const params: Record<string, string | number | boolean> = {
-      page,
+      pageNumber: page,
       pageSize,
     };
 
@@ -67,8 +67,8 @@ export class RulesService {
       .get<PaginatedResponse<RecognitionRule>>(this.endpoint, { params })
       .pipe(
         map(response => ({
-          data: response.data,
-          page: response.page,
+          data: response.items,
+          page: response.pageNumber,
           pageSize: response.pageSize,
           totalCount: response.totalCount,
           totalPages: response.totalPages,

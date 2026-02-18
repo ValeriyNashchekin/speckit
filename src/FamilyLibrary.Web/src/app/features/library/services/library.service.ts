@@ -31,7 +31,7 @@ export class LibraryService {
     filters?: FamilyListRequest,
   ): Observable<PagedResult<Family>> {
     const params: Record<string, string | number | boolean> = {
-      page,
+      pageNumber: page,
       pageSize,
     };
 
@@ -52,8 +52,8 @@ export class LibraryService {
       .get<PaginatedResponse<Family>>('/families', { params })
       .pipe(
         map(response => ({
-          data: response.data,
-          page: response.page,
+          data: response.items,
+          page: response.pageNumber,
           pageSize: response.pageSize,
           totalCount: response.totalCount,
           totalPages: response.totalPages,

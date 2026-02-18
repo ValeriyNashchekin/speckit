@@ -9,11 +9,13 @@ export interface ApiResponse<T> {
 }
 
 export interface PaginatedResponse<T> {
-  data: T[];
-  page: number;
-  pageSize: number;
+  items: T[];
   totalCount: number;
+  pageNumber: number;
+  pageSize: number;
   totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
 }
 
 export interface RequestOptions {
