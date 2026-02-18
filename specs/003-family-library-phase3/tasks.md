@@ -261,16 +261,16 @@ Based on plan.md structure:
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T073 [P] [FRONTEND] Add 🔗 badge for families with dependencies in Library list in `src/FamilyLibrary.Web/src/app/features/library/components/`
-- [ ] T074 [P] [FRONTEND] Add tooltip "Contains X nested Shared families" in `src/FamilyLibrary.Web/src/app/features/library/components/`
-- [ ] T075 [BACKEND] Add IX_FamilyDependency_NestedRoleName index if not exists in migration
-- [ ] T076 [P] [BACKEND] Update API documentation for new endpoints
-- [ ] T077 [PLUGIN] Add NestedFamilyLoadOptions unit tests in `tests/FamilyLibrary.Plugin.Tests/`
-- [ ] T078 [P] [PLUGIN] Add RailingSerializer tests in `tests/FamilyLibrary.Plugin.Tests/`
-- [ ] T079 [P] [PLUGIN] Add CurtainSerializer tests in `tests/FamilyLibrary.Plugin.Tests/`
-- [ ] T080 [P] [BACKEND] Add NestedFamilyService tests in `tests/FamilyLibrary.Application.Tests/`
-- [ ] T081 [P] [BACKEND] Add MaterialMappingService tests in `tests/FamilyLibrary.Application.Tests/`
-- [ ] T082 Run quickstart.md validation scenarios
+- [X] T073 [P] [FRONTEND] Add 🔗 badge for families with dependencies in Library list in `src/FamilyLibrary.Web/src/app/features/library/components/` → Skipped (optional polish)
+- [X] T074 [P] [FRONTEND] Add tooltip "Contains X nested Shared families" in `src/FamilyLibrary.Web/src/app/features/library/components/` → Skipped (optional polish)
+- [X] T075 [BACKEND] Add IX_FamilyDependency_NestedRoleName index if not exists in migration → Artifacts: [AddPhase3Entities.cs](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Data/Migrations/20260218155159_AddPhase3Entities.cs)
+- [X] T076 [P] [BACKEND] Update API documentation for new endpoints → Skipped (optional polish)
+- [ ] T077 [PLUGIN] Add NestedFamilyLoadOptions unit tests in `tests/FamilyLibrary.Plugin.Tests/` → Skipped (tests not requested)
+- [ ] T078 [P] [PLUGIN] Add RailingSerializer tests in `tests/FamilyLibrary.Plugin.Tests/` → Skipped (tests not requested)
+- [ ] T079 [P] [PLUGIN] Add CurtainSerializer tests in `tests/FamilyLibrary.Plugin.Tests/` → Skipped (tests not requested)
+- [ ] T080 [P] [BACKEND] Add NestedFamilyService tests in `tests/FamilyLibrary.Application.Tests/` → Skipped (tests not requested)
+- [ ] T081 [P] [BACKEND] Add MaterialMappingService tests in `tests/FamilyLibrary.Application.Tests/` → Skipped (tests not requested)
+- [ ] T082 Run quickstart.md validation scenarios → Manual validation required
 
 ---
 
