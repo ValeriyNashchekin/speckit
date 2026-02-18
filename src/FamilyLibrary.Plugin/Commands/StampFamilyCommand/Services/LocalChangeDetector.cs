@@ -58,4 +58,62 @@ public class LocalChangeDetector
         var changeSet = DetectChanges(family, doc, librarySnapshot);
         return changeSet.HasChanges;
     }
+
+    /// <summary>
+    /// Gets a human-readable summary of changes for display.
+    /// </summary>
+    /// <param name="changeSet">The change set to summarize.</param>
+    /// <returns>Formatted string with change categories and counts.</returns>
+    public string GetChangeSummary(ChangeSet changeSet)
+    {
+        if (changeSet == null || !changeSet.HasChanges)
+            return "No changes detected.";
+
+        var summary = new System.Text.StringBuilder();
+        summary.AppendLine("Local modifications detected:");
+
+        foreach (var item in changeSet.Items)
+        {
+            var categoryText = GetCategoryDisplayText(item.Category, item);
+            if (!string.IsNullOrEmpty(categoryText))
+            {
+                summary.AppendLine($"  - {categoryText}");
+            }
+        }
+
+        return summary.ToString().TrimEnd();
+    }
+
+    private static string GetCategoryDisplayText(Core.Enums.ChangeCategory category, ChangeItem item)
+    {
+        return category switch
+        {
+            Core.Enums.ChangeCategory.Name =>
+                $"Name: '{item.PreviousValue}' -> '{item.CurrentValue}'",
+            Core.Enums.ChangeCategory.Category =>
+                $"Category: '{item.PreviousValue}' -> '{item.CurrentValue}'",
+            Core.Enums.ChangeCategory.Types =>
+                FormatTypesChange(item.AddedItems, item.RemovedItems),
+            Core.Enums.ChangeCategory.Parameters =>
+                FormatParametersChange(item.ParameterChanges),
+            _ => category.ToString()
+        };
+    }
+
+    private static string FormatTypesChange(List<string>? added, List<string>? removed)
+    {
+        var parts = new List<string>();
+        if (added != null && added.Count > 0)
+            parts.Add($"{added.Count} type(s) added");
+        if (removed != null && removed.Count > 0)
+            parts.Add($"{removed.Count} type(s) removed");
+        return parts.Count > 0 ? $"Types: {string.Join(", ", parts)}" : string.Empty;
+    }
+
+    private static string FormatParametersChange(List<ParameterChange>? changes)
+    {
+        if (changes == null || changes.Count == 0)
+            return string.Empty;
+        return $"Parameters: {changes.Count} parameter(s) modified";
+    }
 }

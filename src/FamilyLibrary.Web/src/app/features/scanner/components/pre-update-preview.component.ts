@@ -3,15 +3,17 @@ import { CommonModule } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
+import { PanelModule } from 'primeng/panel';
 import { ChangeSet, ChangeItem, ChangeCategory } from '../../../core/models/scanner.models';
+import { ChangeItemComponent } from '../../library/components/changelog/change-item.component';
 
 /**
  * Preview dialog for confirming family updates before applying changes.
- * Displays changes grouped by category with affected types count.
+ * Displays changes grouped by category with expandable details.
  */
 @Component({
   selector: 'app-pre-update-preview',
-  imports: [CommonModule, DialogModule, ButtonModule, TagModule],
+  imports: [CommonModule, DialogModule, ButtonModule, TagModule, PanelModule, ChangeItemComponent],
   templateUrl: './pre-update-preview.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

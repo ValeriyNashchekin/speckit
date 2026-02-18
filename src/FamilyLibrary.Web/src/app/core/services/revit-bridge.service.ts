@@ -14,6 +14,8 @@ import {
   UiLoadFamilyPayload,
   PluginEventTypes,
   UiEventTypes,
+  Phase2PluginEventTypes,
+  ChangesResultEvent,
 } from '../models/webview-events.model';
 
 /**
@@ -30,6 +32,10 @@ export class RevitBridgeService {
   readonly revitVersion = signal<string | null>(null);
   readonly documentType = signal<'Project' | 'Family' | 'None'>('None');
   readonly isEmbeddedMode = computed(() => this.isEmbedded);
+
+  // Phase 2: Changes result signal
+  readonly changesResult = signal<ChangesResultEvent['payload'] | null>(null);
+  readonly hasChanges = computed(() => this.changesResult()?.changes.hasChanges ?? false);
 
   constructor() {
     if (this.isEmbedded) {
@@ -91,6 +97,12 @@ export class RevitBridgeService {
         this.documentType.set(readyPayload.documentType);
         this.isRevitReady.set(true);
         console.log('[RevitBridge] Revit ready:', readyPayload);
+        break;
+
+      case Phase2PluginEventTypes.REVIT_CHANGES_RESULT:
+        const changesPayload = event.payload as ChangesResultEvent['payload'];
+        this.changesResult.set(changesPayload);
+        console.log('[RevitBridge] Changes result:', changesPayload);
         break;
     }
   }
@@ -188,5 +200,12 @@ export class RevitBridgeService {
    */
   onLoadResult(): Observable<RevitLoadResultPayload> {
     return this.on<RevitLoadResultPayload>(PluginEventTypes.REVIT_LOAD_RESULT);
+  }
+
+  /**
+   * Subscribe to changes result events (Phase 2)
+   */
+  onChangesResult(): Observable<ChangesResultEvent['payload']> {
+    return this.on<ChangesResultEvent['payload']>(Phase2PluginEventTypes.REVIT_CHANGES_RESULT);
   }
 }

@@ -3,6 +3,7 @@ using Autodesk.Revit.DB;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using FamilyLibrary.Plugin.Commands.LoadFamilyCommand;
+using FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services;
 using FamilyLibrary.Plugin.Commands.UpdateFamiliesCommand.Services;
 using FamilyLibrary.Plugin.Core.Enums;
 using FamilyLibrary.Plugin.Core.Interfaces;
@@ -20,6 +21,10 @@ public class RevitBridge : IWebViewBridge
     private readonly Dictionary<string, List<Action<object>>> _handlers = new();
     private bool _isInitialized;
     private Document? _activeDocument;
+
+    // TaskCompletionSource for async UI confirmation
+    private TaskCompletionSource<bool>? _updateConfirmationTcs;
+    private static readonly TimeSpan ConfirmationTimeout = TimeSpan.FromMinutes(5);
 
     public RevitBridge(WebViewHost webViewHost)
     {
@@ -148,6 +153,19 @@ public class RevitBridge : IWebViewBridge
 
             case "ui:stamp-legacy":
                 HandleStampLegacyAsync(message.Payload as JObject).ConfigureAwait(false);
+                break;
+
+            case "ui:get-changes":
+                HandleGetChangesAsync(message.Payload as JObject).ConfigureAwait(false);
+                break;
+
+            // Update confirmation events from UI
+            case "ui:update:confirm":
+                HandleUpdateConfirm();
+                break;
+
+            case "ui:update:cancel":
+                HandleUpdateCancel();
                 break;
         }
     }
@@ -303,39 +321,11 @@ public class RevitBridge : IWebViewBridge
             var previewService = new UpdatePreviewService();
             var updaterService = new FamilyUpdaterService(previewService);
             var results = new List<UpdateResult>();
-            var previews = new List<UpdatePreviewItem>();
 
             // Compute previews for all families if requested
             if (showPreview)
             {
-                foreach (var item in familiesArray)
-                {
-                    var uniqueId = item["uniqueId"]?.ToString();
-                    var roleName = item["roleName"]?.ToString();
-                    var targetVersion = item.Value<int?>("targetVersion");
-                    var librarySnapshotToken = item["librarySnapshot"] as JObject;
-
-                    if (string.IsNullOrEmpty(uniqueId) || string.IsNullOrEmpty(roleName))
-                        continue;
-
-                    FamilySnapshot? librarySnapshot = null;
-                    if (librarySnapshotToken != null)
-                    {
-                        librarySnapshot = librarySnapshotToken.ToObject<FamilySnapshot>();
-                    }
-
-                    var changeSet = updaterService.ComputeUpdatePreview(
-                        _activeDocument, uniqueId, librarySnapshot);
-
-                    previews.Add(new UpdatePreviewItem
-                    {
-                        UniqueId = uniqueId,
-                        FamilyName = GetFamilyNameByUniqueId(uniqueId),
-                        RoleName = roleName,
-                        TargetVersion = targetVersion,
-                        ChangeSet = changeSet
-                    });
-                }
+                var previews = ComputePreviews(familiesArray, updaterService);
 
                 // Send preview event to UI
                 SendEvent("revit:update:preview", new
@@ -344,33 +334,18 @@ public class RevitBridge : IWebViewBridge
                     totalCount = previews.Count,
                     hasChanges = previews.Any(p => p.ChangeSet?.HasChanges == true)
                 });
+
+                // Wait for UI confirmation
+                var confirmed = await WaitForConfirmationAsync().ConfigureAwait(false);
+                if (!confirmed)
+                {
+                    SendUpdateResult(false, "Update cancelled by user", new List<UpdateResult>());
+                    return;
+                }
             }
 
             // Proceed with updates
-            foreach (var item in familiesArray)
-            {
-                var uniqueId = item["uniqueId"]?.ToString();
-                var roleName = item["roleName"]?.ToString();
-                var targetVersion = item.Value<int?>("targetVersion");
-
-                if (string.IsNullOrEmpty(uniqueId) || string.IsNullOrEmpty(roleName) || !targetVersion.HasValue)
-                    continue;
-
-                // Send progress update
-                SendEvent("revit:update:progress", new
-                {
-                    completed = results.Count,
-                    total = familiesArray.Count,
-                    currentFamily = roleName,
-                    success = results.Count(r => r.Success),
-                    failed = results.Count(r => !r.Success)
-                });
-
-                var result = await updaterService.UpdateFamilyAsync(
-                    _activeDocument, uniqueId, roleName, targetVersion.Value).ConfigureAwait(false);
-
-                results.Add(result);
-            }
+            results = await ExecuteUpdatesAsync(familiesArray, updaterService).ConfigureAwait(false);
 
             var success = results.All(r => r.Success);
             var message = success
@@ -384,6 +359,102 @@ public class RevitBridge : IWebViewBridge
             System.Diagnostics.Debug.WriteLine($"Update error: {ex.Message}");
             SendUpdateResult(false, ex.Message, new List<UpdateResult>());
         }
+    }
+
+    private List<UpdatePreviewItem> ComputePreviews(JArray familiesArray, FamilyUpdaterService updaterService)
+    {
+        var previews = new List<UpdatePreviewItem>();
+
+        foreach (var item in familiesArray)
+        {
+            var uniqueId = item["uniqueId"]?.ToString();
+            var roleName = item["roleName"]?.ToString();
+            var targetVersion = item.Value<int?>("targetVersion");
+            var librarySnapshotToken = item["librarySnapshot"] as JObject;
+
+            if (string.IsNullOrEmpty(uniqueId) || string.IsNullOrEmpty(roleName))
+                continue;
+
+            FamilySnapshot? librarySnapshot = null;
+            if (librarySnapshotToken != null)
+            {
+                librarySnapshot = librarySnapshotToken.ToObject<FamilySnapshot>();
+            }
+
+            var changeSet = updaterService.ComputeUpdatePreview(
+                _activeDocument!, uniqueId, librarySnapshot);
+
+            previews.Add(new UpdatePreviewItem
+            {
+                UniqueId = uniqueId,
+                FamilyName = GetFamilyNameByUniqueId(uniqueId),
+                RoleName = roleName,
+                TargetVersion = targetVersion,
+                ChangeSet = changeSet
+            });
+        }
+
+        return previews;
+    }
+
+    private async System.Threading.Tasks.Task<List<UpdateResult>> ExecuteUpdatesAsync(
+        JArray familiesArray, FamilyUpdaterService updaterService)
+    {
+        var results = new List<UpdateResult>();
+
+        foreach (var item in familiesArray)
+        {
+            var uniqueId = item["uniqueId"]?.ToString();
+            var roleName = item["roleName"]?.ToString();
+            var targetVersion = item.Value<int?>("targetVersion");
+
+            if (string.IsNullOrEmpty(uniqueId) || string.IsNullOrEmpty(roleName) || !targetVersion.HasValue)
+                continue;
+
+            // Send progress update
+            SendEvent("revit:update:progress", new
+            {
+                completed = results.Count,
+                total = familiesArray.Count,
+                currentFamily = roleName,
+                success = results.Count(r => r.Success),
+                failed = results.Count(r => !r.Success)
+            });
+
+            var result = await updaterService.UpdateFamilyAsync(
+                _activeDocument!, uniqueId, roleName, targetVersion.Value).ConfigureAwait(false);
+
+            results.Add(result);
+        }
+
+        return results;
+    }
+
+    private async System.Threading.Tasks.Task<bool> WaitForConfirmationAsync()
+    {
+        _updateConfirmationTcs = new TaskCompletionSource<bool>();
+
+        using var cts = new System.Threading.CancellationTokenSource(ConfirmationTimeout);
+        cts.Token.Register(() => _updateConfirmationTcs?.TrySetResult(false));
+
+        try
+        {
+            return await _updateConfirmationTcs.Task.ConfigureAwait(false);
+        }
+        finally
+        {
+            _updateConfirmationTcs = null;
+        }
+    }
+
+    private void HandleUpdateConfirm()
+    {
+        _updateConfirmationTcs?.TrySetResult(true);
+    }
+
+    private void HandleUpdateCancel()
+    {
+        _updateConfirmationTcs?.TrySetResult(false);
     }
 
     private string GetFamilyNameByUniqueId(string uniqueId)
@@ -489,6 +560,75 @@ public class RevitBridge : IWebViewBridge
     private void SendStampLegacyResult(bool success, string message, int stampedCount)
     {
         SendEvent("revit:stamp-legacy:result", new { success, message, stampedCount });
+    }
+
+    private async System.Threading.Tasks.Task HandleGetChangesAsync(JObject? payload)
+    {
+        var uniqueId = payload?["uniqueId"]?.ToString();
+
+        if (string.IsNullOrEmpty(uniqueId))
+        {
+            SendChangesResult(uniqueId ?? string.Empty, new ChangeSet());
+            return;
+        }
+
+        if (_activeDocument == null)
+        {
+            SendChangesResult(uniqueId, new ChangeSet());
+            return;
+        }
+
+        try
+        {
+            // Find family by UniqueId
+            var family = new FilteredElementCollector(_activeDocument)
+                .OfClass(typeof(Family))
+                .Cast<Family>()
+                .FirstOrDefault(f => f.UniqueId == uniqueId);
+
+            if (family == null)
+            {
+                SendChangesResult(uniqueId, new ChangeSet());
+                return;
+            }
+
+            // Try to get library snapshot from payload (UI may pass it)
+            var librarySnapshotToken = payload?["librarySnapshot"] as JObject;
+            FamilySnapshot? librarySnapshot = null;
+
+            if (librarySnapshotToken != null)
+            {
+                librarySnapshot = librarySnapshotToken.ToObject<FamilySnapshot>();
+            }
+
+            // If no snapshot provided, return empty ChangeSet
+            // (snapshot would need to be fetched from API in real implementation)
+            if (librarySnapshot == null)
+            {
+                SendChangesResult(uniqueId, new ChangeSet());
+                return;
+            }
+
+            // Use LocalChangeDetector to compute changes
+            var changeDetector = new LocalChangeDetector();
+            var changeSet = changeDetector.DetectChanges(family, _activeDocument, librarySnapshot);
+
+            SendChangesResult(uniqueId, changeSet);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Get changes error: {ex.Message}");
+            SendChangesResult(uniqueId, new ChangeSet());
+        }
+    }
+
+    private void SendChangesResult(string familyUniqueId, ChangeSet changes)
+    {
+        SendEvent("revit:changes:result", new
+        {
+            familyUniqueId,
+            changes
+        });
     }
 
     #endregion

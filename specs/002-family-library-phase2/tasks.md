@@ -119,14 +119,14 @@
 
 - [X] T047 [US3] [PLUGIN] Create LocalChangeDetector in src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/ → Artifacts: [LocalChangeDetector.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/LocalChangeDetector.cs)
 - [X] T048 [US3] [PLUGIN] Add Local Modified status detection to LibraryQueueViewModel → Artifacts: [LibraryQueueViewModel.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/ViewModels/LibraryQueueViewModel.cs), [FamilyQueueItem.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Models/FamilyQueueItem.cs)
-- [ ] T049 [US3] [PLUGIN] Add View Changes button to Queue tab
-- [ ] T050 [US3] [PLUGIN] Add changes:result event to RevitBridge
+- [X] T049 [US3] [PLUGIN] Add View Changes button to Queue tab → Artifacts: [LibraryQueueView.xaml](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Views/LibraryQueueView.xaml), [LibraryQueueViewModel.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/ViewModels/LibraryQueueViewModel.cs)
+- [X] T050 [US3] [PLUGIN] Add changes:result event to RevitBridge → Artifacts: [RevitBridge.cs](src/FamilyLibrary.Plugin/Infrastructure/WebView2/RevitBridge.cs)
 
 ### Frontend for US3
 
 - [X] T051 [P] [US3] [FRONTEND] Create view-changes-modal.component.ts in src/FamilyLibrary.Web/src/app/features/library/components/ → Artifacts: [view-changes-modal.component.ts](src/FamilyLibrary.Web/src/app/features/library/components/view-changes-modal/view-changes-modal.component.ts), [view-changes-modal.component.html](src/FamilyLibrary.Web/src/app/features/library/components/view-changes-modal/view-changes-modal.component.html)
 - [X] T052 [US3] [FRONTEND] Add View Changes button to queue-list component → Artifacts: [scanner-table.component.ts](src/FamilyLibrary.Web/src/app/features/scanner/components/scanner-table.component.ts), [scanner-table.component.html](src/FamilyLibrary.Web/src/app/features/scanner/components/scanner-table.component.html)
-- [ ] T053 [US3] [FRONTEND] Handle revit:changes:result event in RevitBridgeService
+- [X] T053 [US3] [FRONTEND] Handle revit:changes:result event in RevitBridgeService → Artifacts: [revit-bridge.service.ts](src/FamilyLibrary.Web/src/app/core/services/revit-bridge.service.ts)
 
 **Checkpoint**: Local changes visible in Queue with diff modal
 
@@ -148,13 +148,13 @@
 
 - [X] T057 [US4] [PLUGIN] Create UpdatePreviewService in src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/Services/ → Artifacts: [UpdatePreviewService.cs](src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/Services/UpdatePreviewService.cs)
 - [X] T058 [US4] [PLUGIN] Add pre-update preview check to FamilyUpdaterService → Artifacts: [FamilyUpdaterService.cs](src/FamilyLibrary.Plugin/Commands/UpdateFamiliesCommand/Services/FamilyUpdaterService.cs), [RevitBridge.cs](src/FamilyLibrary.Plugin/Infrastructure/WebView2/RevitBridge.cs)
-- [ ] T059 [US4] [PLUGIN] Send preview data before update via WebView2
+- [X] T059 [US4] [PLUGIN] Send preview data before update via WebView2 → Artifacts: [RevitBridge.cs](src/FamilyLibrary.Plugin/Infrastructure/WebView2/RevitBridge.cs)
 
 ### Frontend for US4
 
 - [X] T060 [P] [US4] [FRONTEND] Create pre-update-preview.component.ts in src/FamilyLibrary.Web/src/app/features/scanner/components/ → Artifacts: [pre-update-preview.component.ts](src/FamilyLibrary.Web/src/app/features/scanner/components/pre-update-preview.component.ts), [pre-update-preview.component.html](src/FamilyLibrary.Web/src/app/features/scanner/components/pre-update-preview.component.html)
 - [X] T061 [US4] [FRONTEND] Show preview dialog before update confirmation → Artifacts: [scanner.component.ts](src/FamilyLibrary.Web/src/app/features/scanner/scanner.component.ts), [scanner.service.ts](src/FamilyLibrary.Web/src/app/features/scanner/services/scanner.service.ts)
-- [ ] T062 [US4] [FRONTEND] Add Show Details expansion to preview
+- [X] T062 [US4] [FRONTEND] Add Show Details expansion to preview → Artifacts: [pre-update-preview.component.ts](src/FamilyLibrary.Web/src/app/features/scanner/components/pre-update-preview.component.ts), [pre-update-preview.component.html](src/FamilyLibrary.Web/src/app/features/scanner/components/pre-update-preview.component.html)
 
 **Checkpoint**: Preview shown before any update with full diff
 
@@ -170,16 +170,16 @@
 
 - [X] T063 [US5] [BACKEND] Add RoutingPreferencesJson model in src/FamilyLibrary.Application/DTOs/SystemTypeDtos.cs → Artifacts: [RoutingPreferencesDto.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/DTOs/RoutingPreferencesDto.cs)
 - [X] T064 [US5] [BACKEND] Update SystemTypeService for Group A categories (Roofs, Ceilings, Foundations) → Artifacts: [SystemTypeService.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Services/SystemTypeService.cs), [SystemTypesController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/SystemTypesController.cs)
-- [ ] T065 [US5] [BACKEND] Update SystemTypeValidator for MEP types
+- [X] T065 [US5] [BACKEND] Update SystemTypeValidator for MEP types → Artifacts: [SystemTypeValidator.cs](src/FamilyLibrary.Api/FamilyLibrary.Application/Validators/SystemTypeValidator.cs)
 
 ### Plugin for US5
 
 - [X] T066 [P] [US5] [PLUGIN] Create RoutingPreferencesSerializer in src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/ → Artifacts: [RoutingPreferencesSerializer.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/RoutingPreferencesSerializer.cs), [RoutingPreferencesJson.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Models/RoutingPreferencesJson.cs)
 - [X] T067 [P] [US5] [PLUGIN] Create RoutingPreferencesApplier in src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/ → Artifacts: [RoutingPreferencesApplier.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/RoutingPreferencesApplier.cs)
 - [X] T068 [US5] [PLUGIN] Update SystemTypeScannerService for Group A categories → Artifacts: [SystemTypeScannerService.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/SystemTypeScannerService.cs), [SystemTypeInfo.cs](src/FamilyLibrary.Plugin/Core/Entities/SystemTypeInfo.cs)
-- [ ] T069 [US5] [PLUGIN] Update SystemTypeScannerService for Group B (Pipes, Ducts)
-- [ ] T070 [US5] [PLUGIN] Update SystemTypePublisher with RoutingPreferences serialization
-- [ ] T071 [US5] [PLUGIN] Update SystemTypePullService with RoutingPreferences apply
+- [X] T069 [US5] [PLUGIN] Update SystemTypeScannerService for Group B (Pipes, Ducts) → Artifacts: [SystemTypeScannerService.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/SystemTypeScannerService.cs), [SystemTypeInfo.cs](src/FamilyLibrary.Plugin/Core/Entities/SystemTypeInfo.cs)
+- [X] T070 [US5] [PLUGIN] Update SystemTypePublisher with RoutingPreferences serialization → Artifacts: [SystemTypePublisher.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/SystemTypePublisher.cs)
+- [X] T071 [US5] [PLUGIN] Update SystemTypePullService with RoutingPreferences apply → Artifacts: [SystemTypePullService.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/SystemTypePullService.cs), [CompoundStructureDeserializer.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/CompoundStructureDeserializer.cs)
 
 ### Frontend for US5
 

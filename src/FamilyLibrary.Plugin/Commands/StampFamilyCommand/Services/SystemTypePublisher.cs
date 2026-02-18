@@ -6,6 +6,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Mechanical;
+using Autodesk.Revit.DB.Plumbing;
 using FamilyLibrary.Plugin.Core.Entities;
 using FamilyLibrary.Plugin.Core.Enums;
 using FamilyLibrary.Plugin.Infrastructure.Http;
@@ -15,27 +17,29 @@ namespace FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services
 {
     /// <summary>
     /// Service for publishing system family types to backend API.
-    /// Handles GroupA (CompoundStructure) and GroupE (Simple parameters).
+    /// Handles GroupA (CompoundStructure), GroupB (RoutingPreferences), and GroupE (Simple parameters).
     /// </summary>
     public class SystemTypePublisher
     {
         private readonly CompoundStructureSerializer _serializer;
+        private readonly RoutingPreferencesSerializer _routingSerializer;
         private readonly HttpClient _httpClient;
         private readonly string _apiBaseUrl;
 
         /// <summary>
         /// Default constructor for production use.
         /// </summary>
-        public SystemTypePublisher() : this(new CompoundStructureSerializer())
+        public SystemTypePublisher() : this(new CompoundStructureSerializer(), new RoutingPreferencesSerializer())
         {
         }
 
         /// <summary>
         /// Constructor for testing with dependencies.
         /// </summary>
-        public SystemTypePublisher(CompoundStructureSerializer serializer)
+        public SystemTypePublisher(CompoundStructureSerializer serializer, RoutingPreferencesSerializer routingSerializer)
         {
             _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
+            _routingSerializer = routingSerializer ?? throw new ArgumentNullException(nameof(routingSerializer));
             _httpClient = new HttpClient();
             // MVP: Configuration should be injected
             _apiBaseUrl = "https://localhost:5001/api";
@@ -62,6 +66,8 @@ namespace FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services
                     return false;
 
                 string json;
+                string? routingPreferences = null;
+
                 if (systemType.Group == SystemFamilyGroup.GroupA)
                 {
                     var compoundStructure = GetCompoundStructure(element);
@@ -69,12 +75,17 @@ namespace FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services
                         ? _serializer.Serialize(compoundStructure, document)
                         : "{}";
                 }
+                else if (systemType.Group == SystemFamilyGroup.GroupB)
+                {
+                    json = SerializeSimpleParameters(element);
+                    routingPreferences = SerializeRoutingPreferences(element, document);
+                }
                 else
                 {
                     json = SerializeSimpleParameters(element);
                 }
 
-                var hash = ComputeHashFromString(json);
+                var hash = ComputeHashFromString(json + (routingPreferences ?? ""));
 
                 var request = new SystemTypePublishRequest
                 {
@@ -84,7 +95,8 @@ namespace FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services
                     SystemFamily = systemType.SystemFamily,
                     Group = (int)systemType.Group,
                     Json = json,
-                    Hash = hash
+                    Hash = hash,
+                    RoutingPreferences = routingPreferences
                 };
 
                 return CallPublishApi(request);
@@ -122,12 +134,31 @@ namespace FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services
         /// Gets the compound structure from a host object element type.
         /// Returns null if element does not have compound structure.
         /// </summary>
-        private CompoundStructure GetCompoundStructure(Element element)
+        private CompoundStructure? GetCompoundStructure(Element element)
         {
             if (element is HostObjAttributes hostAttrs)
             {
                 return hostAttrs.GetCompoundStructure();
             }
+            return null;
+        }
+
+        /// <summary>
+        /// Serializes RoutingPreferences for MEP types (PipeType, DuctType).
+        /// Returns null if element is not an MEP type or has no routing preferences.
+        /// </summary>
+        private string? SerializeRoutingPreferences(Element element, Document document)
+        {
+            if (element is PipeType pipeType)
+            {
+                return _routingSerializer.SerializeToJson(pipeType, document);
+            }
+
+            if (element is DuctType ductType)
+            {
+                return _routingSerializer.SerializeToJson(ductType, document);
+            }
+
             return null;
         }
 
@@ -247,6 +278,13 @@ namespace FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services
         public int Group { get; set; }
         public string Json { get; set; } = string.Empty;
         public string Hash { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Routing preferences JSON for GroupB types (PipeType, DuctType).
+        /// Null for other groups.
+        /// </summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string? RoutingPreferences { get; set; }
     }
 
     /// <summary>

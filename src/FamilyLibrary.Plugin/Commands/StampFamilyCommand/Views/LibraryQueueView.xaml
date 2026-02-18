@@ -108,6 +108,18 @@
                             <DataGridTextColumn Binding="{Binding CategoryName}" Header="Category" Width="120"/>
                             <DataGridTextColumn Binding="{Binding Status}" Header="Status" Width="80"/>
                             <DataGridCheckBoxColumn Binding="{Binding HasLocalChanges}" Header="Modified" Width="70"/>
+                            <DataGridTemplateColumn Header="Actions" Width="Auto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="View Changes"
+                                                Command="{Binding DataContext.ViewChangesCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Visibility="{Binding HasLocalChanges, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Padding="8,2"
+                                                FontSize="11"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn Binding="{Binding ErrorMessage}" Header="Error" Width="120"/>
                         </DataGrid.Columns>
                     </DataGrid>

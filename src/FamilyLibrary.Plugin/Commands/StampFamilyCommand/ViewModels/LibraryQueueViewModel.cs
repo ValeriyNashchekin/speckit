@@ -354,6 +354,66 @@ public sealed partial class LibraryQueueViewModel : ObservableObject
         StatusMessage = "Queue cleared.";
     }
 
+    [RelayCommand]
+    private void ViewChanges(FamilyQueueItem item)
+    {
+        if (item == null || _document == null)
+            return;
+
+        if (!item.HasLocalChanges || item.StampData?.RoleId == null || item.StampData.RoleId == Guid.Empty)
+        {
+            System.Windows.MessageBox.Show(
+                "No local changes detected for this family.",
+                "Changes",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+            return;
+        }
+
+        try
+        {
+            var element = _document.GetElement(item.UniqueId);
+            if (!(element is Autodesk.Revit.DB.Family family))
+            {
+                System.Windows.MessageBox.Show(
+                    "Unable to access family element.",
+                    "Error",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            // Fetch library snapshot synchronously for MVP
+            var librarySnapshot = FetchLibrarySnapshotAsync(item.StampData.RoleName).Result;
+            if (librarySnapshot == null)
+            {
+                System.Windows.MessageBox.Show(
+                    "Unable to fetch library snapshot for comparison.",
+                    "Changes",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Information);
+                return;
+            }
+
+            var changeSet = _changeDetector.DetectChanges(family, _document, librarySnapshot);
+            var summary = _changeDetector.GetChangeSummary(changeSet);
+
+            System.Windows.MessageBox.Show(
+                summary,
+                $"Changes: {item.FamilyName}",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+        }
+        catch (System.Exception ex)
+        {
+            System.Windows.MessageBox.Show(
+                $"Error detecting changes: {ex.Message}",
+                "Error",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Error);
+        }
+    }
+
     public string GetStatusSummary()
     {
         return $"Scanned: {ScannedCount} | Stamped: {StampedCount} | Published: {PublishedCount} | Failed: {FailedCount}";
