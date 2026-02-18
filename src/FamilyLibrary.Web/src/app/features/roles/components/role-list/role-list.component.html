@@ -175,3 +175,13 @@
 
 <!-- Toast -->
 <p-toast position="top-right" />
+
+<!-- Role Editor Dialog -->
+<app-role-editor
+  [visible]="editorVisible()"
+  [role]="editingRole()"
+  [categories]="categories()"
+  [tags]="tags()"
+  (saved)="onRoleSaved($event)"
+  (closed)="onEditorClosed()"
+/>

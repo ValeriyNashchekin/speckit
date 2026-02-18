@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -8,9 +8,12 @@ import { TableModule, TableLazyLoadEvent } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
-import { FamilyRole } from '../../../../core/models/family-role.model';
+import { Category, FamilyRole, CreateFamilyRoleRequest, Tag, UpdateFamilyRoleRequest } from '../../../../core/models';
 import { ConfirmDialogService } from '../../../../shared/components/confirm-dialog/confirm-dialog.service';
+import { CategoriesService } from '../../../categories/services/categories.service';
+import { TagsService } from '../../../tags/services/tags.service';
 import { RolesStore } from '../../roles.store';
+import { RoleEditorComponent } from '../role-editor/role-editor.component';
 
 @Component({
   selector: 'app-role-list',
@@ -19,6 +22,7 @@ import { RolesStore } from '../../roles.store';
     ConfirmDialogModule,
     FormsModule,
     InputTextModule,
+    RoleEditorComponent,
     TableModule,
     TagModule,
     ToastModule,
@@ -31,6 +35,8 @@ export class RoleListComponent {
   private readonly rolesStore = inject(RolesStore);
   private readonly confirmDialogService = inject(ConfirmDialogService);
   private readonly messageService = inject(MessageService);
+  private readonly categoriesService = inject(CategoriesService);
+  private readonly tagsService = inject(TagsService);
 
   // Pagination state
   protected readonly first = signal(0);
@@ -41,6 +47,14 @@ export class RoleListComponent {
 
   // Deletion state
   protected readonly isDeleting = signal<string | null>(null);
+
+  // Dialog state
+  protected readonly editorVisible = signal(false);
+  protected readonly editingRole = signal<FamilyRole | null>(null);
+
+  // Reference data
+  protected readonly categories = signal<Category[]>([]);
+  protected readonly tags = signal<Tag[]>([]);
 
   // Store signals
   protected readonly roles = this.rolesStore.roles;
@@ -54,6 +68,23 @@ export class RoleListComponent {
   constructor() {
     // Load roles on init
     this.loadRoles();
+    // Load reference data
+    this.loadCategories();
+    this.loadTags();
+  }
+
+  private loadCategories(): void {
+    this.categoriesService.getCategories().subscribe({
+      next: (data) => this.categories.set(data),
+      error: (err) => console.error('Failed to load categories:', err),
+    });
+  }
+
+  private loadTags(): void {
+    this.tagsService.getTags().subscribe({
+      next: (data) => this.tags.set(data),
+      error: (err) => console.error('Failed to load tags:', err),
+    });
   }
 
   private loadRoles(): void {
@@ -87,19 +118,45 @@ export class RoleListComponent {
   }
 
   protected createRole(): void {
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Coming Soon',
-      detail: 'Role creation will be implemented soon',
-    });
+    this.editingRole.set(null);
+    this.editorVisible.set(true);
   }
 
   protected editRole(role: FamilyRole): void {
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Coming Soon',
-      detail: `Edit role "${role.name}" will be implemented soon`,
-    });
+    this.editingRole.set(role);
+    this.editorVisible.set(true);
+  }
+
+  protected onEditorClosed(): void {
+    this.editorVisible.set(false);
+    this.editingRole.set(null);
+  }
+
+  protected async onRoleSaved(request: CreateFamilyRoleRequest | UpdateFamilyRoleRequest): Promise<void> {
+    const isEdit = this.editingRole() !== null;
+    let success: boolean;
+
+    if (isEdit && this.editingRole()) {
+      success = !!(await this.rolesStore.updateRole(this.editingRole()!.id, request as UpdateFamilyRoleRequest));
+    } else {
+      success = !!(await this.rolesStore.createRole(request as CreateFamilyRoleRequest));
+    }
+
+    if (success) {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: isEdit ? 'Role updated successfully' : 'Role created successfully',
+      });
+      this.editorVisible.set(false);
+      this.editingRole.set(null);
+    } else {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: isEdit ? 'Failed to update role' : 'Failed to create role',
+      });
+    }
   }
 
   protected deleteRole(role: FamilyRole, event: Event): void {

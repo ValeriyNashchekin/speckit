@@ -12,6 +12,17 @@ description: "Task list template for feature implementation"
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
+## Entity Coverage Matrix
+
+| Entity | Role | API Endpoints | UI Exposure | Story |
+|--------|------|---------------|-------------|-------|
+| [PrimaryEntity] | Primary | Full CRUD | List, Editor | US1 |
+| [SupportingEntity1] | Supporting | Full CRUD | Selector | US1 |
+| [SupportingEntity2] | Supporting | GET only | Dropdown | US1 |
+
+**Role**: Primary = main focus of story, Supporting = referenced by primary, Internal = backend only
+**UI Exposure**: CRUD = full management UI, Selector = dropdown/multi-select, Read-only = display only
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
@@ -79,21 +90,41 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
+**Primary Entity**: [Main entity for this story]
+**Supporting Entities**: [Entities referenced by primary, e.g., Category, Tag]
+
+### Tests for User Story 1 (OPTIONAL - only if tests requested)
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
 - [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
 - [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
 
-### Implementation for User Story 1
+### Backend - US1
 
-- [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py
-- [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
-- [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013)
-- [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
-- [ ] T016 [US1] Add validation and error handling
-- [ ] T017 [US1] Add logging for user story 1 operations
+- [ ] T012 [P] [US1] [BACKEND] Create [PrimaryEntity] in src/[backend]/entities/
+- [ ] T013 [P] [US1] [BACKEND] Create [SupportingEntity] in src/[backend]/entities/
+- [ ] T014 [US1] [BACKEND] Implement [PrimaryEntity]Service in src/[backend]/services/
+- [ ] T015 [US1] [BACKEND] Implement [SupportingEntity]Service in src/[backend]/services/
+- [ ] T016 [US1] [BACKEND] Create [PrimaryEntity]Controller in src/[backend]/controllers/
+- [ ] T017 [US1] [BACKEND] Create [SupportingEntity]Controller in src/[backend]/controllers/
+
+### Frontend - US1 (Primary Entity)
+
+- [ ] T018 [P] [US1] [FRONTEND] Create [primary-entity].service.ts in src/[frontend]/features/[feature]/
+- [ ] T019 [P] [US1] [FRONTEND] Create [primary-entity]-list component in src/[frontend]/features/[feature]/components/
+- [ ] T020 [US1] [FRONTEND] Create [primary-entity]-editor component in src/[frontend]/features/[feature]/components/
+- [ ] T021 [US1] [FRONTEND] Add routes for [feature] in src/[frontend]/features/[feature]/
+
+### Frontend - US1 (Supporting Entities)
+
+- [ ] T022 [P] [US1] [FRONTEND] Create [supporting-entity].service.ts in src/[frontend]/features/[feature]/
+- [ ] T023 [P] [US1] [FRONTEND] Create [supporting-entity]-selector component in src/[frontend]/features/[feature]/components/
+
+### UI Composition - US1
+
+- [ ] T024 [US1] [FRONTEND] Integrate [SupportingEntity]Selector into [PrimaryEntity]Editor
+- [ ] T025 [US1] [FRONTEND] Wire [field] dropdown to [SupportingEntity]Service.getAll()
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -245,7 +276,20 @@ With multiple developers:
 - [P] tasks = different files, no dependencies
 - [Story] label maps task to specific user story for traceability
 - Each user story should be independently completable and testable
+- **Supporting entities**: If an entity is referenced by FK in another entity's form, it needs selector component + integration task
+- **Composition tasks**: Every FK field in a form requires a task to integrate the selector
 - Verify tests fail before implementing
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
+
+## Coverage Checklist
+
+Before considering tasks.md complete, verify:
+
+- [ ] Every entity in data-model.md has backend tasks
+- [ ] Every entity in acceptance criteria has frontend tasks
+- [ ] Every FK field in forms has selector component task
+- [ ] Every selector component has integration task into parent form
+- [ ] Every API endpoint has a consumer (frontend or plugin)
+- [ ] Entity Coverage Matrix is filled in

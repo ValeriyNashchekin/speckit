@@ -3,14 +3,15 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 
-import { Category, CreateFamilyRoleRequest, FamilyRole, RoleType, UpdateFamilyRoleRequest } from '../../../../core/models';
+import { Category, CreateFamilyRoleRequest, FamilyRole, RoleType, Tag, UpdateFamilyRoleRequest } from '../../../../core/models';
 
 @Component({
   selector: 'app-role-editor',
-  imports: [ButtonModule, DialogModule, InputTextModule, ReactiveFormsModule, SelectModule, TextareaModule],
+  imports: [ButtonModule, DialogModule, InputTextModule, MultiSelectModule, ReactiveFormsModule, SelectModule, TextareaModule],
   templateUrl: './role-editor.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -19,6 +20,7 @@ export class RoleEditorComponent {
   visible = input<boolean>(false);
   role = input<FamilyRole | null>(null);
   categories = input<Array<Category>>([]);
+  tags = input<Array<Tag>>([]);
 
   // outputs
   saved = output<CreateFamilyRoleRequest | UpdateFamilyRoleRequest>();
@@ -42,6 +44,11 @@ export class RoleEditorComponent {
     return cats.map(c => ({ label: c.name, value: c.id }));
   });
 
+  protected readonly tagOptions = computed(() => {
+    const tagsList = this.tags();
+    return tagsList.map(t => ({ label: t.name, value: t.id }));
+  });
+
   // services
   private readonly fb = inject(FormBuilder);
 
@@ -51,6 +58,7 @@ export class RoleEditorComponent {
       type: ['Loadable', [Validators.required]],
       description: [null, [Validators.maxLength(500)]],
       categoryId: [null],
+      tagIds: [[]],
     });
 
     // Sync form when role changes
@@ -62,6 +70,7 @@ export class RoleEditorComponent {
           type: role.type,
           description: role.description,
           categoryId: role.categoryId,
+          tagIds: role.tags?.map(t => t.id) ?? [],
         });
         this.roleForm.get('name')?.disable();
       } else {
@@ -70,6 +79,7 @@ export class RoleEditorComponent {
           type: 'Loadable',
           description: null,
           categoryId: null,
+          tagIds: [],
         });
         this.roleForm.get('name')?.enable();
       }
@@ -88,6 +98,7 @@ export class RoleEditorComponent {
       const updateRequest: UpdateFamilyRoleRequest = {
         description: formValue.description,
         categoryId: formValue.categoryId,
+        tagIds: formValue.tagIds,
       };
       this.saved.emit(updateRequest);
     } else {
@@ -96,6 +107,7 @@ export class RoleEditorComponent {
         type: formValue.type,
         description: formValue.description,
         categoryId: formValue.categoryId,
+        tagIds: formValue.tagIds,
       };
       this.saved.emit(createRequest);
     }

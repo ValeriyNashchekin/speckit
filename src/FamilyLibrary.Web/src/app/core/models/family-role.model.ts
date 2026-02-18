@@ -1,5 +1,7 @@
 // DTOs matching backend FamilyRole entity
 
+import { Tag } from './tag.model';
+
 export type RoleType = 'Loadable' | 'System';
 
 export interface FamilyRole {
@@ -8,6 +10,7 @@ export interface FamilyRole {
   type: RoleType;
   description: string | null;
   categoryId: string | null;
+  tags?: Tag[];
   createdAt: string;
   updatedAt: string;
 }
@@ -17,11 +20,13 @@ export interface CreateFamilyRoleRequest {
   type: RoleType;
   description?: string | null;
   categoryId?: string | null;
+  tagIds?: string[];
 }
 
 export interface UpdateFamilyRoleRequest {
   description?: string | null;
   categoryId?: string | null;
+  tagIds?: string[];
 }
 
 export interface FamilyRoleListRequest {
