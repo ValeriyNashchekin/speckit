@@ -1,16 +1,13 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
-import { MenuModule } from 'primeng/menu';
+import { PanelMenuModule } from 'primeng/panelmenu';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
+import { MenuItem } from 'primeng/api';
 
-interface NavItem {
-  label: string;
-  icon: string;
-  route: string;
-}
+type UserRole = 'designer' | 'bim_manager' | 'admin';
 
 @Component({
   selector: 'app-main-layout',
@@ -19,7 +16,7 @@ interface NavItem {
     RouterLink,
     RouterLinkActive,
     ButtonModule,
-    MenuModule,
+    PanelMenuModule,
     ToolbarModule,
     ConfirmDialogModule,
     ToastModule,
@@ -28,16 +25,101 @@ interface NavItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainLayoutComponent {
-  protected readonly navItems = signal<NavItem[]>([
-    { label: 'Dashboard', icon: 'pi pi-home', route: '/dashboard' },
-    { label: 'Queue', icon: 'pi pi-list', route: '/queue' },
-    { label: 'Scanner', icon: 'pi pi-search', route: '/scanner' },
-    { label: 'Library', icon: 'pi pi-folder-open', route: '/library' },
-    { label: 'Family Roles', icon: 'pi pi-tags', route: '/roles' },
-    { label: 'Categories', icon: 'pi pi-folder', route: '/categories' },
-    { label: 'Tags', icon: 'pi pi-label', route: '/tags' },
-    { label: 'Families', icon: 'pi pi-box', route: '/families' },
-    { label: 'Drafts', icon: 'pi pi-file-edit', route: '/drafts' },
-    { label: 'Settings', icon: 'pi pi-cog', route: '/settings' },
-  ]);
+  /**
+   * Current user role. In real app, this would come from auth service.
+   * For now, hardcoded to 'admin' for development.
+   */
+  protected readonly userRole = signal<UserRole>('admin');
+
+  /**
+   * All menu items grouped by access level.
+   * PanelMenu with multiple roots - always expanded.
+   */
+  protected readonly menuItems = computed<MenuItem[]>(() => {
+    const role = this.userRole();
+    const items: MenuItem[] = [];
+
+    // 📁 LIBRARY (all users)
+    items.push({
+      label: 'Library',
+      icon: 'pi pi-folder-open',
+      expanded: true,
+      items: [
+        {
+          label: 'Browse',
+          icon: 'pi pi-book',
+          routerLink: '/library',
+        },
+      ],
+    });
+
+    // 🔧 WORK (BIM Manager + Admin)
+    if (role === 'bim_manager' || role === 'admin') {
+      items.push({
+        label: 'Work',
+        icon: 'pi pi-briefcase',
+        expanded: true,
+        items: [
+          {
+            label: 'Queue',
+            icon: 'pi pi-list',
+            routerLink: '/queue',
+          },
+          {
+            label: 'Scanner',
+            icon: 'pi pi-search',
+            routerLink: '/scanner',
+          },
+          {
+            label: 'Drafts',
+            icon: 'pi pi-file-edit',
+            routerLink: '/drafts',
+          },
+        ],
+      });
+    }
+
+    // ⚙️ ADMINISTRATION (Admin only)
+    if (role === 'admin') {
+      items.push({
+        label: 'Administration',
+        icon: 'pi pi-cog',
+        expanded: true,
+        items: [
+          {
+            label: 'Dashboard',
+            icon: 'pi pi-home',
+            routerLink: '/dashboard',
+          },
+          {
+            label: 'Family Roles',
+            icon: 'pi pi-tags',
+            routerLink: '/roles',
+          },
+          {
+            label: 'Categories',
+            icon: 'pi pi-folder',
+            routerLink: '/categories',
+          },
+          {
+            label: 'Tags',
+            icon: 'pi pi-label',
+            routerLink: '/tags',
+          },
+          {
+            label: 'Recognition Rules',
+            icon: 'pi pi-link',
+            routerLink: '/recognition-rules',
+          },
+          {
+            label: 'Settings',
+            icon: 'pi pi-sliders-h',
+            routerLink: '/settings',
+          },
+        ],
+      });
+    }
+
+    return items;
+  });
 }
