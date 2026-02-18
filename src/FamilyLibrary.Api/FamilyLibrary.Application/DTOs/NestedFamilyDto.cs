@@ -1,6 +1,48 @@
 namespace FamilyLibrary.Application.DTOs;
 
 /// <summary>
+/// DTO for saving a nested family dependency detected by the Revit plugin.
+/// </summary>
+public record SaveDependencyDto
+{
+    /// <summary>
+    /// Name of the nested family as it appears in the RFA file.
+    /// </summary>
+    public required string NestedFamilyName { get; init; }
+
+    /// <summary>
+    /// Role name if the nested family is Shared and has been stamped.
+    /// </summary>
+    public string? NestedRoleName { get; init; }
+
+    /// <summary>
+    /// Indicates whether the nested family is a Shared family.
+    /// </summary>
+    public bool IsShared { get; init; }
+
+    /// <summary>
+    /// Indicates whether the nested family exists in the library.
+    /// </summary>
+    public bool InLibrary { get; init; }
+
+    /// <summary>
+    /// Current version number in the library, if InLibrary is true.
+    /// </summary>
+    public int? LibraryVersion { get; init; }
+}
+
+/// <summary>
+/// Request DTO for saving multiple nested family dependencies at once.
+/// </summary>
+public record SaveDependenciesRequest
+{
+    /// <summary>
+    /// List of nested family dependencies to save.
+    /// </summary>
+    public required List<SaveDependencyDto> Dependencies { get; init; }
+}
+
+/// <summary>
 /// DTO representing a nested family within a parent family RFA file.
 /// Contains information about the family and its version status across library, RFA file, and project.
 /// </summary>

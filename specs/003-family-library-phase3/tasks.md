@@ -92,21 +92,21 @@ Based on plan.md structure:
 
 ### Backend - US1
 
-- [ ] T017 [US1] [BACKEND] Add GetDependenciesAsync to NestedFamilyService in `src/FamilyLibrary.Application/Services/NestedFamilyService.cs`
-- [ ] T018 [US1] [BACKEND] Add POST /api/families/{id}/dependencies endpoint in `src/FamilyLibrary.Api/Controllers/FamiliesController.cs`
+- [X] T017 [US1] [BACKEND] Add GetDependenciesAsync to NestedFamilyService in `src/FamilyLibrary.Application/Services/NestedFamilyService.cs` → Artifacts: [NestedFamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Services/NestedFamilyService.cs)
+- [X] T018 [US1] [BACKEND] Add POST /api/families/{id}/dependencies endpoint in `src/FamilyLibrary.Api/Controllers/FamiliesController.cs` → Artifacts: [FamiliesController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/FamiliesController.cs)
 
 ### Plugin - US1
 
-- [ ] T019 [US1] [PLUGIN] Integrate NestedDetectionService into StampFamilyCommand flow in `src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/`
-- [ ] T020 [US1] [PLUGIN] Send revit:nested:detected event after detection in `src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/`
-- [ ] T021 [US1] [PLUGIN] Save FamilyDependencies to API after detection in `src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/`
+- [X] T019 [US1] [PLUGIN] Integrate NestedDetectionService into StampFamilyCommand flow in `src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/` → Artifacts: [PublishService.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/PublishService.cs)
+- [X] T020 [US1] [PLUGIN] Send revit:nested:detected event after detection in `src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/` → Artifacts: [NestedDetectedEvent.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Models/NestedDetectedEvent.cs), [LibraryQueueViewModel.cs](src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/ViewModels/LibraryQueueViewModel.cs)
+- [X] T021 [US1] [PLUGIN] Save FamilyDependencies to API after detection in `src/FamilyLibrary.Plugin/Commands/StampFamilyCommand/Services/` → Artifacts: [FamiliesController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/FamiliesController.cs), [NestedFamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Services/NestedFamilyService.cs)
 
 ### Frontend - US1
 
-- [ ] T022 [P] [US1] [FRONTEND] Create nested-family.service.ts in `src/FamilyLibrary.Web/src/app/core/services/`
-- [ ] T023 [US1] [FRONTEND] Create dependencies-list component in `src/FamilyLibrary.Web/src/app/features/library/components/dependencies-list/`
-- [ ] T024 [US1] [FRONTEND] Handle revit:nested:detected event in Queue component in `src/FamilyLibrary.Web/src/app/features/queue/components/`
-- [ ] T025 [US1] [FRONTEND] Show warning badge when Shared nested not published in `src/FamilyLibrary.Web/src/app/features/queue/components/`
+- [X] T022 [P] [US1] [FRONTEND] Create nested-family.service.ts in `src/FamilyLibrary.Web/src/app/core/services/` → Artifacts: [nested-family.service.ts](src/FamilyLibrary.Web/src/app/core/services/nested-family.service.ts)
+- [X] T023 [US1] [FRONTEND] Create dependencies-list component in `src/FamilyLibrary.Web/src/app/features/library/components/dependencies-list/` → Artifacts: [dependencies-list.component.ts](src/FamilyLibrary.Web/src/app/features/library/components/dependencies-list/dependencies-list.component.ts), [dependencies-list.component.html](src/FamilyLibrary.Web/src/app/features/library/components/dependencies-list/dependencies-list.component.html)
+- [X] T024 [US1] [FRONTEND] Handle revit:nested:detected event in Queue component in `src/FamilyLibrary.Web/src/app/features/queue/components/` → Artifacts: [queue.component.ts](src/FamilyLibrary.Web/src/app/features/queue/components/queue/queue.component.ts), [revit-bridge.service.ts](src/FamilyLibrary.Web/src/app/core/services/revit-bridge.service.ts)
+- [X] T025 [US1] [FRONTEND] Show warning badge when Shared nested not published in `src/FamilyLibrary.Web/src/app/features/queue/components/` → Artifacts: [queue.component.html](src/FamilyLibrary.Web/src/app/features/queue/components/queue/queue.component.html)
 
 **Checkpoint**: При Publish показывается список вложенных семейств со статусами
 

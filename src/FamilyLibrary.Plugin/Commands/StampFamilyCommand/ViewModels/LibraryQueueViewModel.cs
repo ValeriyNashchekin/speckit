@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FamilyLibrary.Plugin.Commands.StampFamilyCommand.Models;
 using FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services;
+using FamilyLibrary.Plugin.Core.Interfaces;
 using Newtonsoft.Json;
 
 namespace FamilyLibrary.Plugin.Commands.StampFamilyCommand.ViewModels;
@@ -22,6 +23,7 @@ public sealed partial class LibraryQueueViewModel : ObservableObject
     private readonly SnapshotService _snapshotService;
     private readonly HttpClient _httpClient;
     private readonly string _apiBaseUrl;
+    private IWebViewBridge? _webViewBridge;
 
     [ObservableProperty]
     private ObservableCollection<FamilyQueueItem> _families = new ObservableCollection<FamilyQueueItem>();
@@ -74,6 +76,9 @@ public sealed partial class LibraryQueueViewModel : ObservableObject
         _httpClient = new HttpClient();
         _apiBaseUrl = "https://localhost:5001/api";
 
+        // Subscribe to nested families detected event
+        _publishService.NestedFamiliesDetected += OnNestedFamiliesDetected;
+
         _isFamilyEditorMode = isFamilyEditorMode;
 
         if (isFamilyEditorMode)
@@ -88,6 +93,23 @@ public sealed partial class LibraryQueueViewModel : ObservableObject
                 AddCurrentFamilyToQueue(currentFamily);
             }
         }
+    }
+
+    /// <summary>
+    /// Sets the WebView2 bridge for sending events to the Angular frontend.
+    /// </summary>
+    public void SetWebViewBridge(IWebViewBridge webViewBridge)
+    {
+        _webViewBridge = webViewBridge;
+    }
+
+    /// <summary>
+    /// Handles nested families detected event from PublishService.
+    /// Sends revit:nested:detected event to WebView2.
+    /// </summary>
+    private void OnNestedFamiliesDetected(NestedDetectedEvent detectedEvent)
+    {
+        _webViewBridge?.SendEvent("revit:nested:detected", detectedEvent);
     }
 
     private void AddCurrentFamilyToQueue(Autodesk.Revit.DB.Family family)
@@ -324,9 +346,17 @@ public sealed partial class LibraryQueueViewModel : ObservableObject
         try
         {
             var toPublish = QueueItems.Where(q => q.Status == QueueItemStatus.Stamped).ToList();
-            var published = _publishService.PublishFamilies(toPublish);
+
+            // Use document-aware publish to enable nested family detection
+            var published = _document != null
+                ? _publishService.PublishFamilies(toPublish, _document)
+                : _publishService.PublishFamilies(toPublish);
+
             PublishedCount = published;
-            StatusMessage = $"Published {published} families.";
+            FailedCount = toPublish.Count - published;
+            StatusMessage = published == toPublish.Count
+                ? $"Published {published} families."
+                : $"Published {published} families. {FailedCount} failed.";
         }
         catch (System.Exception ex)
         {

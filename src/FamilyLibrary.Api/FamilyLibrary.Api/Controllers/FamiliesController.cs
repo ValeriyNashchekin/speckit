@@ -11,7 +11,9 @@ namespace FamilyLibrary.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/families")]
-public class FamiliesController(IFamilyService service) : BaseController
+public class FamiliesController(
+    IFamilyService service,
+    INestedFamilyService nestedFamilyService) : BaseController
 {
     /// <summary>
     /// Gets all families with pagination and optional filtering by role.
@@ -259,6 +261,107 @@ public class FamiliesController(IFamilyService service) : BaseController
         var result = await service.DetectLocalChangesAsync(id, request.LocalSnapshotJson, ct);
         return Ok(result);
     }
+
+    #region Phase 3 - Nested Families
+
+    /// <summary>
+    /// Gets all nested family dependencies for a parent family.
+    /// US1: BIM Manager sees nested families when viewing family details.
+    /// </summary>
+    /// <param name="id">The parent family ID.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>List of nested family dependencies with their status.</returns>
+    [HttpGet("{id:guid}/dependencies")]
+    [ProducesResponseType<List<NestedFamilyDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<List<NestedFamilyDto>>> GetDependencies(
+        Guid id,
+        CancellationToken ct)
+    {
+        var result = await nestedFamilyService.GetDependenciesAsync(id, ct);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Gets a pre-load summary for a family before loading to project.
+    /// US2: Designer sees all nested families with version comparison before load.
+    /// </summary>
+    /// <param name="id">The parent family ID.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Pre-load summary with nested families and recommended actions.</returns>
+    [HttpGet("{id:guid}/pre-load-summary")]
+    [ProducesResponseType<PreLoadSummaryDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<PreLoadSummaryDto>> GetPreLoadSummary(
+        Guid id,
+        CancellationToken ct)
+    {
+        var result = await nestedFamilyService.GetPreLoadSummaryAsync(id, ct);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Gets information about where a nested family is used.
+    /// US5: BIM Manager sees all parent families that reference a nested family.
+    /// </summary>
+    /// <param name="id">The family ID (used to get the role name).</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Information about where the family is used as a nested family.</returns>
+    [HttpGet("{id:guid}/used-in")]
+    [ProducesResponseType<UsedInDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<UsedInDto>> GetUsedIn(
+        Guid id,
+        CancellationToken ct)
+    {
+        // Get the family to find its role name
+        var family = await service.GetByIdAsync(id, ct);
+        if (family is null)
+        {
+            return NotFound();
+        }
+
+        var roleName = family.RoleName;
+        if (string.IsNullOrEmpty(roleName))
+        {
+            return Ok(new UsedInDto
+            {
+                NestedFamilyName = family.FamilyName,
+                ParentFamilies = []
+            });
+        }
+
+        var result = await nestedFamilyService.GetUsedInAsync(roleName, ct);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Saves nested family dependencies detected by the Revit plugin during publishing.
+    /// Replaces any existing dependencies for the parent family.
+    /// </summary>
+    /// <param name="id">The parent family ID.</param>
+    /// <param name="request">The request containing nested family dependencies.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Count of dependencies saved.</returns>
+    [HttpPost("{id:guid}/dependencies")]
+    [ProducesResponseType<int>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<int>> SaveDependencies(
+        Guid id,
+        [FromBody] SaveDependenciesRequest request,
+        CancellationToken ct)
+    {
+        if (request?.Dependencies == null || request.Dependencies.Count == 0)
+        {
+            return BadRequest("Dependencies list cannot be empty.");
+        }
+
+        var count = await nestedFamilyService.SaveDependenciesAsync(id, request.Dependencies, ct);
+        return Ok(count);
+    }
+
+    #endregion
 }
 
 /// <summary>

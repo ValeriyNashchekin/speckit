@@ -1,0 +1,119 @@
+<div class="bg-white rounded-lg shadow-sm border border-gray-200">
+  <!-- Header with summary -->
+  <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+    <div class="flex items-center justify-between">
+      <h3 class="text-sm font-semibold text-gray-700">Nested Dependencies</h3>
+      <div class="flex items-center gap-4 text-xs text-gray-500">
+        <span>{{ dependencies().length }} total</span>
+        <span>{{ sharedCount() }} shared</span>
+        @if (notPublishedCount() > 0) {
+          <span class="text-amber-600 font-medium">{{ notPublishedCount() }} not published</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <p-table
+    [value]="dependencies()"
+    [loading]="loading()"
+    dataKey="familyName"
+    [rowHover]="true"
+    [showGridlines]="false"
+    [stripedRows]="true"
+    tableStyleClass="w-full"
+  >
+    <ng-template #header>
+      <tr>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 40%">
+          Family Name
+        </th>
+        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700" style="width: 15%">
+          Shared
+        </th>
+        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700" style="width: 15%">
+          In Library
+        </th>
+        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700" style="width: 15%">
+          Version
+        </th>
+        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700" style="width: 15%">
+          Status
+        </th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-nested>
+      <tr class="border-t border-gray-100">
+        <td class="px-4 py-3">
+          <div class="flex flex-col">
+            <span class="font-medium text-gray-900">{{ nested.familyName }}</span>
+            @if (nested.roleName) {
+              <span class="text-xs text-gray-500">{{ nested.roleName }}</span>
+            }
+          </div>
+        </td>
+        <td class="px-4 py-3 text-center">
+          @if (nested.isShared) {
+            <i class="pi pi-check-circle text-green-500" pTooltip="Shared family"></i>
+          } @else {
+            <i class="pi pi-minus-circle text-gray-400" pTooltip="Not shared"></i>
+          }
+        </td>
+        <td class="px-4 py-3 text-center">
+          @if (nested.inLibrary) {
+            <i class="pi pi-check-circle text-green-500" pTooltip="Available in library"></i>
+          } @else {
+            <i class="pi pi-times-circle text-red-400" pTooltip="Not in library"></i>
+          }
+        </td>
+        <td class="px-4 py-3 text-center">
+          @if (nested.libraryVersion) {
+            <p-tag [value]="'v' + nested.libraryVersion" severity="info" />
+          } @else {
+            <span class="text-gray-400">-</span>
+          }
+        </td>
+        <td class="px-4 py-3 text-center">
+          <p-tag
+            [value]="getStatusLabel(nested.status)"
+            [severity]="getStatusSeverity(nested.status)"
+          />
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="5" class="px-4 py-8 text-center">
+          <div class="flex flex-col items-center gap-2">
+            <i class="pi pi-folder-open text-2xl text-gray-300"></i>
+            <p class="text-gray-500 text-sm">No nested dependencies found</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #loadingbody>
+      @for (i of [1, 2, 3]; track i) {
+        <tr class="border-t border-gray-100">
+          <td class="px-4 py-3">
+            <div class="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="h-4 bg-gray-200 rounded animate-pulse w-4 mx-auto"></div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="h-4 bg-gray-200 rounded animate-pulse w-4 mx-auto"></div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="h-5 bg-gray-200 rounded animate-pulse w-10 mx-auto"></div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="h-5 bg-gray-200 rounded animate-pulse w-20 mx-auto"></div>
+          </td>
+        </tr>
+      }
+    </ng-template>
+  </p-table>
+</div>

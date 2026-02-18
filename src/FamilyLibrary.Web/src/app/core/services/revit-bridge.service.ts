@@ -15,7 +15,12 @@ import {
   PluginEventTypes,
   UiEventTypes,
   Phase2PluginEventTypes,
+  Phase3PluginEventTypes,
+  Phase3UiEventTypes,
   ChangesResultEvent,
+  NestedDetectedEvent,
+  LoadPreviewEvent,
+  MaterialFallbackEvent,
 } from '../models/webview-events.model';
 
 /**
@@ -36,6 +41,15 @@ export class RevitBridgeService {
   // Phase 2: Changes result signal
   readonly changesResult = signal<ChangesResultEvent['payload'] | null>(null);
   readonly hasChanges = computed(() => this.changesResult()?.changes.hasChanges ?? false);
+
+  // Phase 3: Nested families signals
+  readonly nestedDetected = signal<NestedDetectedEvent['payload'] | null>(null);
+  readonly hasNestedDependencies = computed(() =>
+    (this.nestedDetected()?.nestedFamilies.length ?? 0) > 0
+  );
+  readonly unpublishedNestedCount = computed(() =>
+    this.nestedDetected()?.nestedFamilies.filter(n => n.status === 'not_published').length ?? 0
+  );
 
   constructor() {
     if (this.isEmbedded) {
@@ -103,6 +117,12 @@ export class RevitBridgeService {
         const changesPayload = event.payload as ChangesResultEvent['payload'];
         this.changesResult.set(changesPayload);
         console.log('[RevitBridge] Changes result:', changesPayload);
+        break;
+
+      case Phase3PluginEventTypes.REVIT_NESTED_DETECTED:
+        const nestedPayload = event.payload as NestedDetectedEvent['payload'];
+        this.nestedDetected.set(nestedPayload);
+        console.log('[RevitBridge] Nested families detected:', nestedPayload);
         break;
     }
   }
@@ -208,4 +228,58 @@ export class RevitBridgeService {
   onChangesResult(): Observable<ChangesResultEvent['payload']> {
     return this.on<ChangesResultEvent['payload']>(Phase2PluginEventTypes.REVIT_CHANGES_RESULT);
   }
+
+  // ==================== PHASE 3: NESTED FAMILIES ====================
+
+  /**
+   * Subscribe to nested detected events
+   */
+  onNestedDetected(): Observable<NestedDetectedEvent['payload']> {
+    return this.on<NestedDetectedEvent['payload']>(Phase3PluginEventTypes.REVIT_NESTED_DETECTED);
+  }
+
+  /**
+   * Subscribe to load preview events
+   */
+  onLoadPreview(): Observable<LoadPreviewEvent['payload']> {
+    return this.on<LoadPreviewEvent['payload']>(Phase3PluginEventTypes.REVIT_LOAD_PREVIEW);
+  }
+
+  /**
+   * Subscribe to material fallback events
+   */
+  onMaterialFallback(): Observable<MaterialFallbackEvent['payload']> {
+    return this.on<MaterialFallbackEvent['payload']>(Phase3PluginEventTypes.REVIT_MATERIAL_FALLBACK);
+  }
+
+  /**
+   * Clear nested detected state
+   */
+  clearNestedDetected(): void {
+    this.nestedDetected.set(null);
+  }
+
+  /**
+   * Load family with nested choices
+   */
+  loadWithNested(payload: LoadWithNestedEvent['payload']): void {
+    this.send(Phase3UiEventTypes.UI_LOAD_WITH_NESTED, payload);
+  }
+
+  /**
+   * Save material mapping
+   */
+  saveMaterialMapping(payload: MaterialMappingSaveEvent['payload']): void {
+    this.send(Phase3UiEventTypes.UI_MATERIAL_MAPPING_SAVE, payload);
+  }
+
+  /**
+   * View changes between nested versions
+   */
+  viewNestedChanges(payload: NestedViewChangesEvent['payload']): void {
+    this.send(Phase3UiEventTypes.UI_NESTED_VIEW_CHANGES, payload);
+  }
 }
+
+// Import types used in method signatures
+import type { LoadWithNestedEvent, MaterialMappingSaveEvent, NestedViewChangesEvent } from '../models/webview-events.model';

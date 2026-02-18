@@ -40,4 +40,17 @@ public interface INestedFamilyService
     Task<UsedInDto> GetUsedInAsync(
         string roleName,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Saves nested family dependencies detected by the Revit plugin during publishing.
+    /// Replaces any existing dependencies for the parent family.
+    /// </summary>
+    /// <param name="familyId">The unique identifier of the parent family.</param>
+    /// <param name="dependencies">List of nested family dependencies to save.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Count of dependencies saved.</returns>
+    Task<int> SaveDependenciesAsync(
+        Guid familyId,
+        List<SaveDependencyDto> dependencies,
+        CancellationToken cancellationToken = default);
 }

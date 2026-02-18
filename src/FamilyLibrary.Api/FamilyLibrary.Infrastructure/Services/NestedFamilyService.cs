@@ -170,4 +170,40 @@ public class NestedFamilyService : INestedFamilyService
         // This is a stub implementation until plugin coordination is available
         return NestedLoadAction.UpdateFromLibrary;
     }
+
+    /// <inheritdoc />
+    public async Task<int> SaveDependenciesAsync(
+        Guid familyId,
+        List<SaveDependencyDto> dependencies,
+        CancellationToken cancellationToken = default)
+    {
+        // Verify the family exists
+        var family = await _context.Families
+            .FirstOrDefaultAsync(f => f.Id == familyId, cancellationToken)
+            ?? throw new NotFoundException(nameof(FamilyEntity), familyId);
+
+        // Remove existing dependencies for this family
+        var existingDependencies = await _context.FamilyDependencies
+            .Where(d => d.ParentFamilyId == familyId)
+            .ToListAsync(cancellationToken);
+
+        _context.FamilyDependencies.RemoveRange(existingDependencies);
+
+        // Add new dependencies
+        foreach (var dto in dependencies)
+        {
+            var dependency = new FamilyDependencyEntity(
+                parentFamilyId: familyId,
+                nestedFamilyName: dto.NestedFamilyName,
+                isShared: dto.IsShared,
+                nestedRoleName: dto.NestedRoleName,
+                inLibrary: dto.InLibrary,
+                libraryVersion: dto.LibraryVersion);
+
+            _context.FamilyDependencies.Add(dependency);
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+        return dependencies.Count;
+    }
 }

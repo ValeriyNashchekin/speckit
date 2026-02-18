@@ -358,3 +358,145 @@ export const Phase2UiEventTypes = {
   UI_STAMP_LEGACY: 'ui:stamp-legacy',
   UI_GET_CHANGES: 'ui:get-changes',
 } as const;
+
+// ==================== PHASE 3: NESTED FAMILIES EVENTS ====================
+// Phase 3 additions for nested family management
+
+/**
+ * Nested family information from publish workflow
+ */
+export interface NestedFamilyInfo {
+  familyName: string;
+  isShared: boolean;
+  hasRole: boolean;
+  roleName?: string;
+  inLibrary: boolean;
+  libraryVersion?: number;
+  status: 'ready' | 'not_published' | 'no_role';
+}
+
+/**
+ * Plugin -> Frontend: Nested families detected during Publish
+ */
+export interface NestedDetectedEvent {
+  type: 'revit:nested:detected';
+  payload: {
+    parentFamilyId: string;
+    parentFamilyName: string;
+    nestedFamilies: NestedFamilyInfo[];
+  };
+}
+
+/**
+ * Nested load info for pre-load summary
+ */
+export interface NestedLoadInfo {
+  familyName: string;
+  roleName?: string;
+  rfaVersion: number;
+  libraryVersion?: number;
+  projectVersion?: number;
+  recommendedAction: 'load_from_rfa' | 'update_from_library' | 'keep_project' | 'no_action';
+  hasConflict: boolean;
+}
+
+/**
+ * Plugin -> Frontend: Pre-load summary before loading family
+ */
+export interface LoadPreviewEvent {
+  type: 'revit:load:preview';
+  payload: {
+    parentFamily: {
+      familyId: string;
+      familyName: string;
+      roleName: string;
+      version: number;
+    };
+    nestedFamilies: NestedLoadInfo[];
+    summary: {
+      totalToLoad: number;
+      newCount: number;
+      updateCount: number;
+      conflictCount: number;
+    };
+  };
+}
+
+/**
+ * Material option for fallback dialog
+ */
+export interface MaterialOption {
+  id: string;
+  name: string;
+  type: 'existing' | 'create' | 'default' | 'skip';
+}
+
+/**
+ * Plugin -> Frontend: Material not found during Pull Update
+ */
+export interface MaterialFallbackEvent {
+  type: 'revit:material:fallback';
+  payload: {
+    systemTypeId: string;
+    systemTypeName: string;
+    missingMaterial: {
+      templateMaterialName: string;
+      category?: string;
+      layerIndex?: number;
+    };
+    availableOptions: MaterialOption[];
+  };
+}
+
+/**
+ * UI -> Plugin: Load family with selected nested versions
+ */
+export interface LoadWithNestedEvent {
+  type: 'ui:load-with-nested';
+  payload: {
+    parentFamilyId: string;
+    nestedChoices: Array<{
+      familyName: string;
+      source: 'rfa' | 'library';
+      targetVersion?: number;
+    }>;
+  };
+}
+
+/**
+ * UI -> Plugin: Save material mapping decision
+ */
+export interface MaterialMappingSaveEvent {
+  type: 'ui:material-mapping:save';
+  payload: {
+    projectId: string;
+    templateMaterialName: string;
+    projectMaterialName: string;
+    applyToCurrent: boolean;
+  };
+}
+
+/**
+ * UI -> Plugin: View changes between nested versions
+ */
+export interface NestedViewChangesEvent {
+  type: 'ui:nested:view-changes';
+  payload: {
+    familyName: string;
+    fromVersion: number;
+    toVersion: number;
+  };
+}
+
+// Phase 3 Event Type Constants
+export const Phase3PluginEventTypes = {
+  REVIT_NESTED_DETECTED: 'revit:nested:detected',
+  REVIT_LOAD_PREVIEW: 'revit:load:preview',
+  REVIT_MATERIAL_FALLBACK: 'revit:material:fallback',
+} as const;
+
+export const Phase3UiEventTypes = {
+  UI_LOAD_WITH_NESTED: 'ui:load-with-nested',
+  UI_MATERIAL_MAPPING_SAVE: 'ui:material-mapping:save',
+  UI_NESTED_VIEW_CHANGES: 'ui:nested:view-changes',
+} as const;

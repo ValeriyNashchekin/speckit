@@ -1,8 +1,27 @@
 <p-toast />
 <div class="space-y-6">
-  <div>
-    <h1 class="text-2xl font-bold text-gray-900">Family Queue</h1>
-    <p class="text-sm text-gray-500 mt-1">Manage families, drafts, system types, and library status</p>
+  <!-- Header with nested dependencies warning -->
+  <div class="flex items-start justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Family Queue</h1>
+      <p class="text-sm text-gray-500 mt-1">Manage families, drafts, system types, and library status</p>
+    </div>
+
+    @if (hasNestedDependencies()) {
+      <button
+        type="button"
+        class="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 hover:bg-amber-100 transition-colors"
+        (click)="showDependenciesDialog.set(true)"
+      >
+        <i class="pi pi-exclamation-triangle text-amber-500"></i>
+        <span class="text-sm font-medium">Nested Dependencies</span>
+        @if (hasUnpublishedWarning()) {
+          <span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">
+            {{ unpublishedNestedCount() }}
+          </span>
+        }
+      </button>
+    }
   </div>
 
   <p-tabs [(value)]="activeTab">
@@ -41,3 +60,59 @@
     </p-tabpanels>
   </p-tabs>
 </div>
+
+<!-- Nested Dependencies Dialog -->
+<p-dialog
+  [(visible)]="showDependenciesDialog"
+  [modal]="true"
+  [style]="{ width: '700px' }"
+  header="Nested Family Dependencies"
+  [draggable]="false"
+  [resizable]="false"
+>
+  @if (nestedDetected()) {
+    <div class="space-y-4">
+      <!-- Parent family info -->
+      <div class="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <i class="pi pi-info-circle text-blue-500"></i>
+        <div>
+          <span class="text-sm text-blue-700">
+            Publishing <strong>{{ nestedDetected()!.parentFamilyName }}</strong> with
+            <strong>{{ nestedDetected()!.nestedFamilies.length }}</strong> nested families.
+          </span>
+        </div>
+      </div>
+
+      <!-- Warning for unpublished nested -->
+      @if (hasUnpublishedWarning()) {
+        <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <i class="pi pi-exclamation-triangle text-amber-500 mt-0.5"></i>
+          <div class="flex-1">
+            <p class="text-sm font-medium text-amber-800">
+              {{ unpublishedNestedCount() }} shared nested families are not published to the library
+            </p>
+            <p class="text-xs text-amber-600 mt-1">
+              Consider publishing nested families before the parent to ensure proper version tracking.
+            </p>
+          </div>
+        </div>
+      }
+
+      <!-- Dependencies table -->
+      <app-dependencies-list
+        [dependencies]="nestedDetected()!.nestedFamilies"
+        [parentFamilyName]="nestedDetected()!.parentFamilyName"
+      />
+    </div>
+
+    <ng-template #footer>
+      <div class="flex justify-end gap-2">
+        <p-button
+          label="Dismiss"
+          severity="secondary"
+          (onClick)="clearNestedDetected()"
+        />
+      </div>
+    </ng-template>
+  }
+</p-dialog>
