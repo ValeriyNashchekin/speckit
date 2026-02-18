@@ -403,78 +403,181 @@ public class NestedFamilyLoadService
 
     /// <summary>
     /// Loads nested families from library that need override.
-    /// T031: Downloads and loads library versions to override RFA versions.
+    /// T041: Downloads and loads library versions to override RFA versions.
     /// </summary>
+    /// <remarks>
+    /// This method is called after Phase 1 (parent family load) to override
+    /// nested families that the user selected to load from library.
+    /// </remarks>
     private async Task<List<NestedOverrideResult>> LoadLibraryOverridesAsync(
         Document document,
         List<UiNestedLoadChoice> choices)
     {
         var results = new List<NestedOverrideResult>();
 
-        if (choices == null) return results;
+        if (choices == null || choices.Count == 0)
+        {
+            return results;
+        }
 
         // Filter choices that need library update (source = 'library')
-        var libraryUpdates = choices.Where(c => c.Source == "library").ToList();
+        var libraryUpdates = choices
+            .Where(c => string.Equals(c.Source, "library", StringComparison.OrdinalIgnoreCase))
+            .ToList();
 
+        if (libraryUpdates.Count == 0)
+        {
+            return results;
+        }
+
+        // Download all library families first (parallel downloads)
+        var downloadTasks = new List<Task<LibraryDownloadInfo>>();
         foreach (var choice in libraryUpdates)
         {
-            try
-            {
-                // Need to lookup familyId by name if not provided
-                var familyId = await LookupFamilyIdByNameAsync(choice.FamilyName)
-                    .ConfigureAwait(false);
+            downloadTasks.Add(DownloadLibraryFamilyAsync(choice));
+        }
 
-                if (familyId == null)
-                {
-                    results.Add(new NestedOverrideResult
-                    {
-                        FamilyName = choice.FamilyName,
-                        Success = false,
-                        ErrorMessage = "Family not found in library"
-                    });
-                    continue;
-                }
+        var downloadedFamilies = await Task.WhenAll(downloadTasks).ConfigureAwait(false);
 
-                // Download from library
-                var downloadResult = await _familyDownloader.DownloadFamilyAsync(
-                    familyId.Value, choice.TargetVersion).ConfigureAwait(false);
-
-                if (string.IsNullOrEmpty(downloadResult.LocalPath) ||
-                    !File.Exists(downloadResult.LocalPath))
-                {
-                    results.Add(new NestedOverrideResult
-                    {
-                        FamilyName = choice.FamilyName,
-                        Success = false,
-                        ErrorMessage = "Failed to download family from library"
-                    });
-                    continue;
-                }
-
-                // Load into document to override
-                var loadOptions = new SimpleFamilyLoadOptions();
-                var wasLoaded = document.LoadFamily(downloadResult.LocalPath, loadOptions, out _);
-
-                results.Add(new NestedOverrideResult
-                {
-                    FamilyName = choice.FamilyName,
-                    Success = wasLoaded,
-                    Version = downloadResult.Version,
-                    ErrorMessage = wasLoaded ? null : "Failed to load family"
-                });
-            }
-            catch (Exception ex)
-            {
-                results.Add(new NestedOverrideResult
-                {
-                    FamilyName = choice.FamilyName,
-                    Success = false,
-                    ErrorMessage = ex.Message
-                });
-            }
+        // Load each downloaded family into document
+        foreach (var info in downloadedFamilies)
+        {
+            var result = LoadDownloadedFamily(document, info);
+            results.Add(result);
         }
 
         return results;
+    }
+
+    /// <summary>
+    /// Downloads a family from the library.
+    /// T041: Download and prepare library version for nested family.
+    /// </summary>
+    private async Task<LibraryDownloadInfo> DownloadLibraryFamilyAsync(UiNestedLoadChoice choice)
+    {
+        var info = new LibraryDownloadInfo
+        {
+            FamilyName = choice.FamilyName,
+            TargetVersion = choice.TargetVersion
+        };
+
+        try
+        {
+            // Lookup family ID by name
+            var familyId = await LookupFamilyIdByNameAsync(choice.FamilyName)
+                .ConfigureAwait(false);
+
+            if (familyId == null)
+            {
+                info.ErrorMessage = "Family not found in library";
+                return info;
+            }
+
+            // Download from library with retry support
+            var downloadResult = await _familyDownloader.DownloadFamilyAsync(
+                familyId.Value,
+                choice.TargetVersion).ConfigureAwait(false);
+
+            if (downloadResult == null ||
+                string.IsNullOrEmpty(downloadResult.LocalPath) ||
+                !File.Exists(downloadResult.LocalPath))
+            {
+                info.ErrorMessage = "Failed to download family from library";
+                return info;
+            }
+
+            info.LocalPath = downloadResult.LocalPath;
+            info.Version = downloadResult.Version;
+            info.Hash = downloadResult.Hash;
+            info.Success = true;
+        }
+        catch (HttpRequestException ex)
+        {
+            info.ErrorMessage = string.Format("Network error: {0}", ex.Message);
+            LogError(string.Format("Download network error for {0}: {1}", choice.FamilyName, ex.Message));
+        }
+        catch (TaskCanceledException)
+        {
+            info.ErrorMessage = "Download timed out";
+            LogError(string.Format("Download timeout for {0}", choice.FamilyName));
+        }
+        catch (Exception ex)
+        {
+            info.ErrorMessage = string.Format("Download error: {0}", ex.Message);
+            LogError(string.Format("Download error for {0}: {1}", choice.FamilyName, ex.Message));
+        }
+
+        return info;
+    }
+
+    /// <summary>
+    /// Loads a downloaded family file into the document.
+    /// T041: Load the library version to override RFA version.
+    /// </summary>
+    private static NestedOverrideResult LoadDownloadedFamily(Document document, LibraryDownloadInfo info)
+    {
+        var result = new NestedOverrideResult
+        {
+            FamilyName = info.FamilyName,
+            Version = info.Version
+        };
+
+        if (!info.Success || string.IsNullOrEmpty(info.LocalPath))
+        {
+            result.Success = false;
+            result.ErrorMessage = info.ErrorMessage ?? "Download failed";
+            return result;
+        }
+
+        try
+        {
+            // Load family into document to override the RFA version
+            var loadOptions = new SimpleFamilyLoadOptions();
+            var wasLoaded = document.LoadFamily(info.LocalPath, loadOptions, out _);
+
+            result.Success = wasLoaded;
+            result.ErrorMessage = wasLoaded ? null : "Failed to load family into document";
+
+            // Cleanup temp file after successful load
+            if (wasLoaded)
+            {
+                CleanupTempFile(info.LocalPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            result.Success = false;
+            result.ErrorMessage = string.Format("Load error: {0}", ex.Message);
+            LogError(string.Format("Load error for {0}: {1}", info.FamilyName, ex.Message));
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Cleans up temporary downloaded file.
+    /// </summary>
+    private static void CleanupTempFile(string filePath)
+    {
+        try
+        {
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+        }
+        catch
+        {
+            // Ignore cleanup errors - temp folder will be cleaned on app exit
+        }
+    }
+
+    /// <summary>
+    /// Logs error message for debugging.
+    /// </summary>
+    private static void LogError(string message)
+    {
+        System.Diagnostics.Debug.WriteLine(string.Format("[NestedFamilyLoadService] {0}", message));
     }
 
     /// <summary>
@@ -637,5 +740,20 @@ public class NestedOverrideResult
     public string FamilyName { get; set; } = string.Empty;
     public bool Success { get; set; }
     public int Version { get; set; }
+    public string ErrorMessage { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Internal class to track library download state.
+/// T041: Used for parallel downloads with error tracking.
+/// </summary>
+internal class LibraryDownloadInfo
+{
+    public string FamilyName { get; set; } = string.Empty;
+    public int? TargetVersion { get; set; }
+    public string LocalPath { get; set; } = string.Empty;
+    public int Version { get; set; }
+    public string Hash { get; set; } = string.Empty;
+    public bool Success { get; set; }
     public string ErrorMessage { get; set; } = string.Empty;
 }

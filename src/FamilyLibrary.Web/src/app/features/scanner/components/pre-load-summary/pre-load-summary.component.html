@@ -72,12 +72,16 @@
             Recommended
           </th>
           <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            Load Source
+            Action
           </th>
         </tr>
       </ng-template>
       <ng-template #body let-nested>
-        <tr class="border-t border-gray-100" [class.bg-orange-50]="nested.hasConflict">
+        <tr
+          class="border-t border-gray-100"
+          [class.bg-orange-50]="nested.hasConflict"
+          [class.bg-green-50]="!nested.hasConflict && isRecommendedSelection(nested)"
+        >
           <!-- Family Name -->
           <td class="px-4 py-3">
             <div class="flex flex-col">
@@ -87,21 +91,21 @@
               }
             </div>
           </td>
-          
+
           <!-- RFA Version -->
           <td class="px-4 py-3 text-center">
-            <p-tag 
-              [value]="formatVersion(nested.rfaVersion)" 
+            <p-tag
+              [value]="formatVersion(nested.rfaVersion)"
               severity="info"
               [rounded]="true"
             />
           </td>
-          
+
           <!-- Library Version -->
           <td class="px-4 py-3 text-center">
             @if (nested.libraryVersion !== undefined) {
-              <p-tag 
-                [value]="formatVersion(nested.libraryVersion)" 
+              <p-tag
+                [value]="formatVersion(nested.libraryVersion)"
                 [severity]="getVersionSeverity(nested.hasConflict && nested.libraryVersion !== nested.rfaVersion)"
                 [rounded]="true"
               />
@@ -109,12 +113,12 @@
               <span class="text-gray-400">-</span>
             }
           </td>
-          
+
           <!-- Project Version -->
           <td class="px-4 py-3 text-center">
             @if (nested.projectVersion !== undefined) {
-              <p-tag 
-                [value]="formatVersion(nested.projectVersion)" 
+              <p-tag
+                [value]="formatVersion(nested.projectVersion)"
                 severity="secondary"
                 [rounded]="true"
               />
@@ -122,29 +126,39 @@
               <span class="text-gray-400">Not loaded</span>
             }
           </td>
-          
-          <!-- Recommended Action -->
+
+          <!-- Recommended Action Badge -->
           <td class="px-4 py-3 text-center">
-            <p-tag 
-              [value]="getActionLabel(nested.recommendedAction)" 
-              [severity]="getActionSeverity(nested.recommendedAction)"
-              [rounded]="true"
-            />
+            <div class="flex items-center justify-center gap-2">
+              <p-tag
+                [value]="getActionLabel(nested.recommendedAction)"
+                [severity]="getActionSeverity(nested.recommendedAction)"
+                [rounded]="true"
+              />
+              @if (nested.hasConflict) {
+                <i
+                  class="pi pi-exclamation-triangle text-orange-500"
+                  aria-label="Conflict detected"
+                  pTooltip="Version conflict detected"
+                ></i>
+              }
+            </div>
           </td>
-          
-          <!-- Load Source Selection -->
+
+          <!-- Action Selection Dropdown -->
           <td class="px-4 py-3">
             <div class="flex justify-center">
-              <p-selectbutton
-                [options]="sourceOptions"
+              <p-select
+                [options]="getSourceOptions(nested)"
                 [ngModel]="getSelection(nested.familyName)"
                 (ngModelChange)="onSelectionChange(nested.familyName, $event)"
                 optionLabel="label"
                 optionValue="value"
-                [allowEmpty]="false"
-                [disabled]="nested.libraryVersion === undefined"
-                ariaLabel="Select load source"
-                styleClass="text-sm"
+                optionDisabled="disabled"
+                placeholder="Select action"
+                styleClass="w-full min-w-48"
+                [ariaLabel]="'Select load action for ' + nested.familyName"
+                size="small"
               />
             </div>
           </td>
@@ -172,11 +186,23 @@
     </div>
   }
 
+  <!-- User Modifications Notice -->
+  @if (hasUserModifications()) {
+    <div class="mt-4 p-3 rounded-lg bg-blue-50 border border-blue-200">
+      <div class="flex items-center gap-2">
+        <i class="pi pi-info-circle text-blue-500" aria-hidden="true"></i>
+        <span class="text-sm text-blue-700">
+          You have modified the recommended actions. Click "Load Selected" to apply your choices.
+        </span>
+      </div>
+    </div>
+  }
+
   <!-- Footer -->
   <ng-template pTemplate="footer">
     <div class="flex justify-between items-center">
       <span class="text-sm text-gray-500">
-        {{ nestedFamilies().length }} nested families
+        {{ loadCount() }} of {{ nestedFamilies().length }} families will be loaded
       </span>
       <div class="flex justify-end gap-2">
         <p-button
@@ -187,11 +213,20 @@
           aria-label="Cancel loading"
         />
         <p-button
-          label="Load"
+          label="Load All"
+          severity="contrast"
+          outlined
+          icon="pi pi-refresh"
+          (onClick)="onLoadAll()"
+          aria-label="Load with all recommended actions"
+          [disabled]="hasConflicts()"
+        />
+        <p-button
+          label="Load Selected"
           severity="primary"
           icon="pi pi-download"
-          (onClick)="onLoad()"
-          aria-label="Confirm load"
+          (onClick)="onLoadSelected()"
+          aria-label="Load with selected actions"
         />
       </div>
     </div>

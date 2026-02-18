@@ -457,7 +457,7 @@ export interface LoadWithNestedEvent {
     parentFamilyId: string;
     nestedChoices: Array<{
       familyName: string;
-      source: 'rfa' | 'library';
+      source: 'rfa' | 'library' | 'project';
       targetVersion?: number;
     }>;
   };

@@ -155,15 +155,15 @@ Based on plan.md structure:
 
 ### Frontend - US6
 
-- [ ] T036 [US6] [FRONTEND] Add per-nested action selector in pre-load-summary in `src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/`
-- [ ] T037 [US6] [FRONTEND] Show recommended action per nested family in `src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/`
-- [ ] T038 [US6] [FRONTEND] Add "Load All" / "Load Selected" / "Cancel" buttons in `src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/`
-- [ ] T039 [US6] [FRONTEND] Send individual choices per nested in ui:load-with-nested in `src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/`
+- [X] T036 [US6] [FRONTEND] Add per-nested action selector in pre-load-summary in `src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/` → Artifacts: [pre-load-summary.component.ts](src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/pre-load-summary.component.ts)
+- [X] T037 [US6] [FRONTEND] Show recommended action per nested family in `src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/` → Artifacts: [pre-load-summary.component.html](src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/pre-load-summary.component.html)
+- [X] T038 [US6] [FRONTEND] Add "Load All" / "Load Selected" / "Cancel" buttons in `src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/` → Artifacts: [pre-load-summary.component.html](src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/pre-load-summary.component.html)
+- [X] T039 [US6] [FRONTEND] Send individual choices per nested in ui:load-with-nested in `src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/` → Artifacts: [pre-load-summary.component.ts](src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/pre-load-summary.component.ts)
 
 ### Plugin - US6
 
-- [ ] T040 [US6] [PLUGIN] Process individual NestedLoadChoice per family in NestedFamilyLoadOptions in `src/FamilyLibrary.Plugin/Services/NestedFamilyLoadOptions.cs`
-- [ ] T041 [US6] [PLUGIN] Download and load library versions for selected nested in `src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs`
+- [X] T040 [US6] [PLUGIN] Process individual NestedLoadChoice per family in NestedFamilyLoadOptions in `src/FamilyLibrary.Plugin/Services/NestedFamilyLoadOptions.cs` → Artifacts: [NestedFamilyLoadOptions.cs](src/FamilyLibrary.Plugin/Services/NestedFamilyLoadOptions.cs)
+- [X] T041 [US6] [PLUGIN] Download and load library versions for selected nested in `src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs` → Artifacts: [NestedFamilyLoadService.cs](src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs)
 
 **Checkpoint**: Конфликты версий разрешаются пользователем для каждого nested отдельно
 

@@ -3,26 +3,29 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
-import { SelectButtonModule } from 'primeng/selectbutton';
+import { SelectModule } from 'primeng/select';
+import { TooltipModule } from 'primeng/tooltip';
 import { FormsModule } from '@angular/forms';
 import { RevitBridgeService } from '../../../../core/services/revit-bridge.service';
 import type { NestedLoadInfo, LoadPreviewEvent } from '../../../../core/models/webview-events.model';
+
+/** Source type for nested family loading */
+export type NestedLoadSource = 'rfa' | 'library' | 'project';
 
 /**
  * User choice for nested family load source
  */
 export interface NestedLoadChoice {
   familyName: string;
-  source: 'rfa' | 'library';
+  source: NestedLoadSource;
   targetVersion?: number;
 }
 
-/**
- * Internal selection state for each nested family
- */
-interface NestedSelection {
-  info: NestedLoadInfo;
-  selectedSource: 'rfa' | 'library';
+/** Option for dropdown selection */
+interface SourceOption {
+  label: string;
+  value: NestedLoadSource;
+  disabled?: boolean;
 }
 
 /**
@@ -36,7 +39,8 @@ interface NestedSelection {
     ButtonModule,
     TableModule,
     TagModule,
-    SelectButtonModule,
+    SelectModule,
+    TooltipModule,
     FormsModule,
   ],
   templateUrl: './pre-load-summary.component.html',
@@ -55,12 +59,13 @@ export class PreLoadSummaryComponent {
   cancelled = output<void>();
 
   // Internal state for user selections per nested family
-  protected readonly selections = signal<Map<string, 'rfa' | 'library'>>(new Map());
+  protected readonly selections = signal<Map<string, NestedLoadSource>>(new Map());
 
-  // Source options for select button
-  protected readonly sourceOptions = [
-    { label: 'From RFA', value: 'rfa' as const },
-    { label: 'From Library', value: 'library' as const },
+  // Base source options for dropdown
+  protected readonly baseSourceOptions: SourceOption[] = [
+    { label: 'Load from RFA', value: 'rfa' },
+    { label: 'Update from Library', value: 'library' },
+    { label: 'Keep Project Version', value: 'project' },
   ];
 
   // Computed: nested families list
@@ -98,14 +103,35 @@ export class PreLoadSummaryComponent {
   protected readonly choices = computed<NestedLoadChoice[]>(() => {
     const families = this.nestedFamilies();
     const currentSelections = this.selections();
-    
-    return families.map(f => ({
-      familyName: f.familyName,
-      source: currentSelections.get(f.familyName) ?? 'rfa',
-      targetVersion: currentSelections.get(f.familyName) === 'library' 
-        ? f.libraryVersion 
-        : undefined,
-    }));
+
+    return families.map(f => {
+      const source = currentSelections.get(f.familyName) ?? 'rfa';
+      return {
+        familyName: f.familyName,
+        source,
+        targetVersion: source === 'library' ? f.libraryVersion : undefined,
+      };
+    });
+  });
+
+  // Computed: check if user has modified any selections from recommendations
+  protected readonly hasUserModifications = computed(() => {
+    const families = this.nestedFamilies();
+    const currentSelections = this.selections();
+
+    return families.some(f => {
+      const current = currentSelections.get(f.familyName);
+      const recommended = this.mapRecommendedToSource(f.recommendedAction);
+      return current !== recommended;
+    });
+  });
+
+  // Computed: count of families that will be loaded (not 'project' source)
+  protected readonly loadCount = computed(() => {
+    const currentSelections = this.selections();
+    return this.nestedFamilies().filter(f =>
+      currentSelections.get(f.familyName) !== 'project'
+    ).length;
   });
 
   /**
@@ -113,36 +139,68 @@ export class PreLoadSummaryComponent {
    */
   protected initializeSelections(): void {
     const families = this.nestedFamilies();
-    const newSelections = new Map<string, 'rfa' | 'library'>();
-    
+    const newSelections = new Map<string, NestedLoadSource>();
+
     families.forEach(f => {
-      // Use recommended action as default
-      if (f.recommendedAction === 'update_from_library') {
-        newSelections.set(f.familyName, 'library');
-      } else {
-        newSelections.set(f.familyName, 'rfa');
-      }
+      newSelections.set(f.familyName, this.mapRecommendedToSource(f.recommendedAction));
     });
-    
+
     this.selections.set(newSelections);
+  }
+
+  /**
+   * Map recommended action to source type
+   */
+  private mapRecommendedToSource(action: NestedLoadInfo['recommendedAction']): NestedLoadSource {
+    switch (action) {
+      case 'update_from_library':
+        return 'library';
+      case 'keep_project':
+        return 'project';
+      case 'load_from_rfa':
+      case 'no_action':
+      default:
+        return 'rfa';
+    }
   }
 
   /**
    * Get current selection for a family
    */
-  protected getSelection(familyName: string): 'rfa' | 'library' {
+  protected getSelection(familyName: string): NestedLoadSource {
     return this.selections().get(familyName) ?? 'rfa';
+  }
+
+  /**
+   * Get available source options for a nested family
+   * Disables options that are not applicable (e.g., library if not in library)
+   */
+  protected getSourceOptions(nested: NestedLoadInfo): SourceOption[] {
+    return this.baseSourceOptions.map(opt => ({
+      ...opt,
+      disabled: opt.value === 'library' && nested.libraryVersion === undefined ||
+                opt.value === 'project' && nested.projectVersion === undefined,
+    }));
   }
 
   /**
    * Update selection for a family
    */
-  protected onSelectionChange(familyName: string, source: 'rfa' | 'library'): void {
+  protected onSelectionChange(familyName: string, source: NestedLoadSource): void {
     this.selections.update(current => {
       const newMap = new Map(current);
       newMap.set(familyName, source);
       return newMap;
     });
+  }
+
+  /**
+   * Check if current selection matches recommended action
+   */
+  protected isRecommendedSelection(nested: NestedLoadInfo): boolean {
+    const current = this.getSelection(nested.familyName);
+    const recommended = this.mapRecommendedToSource(nested.recommendedAction);
+    return current === recommended;
   }
 
   /**
@@ -194,9 +252,25 @@ export class PreLoadSummaryComponent {
   }
 
   /**
-   * Handle Load button click
+   * Handle Load All button click - applies all recommended actions
    */
-  protected onLoad(): void {
+  protected onLoadAll(): void {
+    // Reset all selections to recommended actions
+    this.initializeSelections();
+    this.performLoad();
+  }
+
+  /**
+   * Handle Load Selected button click - applies user-modified choices
+   */
+  protected onLoadSelected(): void {
+    this.performLoad();
+  }
+
+  /**
+   * Perform the actual load operation
+   */
+  private performLoad(): void {
     const parent = this.parentFamily();
     if (!parent) {
       return;
@@ -211,6 +285,14 @@ export class PreLoadSummaryComponent {
     // Emit event and close dialog
     this.loadConfirmed.emit(this.choices());
     this.visibleChange.emit(false);
+  }
+
+  /**
+   * Handle Load button click (legacy - uses current selections)
+   * @deprecated Use onLoadAll or onLoadSelected instead
+   */
+  protected onLoad(): void {
+    this.performLoad();
   }
 
   /**
