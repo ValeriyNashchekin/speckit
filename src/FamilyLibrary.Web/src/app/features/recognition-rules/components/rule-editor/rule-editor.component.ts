@@ -275,8 +275,13 @@ export class RuleEditorComponent {
           children: [condition],
         };
       }
-      
-      return this.parseExpression(expr);
+
+      // Cannot parse this expression - return empty group instead of infinite recursion
+      return {
+        type: 'group',
+        operator: 'And',
+        children: [],
+      };
     }
 
     const children: RecognitionNode[] = [];
