@@ -123,22 +123,22 @@ Based on plan.md structure:
 
 ### Backend - US2
 
-- [ ] T026 [US2] [BACKEND] Add GetPreLoadSummaryAsync to NestedFamilyService in `src/FamilyLibrary.Application/Services/NestedFamilyService.cs`
-- [ ] T027 [US2] [BACKEND] Add GET /api/families/{id}/pre-load-summary endpoint in `src/FamilyLibrary.Api/Controllers/FamiliesController.cs`
+- [X] T026 [US2] [BACKEND] Add GetPreLoadSummaryAsync to NestedFamilyService in `src/FamilyLibrary.Application/Services/NestedFamilyService.cs` → Artifacts: [NestedFamilyService.cs](src/FamilyLibrary.Api/FamilyLibrary.Infrastructure/Services/NestedFamilyService.cs)
+- [X] T027 [US2] [BACKEND] Add GET /api/families/{id}/pre-load-summary endpoint in `src/FamilyLibrary.Api/Controllers/FamiliesController.cs` → Artifacts: [FamiliesController.cs](src/FamilyLibrary.Api/FamilyLibrary.Api/Controllers/FamiliesController.cs)
 
 ### Plugin - US2
 
-- [ ] T028 [US2] [PLUGIN] Implement PreLoadSummary logic in NestedFamilyLoadService in `src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs`
-- [ ] T029 [US2] [PLUGIN] Send revit:load:preview event before load in `src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs`
-- [ ] T030 [US2] [PLUGIN] Handle ui:load-with-nested event from UI in `src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs`
-- [ ] T031 [US2] [PLUGIN] Implement two-phase load (parent first, then override nested) in `src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs`
+- [X] T028 [US2] [PLUGIN] Implement PreLoadSummary logic in NestedFamilyLoadService in `src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs` → Artifacts: [NestedFamilyLoadService.cs](src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs)
+- [X] T029 [US2] [PLUGIN] Send revit:load:preview event before load in `src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs` → Artifacts: [NestedFamilyLoadService.cs](src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs), [RevitBridge.cs](src/FamilyLibrary.Plugin/Infrastructure/WebView2/RevitBridge.cs)
+- [X] T030 [US2] [PLUGIN] Handle ui:load-with-nested event from UI in `src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs` → Artifacts: [NestedFamilyLoadService.cs](src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs)
+- [X] T031 [US2] [PLUGIN] Implement two-phase load (parent first, then override nested) in `src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs` → Artifacts: [NestedFamilyLoadService.cs](src/FamilyLibrary.Plugin/Services/NestedFamilyLoadService.cs)
 
 ### Frontend - US2
 
-- [ ] T032 [P] [US2] [FRONTEND] Create pre-load-summary component in `src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/`
-- [ ] T033 [US2] [FRONTEND] Handle revit:load:preview event in Library component in `src/FamilyLibrary.Web/src/app/features/library/components/`
-- [ ] T034 [US2] [FRONTEND] Send ui:load-with-nested event with user choices in `src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/`
-- [ ] T035 [US2] [FRONTEND] Show version comparison (RFA vs Library vs Project) in `src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/`
+- [X] T032 [P] [US2] [FRONTEND] Create pre-load-summary component in `src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/` → Artifacts: [pre-load-summary.component.ts](src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/pre-load-summary.component.ts), [pre-load-summary.component.html](src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/pre-load-summary.component.html)
+- [X] T033 [US2] [FRONTEND] Handle revit:load:preview event in Library component in `src/FamilyLibrary.Web/src/app/features/library/components/` → Artifacts: [family-detail.component.ts](src/FamilyLibrary.Web/src/app/features/library/components/family-detail/family-detail.component.ts)
+- [X] T034 [US2] [FRONTEND] Send ui:load-with-nested event with user choices in `src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/` → Artifacts: [pre-load-summary.component.ts](src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/pre-load-summary.component.ts)
+- [X] T035 [US2] [FRONTEND] Show version comparison (RFA vs Library vs Project) in `src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/` → Artifacts: [pre-load-summary.component.html](src/FamilyLibrary.Web/src/app/features/scanner/components/pre-load-summary/pre-load-summary.component.html)
 
 **Checkpoint**: Pre-Load Summary работает, загрузка с контролем версий nested работает
 

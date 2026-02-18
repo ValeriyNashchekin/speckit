@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Autodesk.Revit.DB;
 using Newtonsoft.Json;
@@ -8,6 +11,7 @@ using FamilyLibrary.Plugin.Commands.UpdateFamiliesCommand.Services;
 using FamilyLibrary.Plugin.Core.Enums;
 using FamilyLibrary.Plugin.Core.Interfaces;
 using FamilyLibrary.Plugin.Core.Models;
+using FamilyLibrary.Plugin.Services;
 
 namespace FamilyLibrary.Plugin.Infrastructure.WebView2;
 
@@ -166,6 +170,15 @@ public class RevitBridge : IWebViewBridge
 
             case "ui:update:cancel":
                 HandleUpdateCancel();
+                break;
+
+            // Phase 3 - Nested family loading events
+            case "ui:load-with-nested":
+                HandleLoadWithNestedAsync(message.Payload as JObject).ConfigureAwait(false);
+                break;
+
+            case "ui:load-preview":
+                HandleLoadPreviewAsync(message.Payload as JObject).ConfigureAwait(false);
                 break;
         }
     }
@@ -628,6 +641,193 @@ public class RevitBridge : IWebViewBridge
         {
             familyUniqueId,
             changes
+        });
+    }
+
+    #endregion
+
+    #region Phase 3 - Nested Family Loading Events
+
+    /// <summary>
+    /// T029: Handles load preview request and sends revit:load:preview event.
+    /// Called when user clicks "Load to Project" on a family with nested dependencies.
+    /// </summary>
+    private async System.Threading.Tasks.Task HandleLoadPreviewAsync(JObject payload)
+    {
+        if (_activeDocument == null)
+        {
+            SendLoadPreviewError("No active document");
+            return;
+        }
+
+        try
+        {
+            var familyIdStr = payload?["familyId"]?.ToString();
+            var rfaPath = payload?["rfaPath"]?.ToString();
+
+            if (string.IsNullOrEmpty(rfaPath))
+            {
+                SendLoadPreviewError("RFA path is required");
+                return;
+            }
+
+            Guid? familyId = null;
+            if (!string.IsNullOrEmpty(familyIdStr) && Guid.TryParse(familyIdStr, out var parsedId))
+            {
+                familyId = parsedId;
+            }
+
+            var nestedService = new NestedFamilyLoadService();
+            var summary = nestedService.GetPreLoadSummary(rfaPath, _activeDocument, familyId);
+
+            // T029: Send revit:load:preview event with full payload
+            SendEvent("revit:load:preview", new
+            {
+                parentFamily = new
+                {
+                    familyId = summary.LibraryFamilyId.ToString(),
+                    familyName = summary.ParentFamilyName,
+                    roleName = summary.RoleName,
+                    version = summary.ParentLibraryVersion ?? summary.RfaVersion ?? 0
+                },
+                nestedFamilies = summary.NestedFamilies.Select(n => new
+                {
+                    familyName = n.FamilyName,
+                    roleName = n.RoleName,
+                    rfaVersion = n.RfaVersion ?? 0,
+                    libraryVersion = n.LibraryVersion,
+                    projectVersion = n.ProjectVersion,
+                    recommendedAction = MapRecommendedAction(n.RecommendedAction),
+                    hasConflict = n.HasConflict
+                }),
+                summary = summary.GetSummaryCounts()
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Load preview error: {ex.Message}");
+            SendLoadPreviewError(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Maps internal NestedLoadAction to UI string.
+    /// </summary>
+    private static string MapRecommendedAction(NestedLoadAction action)
+    {
+        return action switch
+        {
+            NestedLoadAction.LoadFromRfa => "load_from_rfa",
+            NestedLoadAction.UpdateFromLibrary => "update_from_library",
+            NestedLoadAction.KeepProjectVersion => "keep_project",
+            NestedLoadAction.NoAction => "no_action",
+            _ => "load_from_rfa"
+        };
+    }
+
+    /// <summary>
+    /// T030: Handles ui:load-with-nested event from UI.
+    /// Executes two-phase load with user's choices for nested families.
+    /// </summary>
+    private async System.Threading.Tasks.Task HandleLoadWithNestedAsync(JObject payload)
+    {
+        if (_activeDocument == null)
+        {
+            SendLoadWithNestedResult(false, "No active document", new List<NestedOverrideResult>());
+            return;
+        }
+
+        try
+        {
+            var familyIdStr = payload?["parentFamilyId"]?.ToString();
+            var rfaPath = payload?["rfaPath"]?.ToString();
+            var nestedChoicesArray = payload?["nestedChoices"] as JArray;
+
+            if (string.IsNullOrEmpty(rfaPath))
+            {
+                SendLoadWithNestedResult(false, "RFA path is required", new List<NestedOverrideResult>());
+                return;
+            }
+
+            // T030: Parse NestedLoadChoice array from UI
+            var choices = ParseNestedChoices(nestedChoicesArray);
+
+            // T031: Execute two-phase load
+            var nestedService = new NestedFamilyLoadService();
+            var result = nestedService.LoadWithNestedChoices(_activeDocument, rfaPath, choices);
+
+            SendLoadWithNestedResult(
+                result.Success,
+                result.Message,
+                result.NestedOverrides,
+                result.ParentFamilyName,
+                result.ParentLoaded);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Load with nested error: {ex.Message}");
+            SendLoadWithNestedResult(false, ex.Message, new List<NestedOverrideResult>());
+        }
+    }
+
+    /// <summary>
+    /// T030: Parses nested choices from UI event payload.
+    /// </summary>
+    private static List<UiNestedLoadChoice> ParseNestedChoices(JArray choicesArray)
+    {
+        var choices = new List<UiNestedLoadChoice>();
+
+        if (choicesArray == null) return choices;
+
+        foreach (var item in choicesArray)
+        {
+            var choice = new UiNestedLoadChoice
+            {
+                FamilyName = item["familyName"]?.ToString() ?? string.Empty,
+                Source = item["source"]?.ToString() ?? "rfa",
+                TargetVersion = item["targetVersion"]?.Value<int?>()
+            };
+
+            if (!string.IsNullOrEmpty(choice.FamilyName))
+            {
+                choices.Add(choice);
+            }
+        }
+
+        return choices;
+    }
+
+    private void SendLoadPreviewError(string error)
+    {
+        SendEvent("revit:load:preview", new
+        {
+            error,
+            parentFamily = (object)null,
+            nestedFamilies = new List<object>(),
+            summary = new { totalToLoad = 0, newCount = 0, updateCount = 0, conflictCount = 0 }
+        });
+    }
+
+    private void SendLoadWithNestedResult(
+        bool success,
+        string message,
+        List<NestedOverrideResult> nestedOverrides,
+        string parentFamilyName = null,
+        bool parentLoaded = false)
+    {
+        SendEvent("revit:load:complete", new
+        {
+            success,
+            message,
+            parentFamilyName,
+            parentLoaded,
+            nestedOverrides = nestedOverrides.Select(o => new
+            {
+                familyName = o.FamilyName,
+                success = o.Success,
+                version = o.Version,
+                errorMessage = o.ErrorMessage
+            })
         });
     }
 

@@ -200,3 +200,12 @@
     </div>
   }
 </div>
+
+<!-- Pre-load Summary Dialog -->
+<app-pre-load-summary
+  [visible]="preLoadDialogVisible()"
+  [previewData]="preLoadData()"
+  (visibleChange)="onPreLoadDialogVisibleChange($event)"
+  (loadConfirmed)="onPreLoadConfirmed()"
+  (cancelled)="onPreLoadCancelled()"
+/>

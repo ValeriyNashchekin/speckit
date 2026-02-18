@@ -1,0 +1,199 @@
+<p-dialog
+  [header]="dialogHeader()"
+  [visible]="visible()"
+  [modal]="true"
+  [style]="{ width: '70vw' }"
+  [breakpoints]="{ '1200px': '85vw', '768px': '95vw' }"
+  [closable]="true"
+  [closeOnEscape]="true"
+  [draggable]="false"
+  [resizable]="false"
+  (onShow)="initializeSelections()"
+  (onHide)="onHide()"
+  aria-label="Pre-load summary dialog"
+>
+  <!-- Summary Banner -->
+  @if (summary(); as summaryData) {
+    <div class="flex items-center gap-4 p-4 mb-4 rounded-lg bg-gray-50 border border-gray-200">
+      <div class="flex items-center gap-2">
+        <i class="pi pi-box text-blue-600" aria-hidden="true"></i>
+        <span class="text-sm text-gray-600">
+          <strong class="text-gray-900">{{ summaryData.totalToLoad }}</strong> families to load
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <i class="pi pi-plus-circle text-green-600" aria-hidden="true"></i>
+        <span class="text-sm text-gray-600">
+          <strong class="text-gray-900">{{ summaryData.newCount }}</strong> new
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <i class="pi pi-refresh text-blue-600" aria-hidden="true"></i>
+        <span class="text-sm text-gray-600">
+          <strong class="text-gray-900">{{ summaryData.updateCount }}</strong> updates
+        </span>
+      </div>
+      @if (hasConflicts()) {
+        <div class="flex items-center gap-2">
+          <i class="pi pi-exclamation-triangle text-orange-500" aria-hidden="true"></i>
+          <span class="text-sm text-gray-600">
+            <strong class="text-orange-600">{{ summaryData.conflictCount }}</strong> conflicts
+          </span>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Nested Families Table -->
+  <div class="max-h-96 overflow-y-auto">
+    <p-table
+      [value]="nestedFamilies()"
+      [dataKey]="'familyName'"
+      [rowHover]="true"
+      [showGridlines]="false"
+      [stripedRows]="true"
+      tableStyleClass="w-full"
+    >
+      <ng-template #header>
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            Family Name
+          </th>
+          <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            RFA Version
+          </th>
+          <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            Library Version
+          </th>
+          <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            Project Version
+          </th>
+          <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            Recommended
+          </th>
+          <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            Load Source
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-nested>
+        <tr class="border-t border-gray-100" [class.bg-orange-50]="nested.hasConflict">
+          <!-- Family Name -->
+          <td class="px-4 py-3">
+            <div class="flex flex-col">
+              <span class="font-medium text-gray-900">{{ nested.familyName }}</span>
+              @if (nested.roleName) {
+                <span class="text-xs text-gray-500">{{ nested.roleName }}</span>
+              }
+            </div>
+          </td>
+          
+          <!-- RFA Version -->
+          <td class="px-4 py-3 text-center">
+            <p-tag 
+              [value]="formatVersion(nested.rfaVersion)" 
+              severity="info"
+              [rounded]="true"
+            />
+          </td>
+          
+          <!-- Library Version -->
+          <td class="px-4 py-3 text-center">
+            @if (nested.libraryVersion !== undefined) {
+              <p-tag 
+                [value]="formatVersion(nested.libraryVersion)" 
+                [severity]="getVersionSeverity(nested.hasConflict && nested.libraryVersion !== nested.rfaVersion)"
+                [rounded]="true"
+              />
+            } @else {
+              <span class="text-gray-400">-</span>
+            }
+          </td>
+          
+          <!-- Project Version -->
+          <td class="px-4 py-3 text-center">
+            @if (nested.projectVersion !== undefined) {
+              <p-tag 
+                [value]="formatVersion(nested.projectVersion)" 
+                severity="secondary"
+                [rounded]="true"
+              />
+            } @else {
+              <span class="text-gray-400">Not loaded</span>
+            }
+          </td>
+          
+          <!-- Recommended Action -->
+          <td class="px-4 py-3 text-center">
+            <p-tag 
+              [value]="getActionLabel(nested.recommendedAction)" 
+              [severity]="getActionSeverity(nested.recommendedAction)"
+              [rounded]="true"
+            />
+          </td>
+          
+          <!-- Load Source Selection -->
+          <td class="px-4 py-3">
+            <div class="flex justify-center">
+              <p-selectbutton
+                [options]="sourceOptions"
+                [ngModel]="getSelection(nested.familyName)"
+                (ngModelChange)="onSelectionChange(nested.familyName, $event)"
+                optionLabel="label"
+                optionValue="value"
+                [allowEmpty]="false"
+                [disabled]="nested.libraryVersion === undefined"
+                ariaLabel="Select load source"
+                styleClass="text-sm"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+            No nested families found
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- Conflict Warning -->
+  @if (hasConflicts()) {
+    <div class="mt-4 p-3 rounded-lg bg-orange-50 border border-orange-200">
+      <div class="flex items-center gap-2">
+        <i class="pi pi-exclamation-triangle text-orange-500" aria-hidden="true"></i>
+        <span class="text-sm text-orange-700">
+          Version conflicts detected. Review the highlighted families before loading.
+        </span>
+      </div>
+    </div>
+  }
+
+  <!-- Footer -->
+  <ng-template pTemplate="footer">
+    <div class="flex justify-between items-center">
+      <span class="text-sm text-gray-500">
+        {{ nestedFamilies().length }} nested families
+      </span>
+      <div class="flex justify-end gap-2">
+        <p-button
+          label="Cancel"
+          severity="secondary"
+          outlined
+          (onClick)="onCancel()"
+          aria-label="Cancel loading"
+        />
+        <p-button
+          label="Load"
+          severity="primary"
+          icon="pi pi-download"
+          (onClick)="onLoad()"
+          aria-label="Confirm load"
+        />
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>

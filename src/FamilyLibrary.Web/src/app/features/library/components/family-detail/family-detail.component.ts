@@ -11,9 +11,13 @@ import { TooltipModule } from 'primeng/tooltip';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TabsModule } from 'primeng/tabs';
 import { MessageService } from 'primeng/api';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LibraryService } from '../../services/library.service';
 import { FamilyDetail, FamilyVersion, TypeCatalogEntry } from '../../../../core/models/family.model';
 import { ChangelogComponent } from '../changelog/changelog.component';
+import { PreLoadSummaryComponent } from '../../../scanner/components/pre-load-summary/pre-load-summary.component';
+import { RevitBridgeService } from '../../../../core/services/revit-bridge.service';
+import type { LoadPreviewEvent } from '../../../../core/models/webview-events.model';
 
 declare global {
   interface Window {
@@ -52,6 +56,7 @@ interface RevitFamilyLoadedDetail {
     FormsModule,
     DatePipe,
     ChangelogComponent,
+    PreLoadSummaryComponent,
   ],
   templateUrl: './family-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -60,6 +65,7 @@ export class FamilyDetailComponent {
   private readonly libraryService = inject(LibraryService);
   private readonly route = inject(ActivatedRoute);
   private readonly messageService = inject(MessageService);
+  private readonly revitBridge = inject(RevitBridgeService);
 
   protected readonly family = signal<FamilyDetail | null>(null);
   protected readonly loading = signal(true);
@@ -70,6 +76,10 @@ export class FamilyDetailComponent {
 
   // Type Catalog state
   protected readonly selectedTypes = signal<Set<number>>(new Set());
+
+  // Pre-load summary dialog state
+  protected readonly preLoadDialogVisible = signal(false);
+  protected readonly preLoadData = signal<LoadPreviewEvent['payload'] | null>(null);
 
   // Computed properties
   protected readonly familyId = computed(() => this.family()?.id ?? '');
@@ -92,6 +102,21 @@ export class FamilyDetailComponent {
 
   constructor() {
     this.loadFamily();
+    this.subscribeToLoadPreview();
+  }
+
+  /**
+   * Subscribe to revit:load:preview events from Revit plugin
+   */
+  private subscribeToLoadPreview(): void {
+    this.revitBridge.onLoadPreview()
+      .pipe(takeUntilDestroyed())
+      .subscribe({
+        next: (payload) => {
+          this.preLoadData.set(payload);
+          this.preLoadDialogVisible.set(true);
+        },
+      });
   }
 
   protected loadFamily(): void {
@@ -246,5 +271,38 @@ export class FamilyDetailComponent {
         detail: 'Running outside Revit. Cannot load types.',
       });
     }
+  }
+
+  // Pre-load summary dialog handlers
+
+  /**
+   * Handle pre-load dialog visibility change
+   */
+  protected onPreLoadDialogVisibleChange(visible: boolean): void {
+    this.preLoadDialogVisible.set(visible);
+    if (!visible) {
+      this.preLoadData.set(null);
+    }
+  }
+
+  /**
+   * Handle load confirmation from pre-load summary dialog
+   */
+  protected onPreLoadConfirmed(): void {
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Loading Family',
+      detail: 'Loading family with nested dependencies...',
+    });
+    this.preLoadDialogVisible.set(false);
+    this.preLoadData.set(null);
+  }
+
+  /**
+   * Handle load cancellation from pre-load summary dialog
+   */
+  protected onPreLoadCancelled(): void {
+    this.preLoadDialogVisible.set(false);
+    this.preLoadData.set(null);
   }
 }
