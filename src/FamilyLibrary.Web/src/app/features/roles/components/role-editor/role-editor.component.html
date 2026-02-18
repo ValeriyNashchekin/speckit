@@ -77,6 +77,27 @@
       />
     </div>
 
+    <!-- Tags field -->
+    <div class="flex flex-col gap-2">
+      <label for="roleTags" class="text-sm font-medium text-gray-700">Tags</label>
+      <p-multiselect
+        formControlName="tagIds"
+        [options]="tagOptions()"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Select tags (optional)"
+        class="w-full"
+        inputId="roleTags"
+        [showClear]="true"
+        [showHeader]="true"
+        [filter]="true"
+        filterPlaceHolder="Search tags..."
+        [maxSelectedLabels]="3"
+        selectedItemsLabel="{0} tags selected"
+        display="chip"
+      />
+    </div>
+
     <!-- Description field -->
     <div class="flex flex-col gap-2">
       <label for="roleDescription" class="text-sm font-medium text-gray-700">Description</label>

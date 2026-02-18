@@ -2,17 +2,17 @@ import { ChangeDetectionStrategy, Component, effect, input, model, output, signa
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { MultiSelectModule } from 'primeng/multiselect';
 import { SelectModule } from 'primeng/select';
 import { TooltipModule } from 'primeng/tooltip';
 import { Category } from '../../../../core/models/category.model';
 import { FamilyRole } from '../../../../core/models/family-role.model';
 import { Tag } from '../../../../core/models/tag.model';
 import { FamilyListRequest } from '../../../../core/models/family.model';
+import { TagMultiSelectComponent } from '../../../../shared/components/tag-multi-select/tag-multi-select.component';
 
 @Component({
   selector: 'app-library-filters',
-  imports: [ButtonModule, FormsModule, InputTextModule, MultiSelectModule, SelectModule, TooltipModule],
+  imports: [ButtonModule, FormsModule, InputTextModule, SelectModule, TooltipModule, TagMultiSelectComponent],
   templateUrl: './library-filters.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -37,7 +37,6 @@ export class LibraryFiltersComponent {
   // Computed options for selects
   protected readonly roleOptions = signal<{ label: string; value: string }[]>([]);
   protected readonly categoryOptions = signal<{ label: string; value: string }[]>([]);
-  protected readonly tagOptions = signal<{ label: string; value: string }[]>([]);
 
   constructor() {
     // Update options when input data changes
@@ -52,13 +51,6 @@ export class LibraryFiltersComponent {
       const categories = this.categories();
       this.categoryOptions.set(
         categories.map(category => ({ label: category.name, value: category.id }))
-      );
-    });
-
-    effect(() => {
-      const tags = this.tags();
-      this.tagOptions.set(
-        tags.map(tag => ({ label: tag.name, value: tag.id }))
       );
     });
   }

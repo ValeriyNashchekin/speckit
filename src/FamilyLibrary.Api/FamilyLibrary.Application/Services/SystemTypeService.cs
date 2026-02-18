@@ -119,4 +119,15 @@ public class SystemTypeService : ISystemTypeService
         var entities = await _repository.GetByRoleIdAsync(roleId, cancellationToken);
         return entities.Adapt<List<SystemTypeDto>>();
     }
+
+    public async Task<IReadOnlyList<SystemTypeDto>> GetByCategoryAsync(string category, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(category))
+        {
+            throw new ArgumentException("Category cannot be null or empty.", nameof(category));
+        }
+
+        var entities = await _repository.GetByCategoryAsync(category, cancellationToken);
+        return entities.Adapt<List<SystemTypeDto>>();
+    }
 }

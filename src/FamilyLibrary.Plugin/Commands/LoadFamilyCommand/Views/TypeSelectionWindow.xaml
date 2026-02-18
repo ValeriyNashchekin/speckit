@@ -128,7 +128,8 @@
         </Grid>
 
         <!-- DataGrid with Types -->
-        <DataGrid Grid.Row="2"
+        <DataGrid x:Name="TypesDataGrid"
+                  Grid.Row="2"
                   ItemsSource="{Binding FilteredTypes}"
                   Style="{StaticResource DataGridStyle}"
                   RowStyle="{StaticResource DataGridRowStyle}">

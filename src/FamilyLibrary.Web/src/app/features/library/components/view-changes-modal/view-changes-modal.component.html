@@ -1,0 +1,47 @@
+<p-dialog
+  [header]="dialogHeader()"
+  [visible]="visible()"
+  [modal]="true"
+  [style]="{ width: '50vw' }"
+  [breakpoints]="{ '960px': '75vw', '640px': '90vw' }"
+  [closable]="true"
+  [closeOnEscape]="true"
+  (onHide)="onHide()"
+  aria-label="Local changes preview"
+>
+  <!-- Content -->
+  <div class="flex flex-col gap-4 max-h-96 overflow-y-auto">
+    @if (hasChanges()) {
+      <div class="flex flex-col gap-3">
+        @for (change of changesList(); track change.category + change.previousValue + change.currentValue) {
+          <app-change-item [changeItem]="change" />
+        }
+      </div>
+    } @else {
+      <div class="flex flex-col items-center justify-center py-8 text-gray-500">
+        <i class="pi pi-check-circle text-4xl text-green-500 mb-2" aria-hidden="true"></i>
+        <p class="text-sm">No changes detected</p>
+      </div>
+    }
+  </div>
+
+  <!-- Footer -->
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button
+        label="Cancel"
+        severity="secondary"
+        outlined
+        (onClick)="onCancel()"
+        aria-label="Cancel publishing"
+      />
+      <p-button
+        label="Publish"
+        severity="primary"
+        [disabled]="!hasChanges()"
+        (onClick)="onPublish()"
+        aria-label="Publish changes"
+      />
+    </div>
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,118 @@
+<p-dialog
+  [visible]="visible()"
+  (visibleChange)="onVisibleChange($event)"
+  [modal]="true"
+  [closable]="true"
+  [closeOnEscape]="true"
+  [dismissableMask]="false"
+  [draggable]="false"
+  [resizable]="false"
+  position="center"
+  [style]="{ width: '32rem', maxWidth: '90vw' }"
+  styleClass="bg-white rounded-lg"
+  [showHeader]="true"
+  [blockScroll]="true"
+  [focusTrap]="true"
+>
+  <!-- Header -->
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <i class="pi pi-exclamation-triangle text-amber-500 text-xl"></i>
+      <span class="text-lg font-semibold text-gray-900">Confirm Family Update</span>
+    </div>
+  </ng-template>
+
+  <!-- Content -->
+  <div class="space-y-4">
+    <!-- Family name -->
+    <div class="bg-gray-50 rounded-lg px-4 py-3">
+      <span class="text-sm text-gray-500">Family:</span>
+      <span class="ml-2 font-medium text-gray-900">{{ familyName() }}</span>
+    </div>
+
+    @if (hasChanges()) {
+      <!-- Summary -->
+      <div class="flex items-center gap-4 text-sm">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-list text-blue-500"></i>
+          <span class="text-gray-600">{{ totalChangesCount() }} change(s)</span>
+        </div>
+        @if (affectedTypesCount() > 0) {
+          <div class="flex items-center gap-2">
+            <i class="pi pi-box text-amber-500"></i>
+            <span class="text-gray-600">{{ affectedTypesCount() }} affected type(s)</span>
+          </div>
+        }
+      </div>
+
+      <!-- Changes grouped by category (expandable panels) -->
+      <div class="space-y-2 max-h-80 overflow-y-auto pr-1">
+        @for (group of groupedChanges(); track trackByCategory($index, group)) {
+          <p-panel
+            [toggleable]="true"
+            [collapsed]="true"
+            toggler="header"
+            styleClass="border border-gray-200 rounded-lg"
+          >
+            <!-- Header with category label and count -->
+            <ng-template #header>
+              <div class="flex items-center gap-2">
+                <p-tag
+                  [value]="group.label"
+                  [severity]="getCategorySeverity(group.category)"
+                  styleClass="text-xs"
+                />
+                <span class="text-sm text-gray-500">{{ group.items.length }} change(s)</span>
+              </div>
+            </ng-template>
+
+            <!-- Expanded content with change items -->
+            <div class="space-y-3">
+              @for (item of group.items; track $index) {
+                <app-change-item [changeItem]="item" />
+              }
+            </div>
+          </p-panel>
+        }
+      </div>
+    } @else {
+      <!-- No changes -->
+      <div class="flex flex-col items-center justify-center py-8 text-center">
+        <i class="pi pi-check-circle text-4xl text-green-500 mb-3"></i>
+        <p class="text-gray-600 font-medium">No changes detected</p>
+        <p class="text-sm text-gray-400 mt-1">The family is already up to date</p>
+      </div>
+    }
+
+    <!-- Warning message -->
+    <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+      <div class="flex items-start gap-3">
+        <i class="pi pi-info-circle text-amber-500 mt-0.5"></i>
+        <p class="text-sm text-amber-800">
+          Updating this family will replace the local version with the library version.
+          This action cannot be undone.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <ng-template #footer>
+    <div class="flex items-center justify-end gap-3">
+      <p-button
+        label="Cancel"
+        icon="pi pi-times"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="onCancel()"
+      />
+      <p-button
+        label="Confirm Update"
+        icon="pi pi-check"
+        severity="success"
+        (onClick)="onConfirm()"
+        [disabled]="!hasChanges()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>

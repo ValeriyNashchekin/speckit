@@ -168,4 +168,21 @@ public class FamilyRepository : Repository<FamilyEntity>, IFamilyRepository
             .Where(f => filteredHashes.Contains(f.Id))
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyList<FamilyEntity>> GetByRoleNamesWithLatestVersionsAsync(
+        IEnumerable<string> roleNames,
+        CancellationToken cancellationToken = default)
+    {
+        var roleNameList = roleNames.ToList();
+        if (roleNameList.Count == 0)
+            return [];
+
+        // Query families by role names with all versions for hash matching
+        return await DbSet
+            .Include(f => f.Role)
+            .Include(f => f.Versions)
+            .AsNoTracking()
+            .Where(f => roleNameList.Contains(f.Role.Name))
+            .ToListAsync(cancellationToken);
+    }
 }

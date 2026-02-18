@@ -34,10 +34,11 @@ You **MUST** consider the user input before proceeding (if not empty).
    - If data-model.md exists: Extract entities and map to user stories
    - If contracts/ exists: Map endpoints to user stories
    - If research.md exists: Extract decisions for setup tasks
+   - **Perform Entity Coverage Analysis** (see below)
    - Generate tasks organized by user story (see Task Generation Rules below)
    - Generate dependency graph showing user story completion order
    - Create parallel execution examples per user story
-   - Validate task completeness (each user story has all needed tasks, independently testable)
+   - Validate coverage completeness (see Coverage Validation below)
 
 4. **Generate tasks.md**: Use `.specify/templates/tasks-template.md` as structure, fill with:
    - Correct feature name from plan.md
@@ -55,9 +56,14 @@ You **MUST** consider the user input before proceeding (if not empty).
 5. **Report**: Output path to generated tasks.md and summary:
    - Total task count
    - Task count per user story
+   - Entity Coverage Matrix (primary vs supporting entities)
    - Parallel opportunities identified
    - Independent test criteria for each story
    - Suggested MVP scope (typically just User Story 1)
+   - Coverage validation results:
+     - API coverage: endpoints → service methods mapped
+     - Entity coverage: all entities have appropriate tasks
+     - FK coverage: selectors + integration tasks for all FK fields
    - Format validation: Confirm ALL tasks follow the checklist format (checkbox, ID, labels, file paths)
 
 Context for task generation: $ARGUMENTS
@@ -117,28 +123,37 @@ When generating tasks, automatically assign component markers based on file path
 
 ### Task Organization
 
-1. **From User Stories (spec.md)** - PRIMARY ORGANIZATION:
-   - Each user story (P1, P2, P3...) gets its own phase
-   - Map all related components to their story:
-     - Models needed for that story
-     - Services needed for that story
-     - Endpoints/UI needed for that story
-     - If tests requested: Tests specific to that story
-   - Mark story dependencies (most stories should be independent)
+**Source Priority for Task Generation:**
+1. **contracts/api.yaml** - Every endpoint group triggers task consideration
+2. **data-model.md** - Entity relationships inform task dependencies and supporting entities
+3. **spec.md** - Acceptance criteria determine UI exposure type
+4. **plan.md** - Project structure guides file paths
 
-2. **From Contracts**:
-   - Map each contract/endpoint → to the user story it serves
-   - If tests requested: Each contract → contract test task [P] before implementation in that story's phase
+**From User Stories (spec.md)** - PRIMARY ORGANIZATION:
+- Each user story (P1, P2, P3...) gets its own phase
+- Identify primary entity for each story
+- Identify supporting entities via FK relationships and acceptance criteria
+- Map all related components to their story:
+  - Primary entity: full stack tasks
+  - Supporting entities: targeted tasks (selector, service, or CRUD based on usage)
+  - Composition tasks for integrating supporting entities into primary forms
 
-3. **From Data Model**:
-   - Map each entity to the user story(ies) that need it
-   - If entity serves multiple stories: Put in earliest story or Setup phase
-   - Relationships → service layer tasks in appropriate story phase
+**From Contracts (api.yaml)**:
+- Every endpoint group (tag) represents an entity
+- Map each endpoint to the user story it primarily serves
+- Supporting entities used by primary entity → included in same story phase
+- If tests requested: Each contract → contract test task [P] before implementation
 
-4. **From Setup/Infrastructure**:
-   - Shared infrastructure → Setup phase (Phase 1)
-   - Foundational/blocking tasks → Foundational phase (Phase 2)
-   - Story-specific setup → within that story's phase
+**From Data Model**:
+- Map each entity to the user story(ies) that need it
+- FK relationships indicate supporting entity usage
+- If entity serves multiple stories: Put in earliest story or Foundational phase
+- Relationships → service layer + selector component tasks
+
+**From Setup/Infrastructure**:
+- Shared infrastructure → Setup phase (Phase 1)
+- Foundational/blocking tasks → Foundational phase (Phase 2)
+- Story-specific setup → within that story's phase
 
 ### Phase Structure
 
@@ -148,3 +163,92 @@ When generating tasks, automatically assign component markers based on file path
   - Within each story: Tests (if requested) → Models → Services → Endpoints → Integration
   - Each phase should be a complete, independently testable increment
 - **Final Phase**: Polish & Cross-Cutting Concerns
+
+### Entity Coverage Analysis
+
+Before generating tasks, perform this analysis to ensure all entities are covered:
+
+**Step 1: Extract all entities from data-model.md**
+- List each entity with its fields and relationships
+- Identify FK relationships between entities
+
+**Step 2: Extract all API endpoint groups from contracts/api.yaml**
+- Group endpoints by tag (e.g., Roles, Categories, Tags)
+- Note CRUD operations available for each group
+
+**Step 3: Classify entities by role in user story**
+For each entity, determine if it is:
+- **Primary Entity**: Main focus of the user story (from story title/goal)
+- **Supporting Entity**: Referenced by primary entity or mentioned in acceptance criteria
+  - Indicators: FK relationship, "select X" in acceptance criteria, "filter by X"
+- **Internal Entity**: Used by system but not directly user-facing
+
+**Step 4: Determine UI exposure for each entity**
+For each entity with API endpoints:
+- If acceptance criteria mention "create/edit/delete X" → CRUD UI needed
+- If acceptance criteria mention "select X" or "filter by X" → Selector UI needed
+- If entity appears in other entity's form as FK → Selector UI needed
+- If entity only has GET endpoints → Read-only display
+
+**Step 5: Generate Entity Coverage Matrix**
+Include this matrix in tasks.md header for transparency:
+
+```text
+| Entity | Role | API Endpoints | UI Exposure | Story |
+|--------|------|---------------|-------------|-------|
+| FamilyRole | Primary | Full CRUD | List, Editor | US1 |
+| Category | Supporting | Full CRUD | Selector | US1 |
+| Tag | Supporting | Full CRUD | Multi-Selector | US1 |
+```
+
+### Task Generation by Entity Type
+
+**Primary Entities** get full stack tasks:
+- Backend: Entity, DTO, Service, Controller, Validator, Repository
+- Frontend: Service, Store, List component, Editor component, Routes
+
+**Supporting Entities** get targeted tasks based on UI exposure:
+- Backend: Entity, DTO, Service, Controller (if not exists)
+- Frontend (CRUD UI): Service, List, Editor, Routes
+- Frontend (Selector only): Service, Selector component
+- Integration: Embed selector into parent form(s)
+
+**Internal Entities** get:
+- Backend only (typically in Foundational phase)
+
+### UI Composition Tasks
+
+For each form/dialog that contains FK fields, generate composition tasks:
+
+```text
+- [ ] T0XX [USn] [FRONTEND] Integrate [Entity]Selector into [ParentComponent]
+- [ ] T0XX [USn] [FRONTEND] Wire [field] dropdown to [Entity]Service.getAll()
+```
+
+Examples:
+- RoleEditor has categoryId → CategorySelector integration task
+- RoleEditor has tagIds → TagSelector integration task
+- LibraryFilters has categoryId → CategoryDropdown integration task
+
+### Coverage Validation
+
+Before finalizing tasks.md, verify:
+
+**API Coverage:**
+- Every GET endpoint → has frontend service method to call it
+- Every POST/PUT/DELETE → has UI trigger (form submit, button click)
+
+**Entity Coverage:**
+- Every entity in data-model.md → has backend tasks
+- Every entity in acceptance criteria → has frontend tasks
+- Every entity with CRUD API → has CRUD UI OR explicit note why not needed
+
+**FK Coverage:**
+- Every FK field in forms → has selector component
+- Every selector component → has integration task into parent form
+- Every selector → wired to corresponding service
+
+**Acceptance Criteria Coverage:**
+- Each acceptance scenario → has corresponding implementation task(s)
+- "Select X" in criteria → X Selector task exists
+- "Filter by X" in criteria → X filter task exists

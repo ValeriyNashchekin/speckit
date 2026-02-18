@@ -1,0 +1,128 @@
+<div class="space-y-6">
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="space-y-4">
+        <p-skeleton width="100%" height="2rem" />
+        <p-skeleton width="75%" height="1.5rem" />
+        <p-skeleton width="50%" height="1.5rem" />
+      </div>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (error()) {
+    <div class="bg-white rounded-lg shadow-sm border border-red-200 p-6">
+      <div class="flex items-center gap-3 text-red-600">
+        <i class="pi pi-exclamation-triangle text-2xl" aria-hidden="true"></i>
+        <div>
+          <p class="font-medium">Error loading changelog</p>
+          <p class="text-sm text-red-500">{{ error() }}</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Content -->
+  @else {
+    <!-- Header with Version Filter -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-xl font-bold text-gray-900">Changelog</h2>
+        <p class="text-sm text-gray-500 mt-1">Version history and changes</p>
+      </div>
+
+      <!-- Version Filter -->
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <p-select
+          [options]="versionOptions()"
+          [(ngModel)]="selectedVersionFilter"
+          placeholder="Filter by version"
+          [showClear]="true"
+          styleClass="w-full sm:w-48"
+          aria-label="Filter versions"
+        />
+        @if (selectedVersionFilter() !== null) {
+          <p-button
+            icon="pi pi-times"
+            [text]="true"
+            severity="secondary"
+            (onClick)="clearFilter()"
+            aria-label="Clear filter"
+          />
+        }
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    @if (timelineEvents(); as events) {
+      @if (events.length > 0) {
+        <p-timeline [value]="events" styleClass="w-full">
+          <!-- Content Template -->
+          <ng-template #content let-event>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <!-- Version Header -->
+              <div class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
+                <div class="flex items-center gap-3">
+                  <p-tag [value]="'v' + event.version" severity="info" />
+                  <span class="text-sm text-gray-500">
+                    {{ event.date | date:'mediumDate' }}
+                  </span>
+                </div>
+                @if (event.author) {
+                  <span class="text-xs text-gray-400">
+                    by {{ event.author }}
+                  </span>
+                }
+              </div>
+
+              <!-- Commit Message -->
+              <div class="px-4 py-3 border-b border-gray-100">
+                <p class="text-sm text-gray-700">{{ event.message }}</p>
+              </div>
+
+              <!-- Changes -->
+              @if (event.changeSet; as changeSet) {
+                @if (changeSet.hasChanges) {
+                  <div class="p-4 space-y-3">
+                    <h4 class="text-sm font-semibold text-gray-700">Changes</h4>
+                    @for (item of changeSet.items; track item.category) {
+                      <app-change-item [changeItem]="item" />
+                    }
+                  </div>
+                }
+              }
+            </div>
+          </ng-template>
+
+          <!-- Marker Template -->
+          <ng-template #marker let-event>
+            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600">
+              <i class="pi pi-history" aria-hidden="true"></i>
+            </div>
+          </ng-template>
+
+          <!-- Opposite Template -->
+          <ng-template #opposite let-event>
+            <span class="text-xs text-gray-400 hidden sm:block">
+              v{{ event.version }}
+            </span>
+          </ng-template>
+        </p-timeline>
+      } @else {
+        <!-- Empty State -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+          <div class="flex flex-col items-center gap-3">
+            <i class="pi pi-inbox text-4xl text-gray-300" aria-hidden="true"></i>
+            <div>
+              <p class="font-medium text-gray-700">No versions found</p>
+              <p class="text-sm text-gray-500 mt-1">
+                This family has no version history yet.
+              </p>
+            </div>
+          </div>
+        </div>
+      }
+    }
+  }
+</div>

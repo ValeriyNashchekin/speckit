@@ -31,6 +31,7 @@ export class MainLayoutComponent {
   protected readonly navItems = signal<NavItem[]>([
     { label: 'Dashboard', icon: 'pi pi-home', route: '/dashboard' },
     { label: 'Queue', icon: 'pi pi-list', route: '/queue' },
+    { label: 'Scanner', icon: 'pi pi-search', route: '/scanner' },
     { label: 'Library', icon: 'pi pi-folder-open', route: '/library' },
     { label: 'Family Roles', icon: 'pi pi-tags', route: '/roles' },
     { label: 'Categories', icon: 'pi pi-folder', route: '/categories' },

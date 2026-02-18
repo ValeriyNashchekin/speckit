@@ -18,6 +18,12 @@ public class FamilyQueueItem
     public EsStampData? StampData { get; set; }
     public QueueItemStatus Status { get; set; }
     public string? ErrorMessage { get; set; }
+
+    /// <summary>
+    /// Indicates if family has local modifications compared to library version.
+    /// Only applicable for stamped families with valid RoleId.
+    /// </summary>
+    public bool HasLocalChanges { get; set; }
 }
 
 /// <summary>

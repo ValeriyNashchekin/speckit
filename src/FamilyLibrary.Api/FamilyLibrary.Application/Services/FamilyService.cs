@@ -1,8 +1,10 @@
 using System.Security.Cryptography;
+using System.Text.Json;
 using FamilyLibrary.Application.Common;
 using FamilyLibrary.Application.DTOs;
 using FamilyLibrary.Application.Interfaces;
 using FamilyLibrary.Domain.Entities;
+using FamilyLibrary.Domain.Enums;
 using FamilyLibrary.Domain.Exceptions;
 using FamilyLibrary.Domain.Interfaces;
 using Mapster;
@@ -18,6 +20,7 @@ public class FamilyService : IFamilyService
     private readonly IFamilyVersionRepository _versionRepository;
     private readonly IFamilyRoleRepository _roleRepository;
     private readonly IBlobStorageService _blobStorageService;
+    private readonly IChangeDetectionService _changeDetectionService;
     private readonly IUnitOfWork _unitOfWork;
 
     private const string FamiliesContainer = "families";
@@ -27,12 +30,14 @@ public class FamilyService : IFamilyService
         IFamilyVersionRepository versionRepository,
         IFamilyRoleRepository roleRepository,
         IBlobStorageService blobStorageService,
+        IChangeDetectionService changeDetectionService,
         IUnitOfWork unitOfWork)
     {
         _familyRepository = familyRepository;
         _versionRepository = versionRepository;
         _roleRepository = roleRepository;
         _blobStorageService = blobStorageService;
+        _changeDetectionService = changeDetectionService;
         _unitOfWork = unitOfWork;
     }
 
@@ -199,56 +204,92 @@ public class FamilyService : IFamilyService
         return await _familyRepository.HashExistsAsync(hash, cancellationToken);
     }
 
-    public async Task<List<FamilyStatusDto>> BatchCheckAsync(
-        List<string> hashes,
+    public async Task<BatchCheckResponse> BatchCheckAsync(
+        BatchCheckRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (hashes == null || hashes.Count == 0)
-            return [];
+        if (request.Families == null || request.Families.Count == 0)
+            return new BatchCheckResponse { Results = [] };
 
-        // Single query to get families by hashes at database level
-        var families = await _familyRepository.GetByHashesAsync(hashes, cancellationToken);
+        var roleNames = request.Families.Select(f => f.RoleName).Distinct().ToList();
+        var requestItems = request.Families.ToList();
 
-        // Build a lookup dictionary from hash to family
-        var hashToFamily = new Dictionary<string, FamilyEntity>(StringComparer.OrdinalIgnoreCase);
-        foreach (var family in families)
+        // Query families with their roles and latest versions by role names
+        var familiesWithRoles = await _familyRepository.GetByRoleNamesWithLatestVersionsAsync(
+            roleNames, cancellationToken);
+
+        // Build lookup by role name
+        var roleToFamilies = familiesWithRoles
+            .GroupBy(f => f.Role.Name, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
+        // Build results
+        var results = new List<FamilyCheckResult>(requestItems.Count);
+        foreach (var item in requestItems)
         {
-            var latestVersion = family.Versions.OrderByDescending(v => v.Version).FirstOrDefault();
-            if (latestVersion != null && !string.IsNullOrEmpty(latestVersion.Hash))
+            if (!roleToFamilies.TryGetValue(item.RoleName, out var families) || families.Count == 0)
             {
-                hashToFamily[latestVersion.Hash] = family;
+                results.Add(new FamilyCheckResult
+                {
+                    RoleName = item.RoleName,
+                    Status = FamilyScanStatus.Unmatched
+                });
+                continue;
             }
+
+            // Find the family with matching hash in its versions
+            FamilyEntity? matchedFamily = null;
+            FamilyVersionEntity? latestVersion = null;
+
+            foreach (var family in families)
+            {
+                latestVersion = family.Versions.OrderByDescending(v => v.Version).FirstOrDefault();
+                if (latestVersion != null)
+                {
+                    // Check if any version matches the hash
+                    var matchingVersion = family.Versions.FirstOrDefault(v =>
+                        string.Equals(v.Hash, item.Hash, StringComparison.OrdinalIgnoreCase));
+
+                    if (matchingVersion != null)
+                    {
+                        matchedFamily = family;
+                        break;
+                    }
+                    else if (matchedFamily == null)
+                    {
+                        // Keep first family as candidate for update
+                        matchedFamily = family;
+                    }
+                }
+            }
+
+            if (matchedFamily == null || latestVersion == null)
+            {
+                results.Add(new FamilyCheckResult
+                {
+                    RoleName = item.RoleName,
+                    Status = FamilyScanStatus.Unmatched
+                });
+                continue;
+            }
+
+            // Determine status based on hash comparison
+            var latestHash = latestVersion.Hash;
+            var status = string.Equals(latestHash, item.Hash, StringComparison.OrdinalIgnoreCase)
+                ? FamilyScanStatus.UpToDate
+                : FamilyScanStatus.UpdateAvailable;
+
+            results.Add(new FamilyCheckResult
+            {
+                RoleName = item.RoleName,
+                Status = status,
+                LibraryVersion = matchedFamily.CurrentVersion,
+                CurrentVersion = matchedFamily.CurrentVersion,
+                LibraryHash = latestHash
+            });
         }
 
-        // Build results preserving original order
-        var results = new List<FamilyStatusDto>(hashes.Count);
-        foreach (var hash in hashes)
-        {
-            if (hashToFamily.TryGetValue(hash, out var family))
-            {
-                results.Add(new FamilyStatusDto
-                {
-                    Hash = hash,
-                    Exists = true,
-                    FamilyId = family.Id,
-                    FamilyName = family.FamilyName,
-                    CurrentVersion = family.CurrentVersion
-                });
-            }
-            else
-            {
-                results.Add(new FamilyStatusDto
-                {
-                    Hash = hash,
-                    Exists = false,
-                    FamilyId = null,
-                    FamilyName = null,
-                    CurrentVersion = null
-                });
-            }
-        }
-
-        return results;
+        return new BatchCheckResponse { Results = results };
     }
 
     public async Task<FamilyDownloadDto> GetDownloadUrlAsync(
@@ -295,6 +336,108 @@ public class FamilyService : IFamilyService
             Hash = versionEntity.Hash,
             Version = versionEntity.Version
         };
+    }
+
+    public async Task<ChangeSetDto> GetChangesAsync(
+        Guid familyId,
+        int fromVersion,
+        int toVersion,
+        CancellationToken cancellationToken = default)
+    {
+        // Verify family exists
+        var familyExists = await _familyRepository.ExistsAsync(familyId, cancellationToken);
+        if (!familyExists)
+        {
+            throw new NotFoundException(nameof(FamilyEntity), familyId);
+        }
+
+        // Get both versions in parallel
+        var fromVersionTask = _versionRepository.GetByVersionAsync(familyId, fromVersion, cancellationToken);
+        var toVersionTask = _versionRepository.GetByVersionAsync(familyId, toVersion, cancellationToken);
+
+        await Task.WhenAll(fromVersionTask, toVersionTask);
+
+        var fromVersionEntity = await fromVersionTask;
+        var toVersionEntity = await toVersionTask;
+
+        if (fromVersionEntity is null)
+        {
+            throw new NotFoundException("FamilyVersion", $"Version {fromVersion} not found for family {familyId}");
+        }
+
+        if (toVersionEntity is null)
+        {
+            throw new NotFoundException("FamilyVersion", $"Version {toVersion} not found for family {familyId}");
+        }
+
+        // Deserialize snapshots
+        var fromSnapshot = JsonSerializer.Deserialize<FamilySnapshot>(fromVersionEntity.SnapshotJson);
+        var toSnapshot = JsonSerializer.Deserialize<FamilySnapshot>(toVersionEntity.SnapshotJson);
+
+        if (fromSnapshot is null)
+        {
+            throw new ValidationException("SnapshotJson", $"Failed to deserialize snapshot for version {fromVersion}");
+        }
+
+        if (toSnapshot is null)
+        {
+            throw new ValidationException("SnapshotJson", $"Failed to deserialize snapshot for version {toVersion}");
+        }
+
+        // Detect changes using the change detection service
+        return _changeDetectionService.DetectChanges(fromSnapshot, toSnapshot);
+    }
+
+    /// <summary>
+    /// Gets a preview of changes that will occur when updating a family.
+    /// US4: Pre-Update Preview - designers see what will change before confirming update.
+    /// </summary>
+    public async Task<ChangeSetDto> GetUpdatePreviewAsync(
+        Guid familyId,
+        int currentVersion,
+        int targetVersion,
+        CancellationToken cancellationToken = default)
+    {
+        // Delegate to GetChangesAsync with semantic naming for update context
+        return await GetChangesAsync(familyId, currentVersion, targetVersion, cancellationToken);
+    }
+
+    public async Task<ChangeSetDto> DetectLocalChangesAsync(
+        Guid familyId,
+        string localSnapshotJson,
+        CancellationToken cancellationToken = default)
+    {
+        // Verify family exists
+        var familyExists = await _familyRepository.ExistsAsync(familyId, cancellationToken);
+        if (!familyExists)
+        {
+            throw new NotFoundException(nameof(FamilyEntity), familyId);
+        }
+
+        // Get the latest version from library
+        var latestVersion = await _versionRepository.GetLatestVersionAsync(familyId, cancellationToken);
+        if (latestVersion is null)
+        {
+            throw new NotFoundException("FamilyVersion", $"No versions found for family {familyId}");
+        }
+
+        // Deserialize local snapshot
+        var localSnapshot = JsonSerializer.Deserialize<FamilySnapshot>(localSnapshotJson);
+        if (localSnapshot is null)
+        {
+            throw new ValidationException("localSnapshotJson", "Failed to deserialize local snapshot JSON");
+        }
+
+        // Deserialize library snapshot
+        var librarySnapshot = JsonSerializer.Deserialize<FamilySnapshot>(latestVersion.SnapshotJson);
+        if (librarySnapshot is null)
+        {
+            throw new ValidationException("SnapshotJson", $"Failed to deserialize snapshot for version {latestVersion.Version}");
+        }
+
+        // Detect changes between local and library versions
+        // Local is the "previous" (what user has), Library is the "current" (what's in library)
+        return _changeDetectionService.DetectChanges(localSnapshot, librarySnapshot);
     }
 
     private static async Task<string> CalculateHashAsync(Stream stream, CancellationToken cancellationToken)

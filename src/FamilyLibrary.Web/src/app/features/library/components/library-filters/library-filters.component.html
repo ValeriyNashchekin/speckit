@@ -59,17 +59,11 @@
       <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">
         Tags
       </label>
-      <p-multiSelect
-        [options]="tagOptions()"
-        [ngModel]="selectedTagIds()"
-        (ngModelChange)="onTagsChange($event)"
+      <app-tag-multi-select
+        [tags]="tags()"
+        [selectedTagIds]="selectedTagIds()"
+        (selectedTagIdsChange)="onTagsChange($event)"
         placeholder="Select tags"
-        [showClear]="true"
-        optionLabel="label"
-        optionValue="value"
-        styleClass="w-full"
-        [maxSelectedLabels]="3"
-        selectedItemsLabel="{0} tags selected"
       />
     </div>
 

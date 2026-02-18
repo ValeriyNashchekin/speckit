@@ -7,3 +7,4 @@ export * from './family.model';
 export * from './system-type.model';
 export * from './draft.model';
 export * from './recognition-rule.model';
+export * from './scanner.models';

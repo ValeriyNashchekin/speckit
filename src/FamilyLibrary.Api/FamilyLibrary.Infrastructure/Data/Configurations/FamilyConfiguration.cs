@@ -23,7 +23,9 @@ public class FamilyConfiguration : IEntityTypeConfiguration<FamilyEntity>
             .IsRequired();
 
         // Performance indexes per data-model.md
-        builder.HasIndex(f => f.RoleId);
+        // Covering index for batch check optimization - includes CurrentVersion to avoid key lookup
+        builder.HasIndex(f => f.RoleId)
+            .IncludeProperties(f => f.CurrentVersion);
         builder.HasIndex(f => f.FamilyName);
 
         // Unique constraint: one family name per role

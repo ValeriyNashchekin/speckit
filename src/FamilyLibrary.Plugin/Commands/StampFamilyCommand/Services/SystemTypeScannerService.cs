@@ -1,4 +1,6 @@
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Mechanical;
+using Autodesk.Revit.DB.Plumbing;
 using FamilyLibrary.Plugin.Core.Entities;
 using FamilyLibrary.Plugin.Core.Enums;
 using FamilyLibrary.Plugin.Core.Interfaces;
@@ -7,12 +9,14 @@ using FamilyLibrary.Plugin.Infrastructure.ExtensibleStorage;
 namespace FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services;
 
 /// <summary>
-/// Service for scanning system family types (WallType, FloorType, etc.).
+/// Service for scanning system family types (WallType, FloorType, PipeType, DuctType, etc.).
 /// Uses FilteredElementCollector with optimized filters.
 /// </summary>
 public class SystemTypeScannerService
 {
     private readonly IEsService _esService;
+    private readonly CompoundStructureSerializer _compoundStructureSerializer;
+    private readonly RoutingPreferencesSerializer _routingPreferencesSerializer;
 
     // GroupA categories: CompoundStructure support
     private static readonly BuiltInCategory[] GroupACategories =
@@ -24,6 +28,13 @@ public class SystemTypeScannerService
         BuiltInCategory.OST_StructuralFoundation
     };
 
+    // GroupB categories: MEP with RoutingPreferences (Pipes, Ducts)
+    private static readonly BuiltInCategory[] GroupBCategories =
+    {
+        BuiltInCategory.OST_PipeSegments,
+        BuiltInCategory.OST_DuctCurves
+    };
+
     // GroupE categories: Simple parameters only
     private static readonly BuiltInCategory[] GroupECategories =
     {
@@ -33,11 +44,17 @@ public class SystemTypeScannerService
         BuiltInCategory.OST_BuildingPad
     };
 
-    public SystemTypeScannerService() : this(new EsService()) { }
+    public SystemTypeScannerService()
+        : this(new EsService(), new CompoundStructureSerializer(), new RoutingPreferencesSerializer()) { }
 
-    public SystemTypeScannerService(IEsService esService)
+    public SystemTypeScannerService(
+        IEsService esService,
+        CompoundStructureSerializer compoundStructureSerializer,
+        RoutingPreferencesSerializer routingPreferencesSerializer)
     {
         _esService = esService;
+        _compoundStructureSerializer = compoundStructureSerializer;
+        _routingPreferencesSerializer = routingPreferencesSerializer;
     }
 
     /// <summary>
@@ -64,7 +81,7 @@ public class SystemTypeScannerService
             var bic = (BuiltInCategory)GetElementIdValue(category.Id);
             if (!categorySet.Contains(bic)) continue;
 
-            var info = CreateSystemTypeInfo(elementType, bic);
+            var info = CreateSystemTypeInfo(document, elementType, bic);
             if (info != null)
                 result.Add(info);
         }
@@ -79,6 +96,9 @@ public class SystemTypeScannerService
     {
         if (Array.IndexOf(GroupACategories, category) >= 0)
             return SystemFamilyGroup.GroupA;
+
+        if (Array.IndexOf(GroupBCategories, category) >= 0)
+            return SystemFamilyGroup.GroupB;
 
         if (Array.IndexOf(GroupECategories, category) >= 0)
             return SystemFamilyGroup.GroupE;
@@ -135,6 +155,61 @@ public class SystemTypeScannerService
     }
 
     /// <summary>
+    /// Gets all PipeTypes from document.
+    /// </summary>
+    public List<SystemTypeInfo> GetPipeTypes(Document document)
+    {
+        if (document == null) return new List<SystemTypeInfo>();
+
+        var result = new List<SystemTypeInfo>();
+        var pipeTypes = new FilteredElementCollector(document)
+            .OfClass(typeof(PipeType))
+            .WhereElementIsElementType()
+            .Cast<PipeType>();
+
+        foreach (var pipeType in pipeTypes)
+        {
+            var info = CreateSystemTypeInfoFromMepCurveType(document, pipeType, "Pipe");
+            if (info != null) result.Add(info);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Gets all DuctTypes from document.
+    /// </summary>
+    public List<SystemTypeInfo> GetDuctTypes(Document document)
+    {
+        if (document == null) return new List<SystemTypeInfo>();
+
+        var result = new List<SystemTypeInfo>();
+        var ductTypes = new FilteredElementCollector(document)
+            .OfClass(typeof(DuctType))
+            .WhereElementIsElementType()
+            .Cast<DuctType>();
+
+        foreach (var ductType in ductTypes)
+        {
+            var info = CreateSystemTypeInfoFromMepCurveType(document, ductType, "Duct");
+            if (info != null) result.Add(info);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Gets all GroupB types (Pipes, Ducts).
+    /// </summary>
+    public List<SystemTypeInfo> GetGroupBTypes(Document document)
+    {
+        var result = new List<SystemTypeInfo>();
+        result.AddRange(GetPipeTypes(document));
+        result.AddRange(GetDuctTypes(document));
+        return result;
+    }
+
+    /// <summary>
     /// Gets levels and grids (GroupE).
     /// </summary>
     public List<SystemTypeInfo> GetSimpleSystemTypes(Document document)
@@ -175,14 +250,38 @@ public class SystemTypeScannerService
     /// </summary>
     public List<SystemTypeInfo> GetAllSystemTypes(Document document)
     {
-        var allCategories = GroupACategories.Concat(GroupECategories).ToArray();
-        return ScanSystemTypes(document, allCategories);
+        var result = new List<SystemTypeInfo>();
+
+        // Group A: CompoundStructure types
+        result.AddRange(GetGroupATypes(document));
+
+        // Group B: MEP types with RoutingPreferences
+        result.AddRange(GetGroupBTypes(document));
+
+        // Group E: Simple types
+        result.AddRange(GetSimpleSystemTypes(document));
+
+        return result;
     }
 
-    private SystemTypeInfo? CreateSystemTypeInfo(Element elementType, BuiltInCategory category)
+    private SystemTypeInfo? CreateSystemTypeInfo(Document document, Element elementType, BuiltInCategory category)
     {
         var stampData = _esService.ReadStamp(elementType);
         var group = GetGroupForCategory(category);
+        string? compoundStructureSnapshot = null;
+        string? routingPreferencesSnapshot = null;
+
+        // Serialize CompoundStructure for Group A types
+        if (group == SystemFamilyGroup.GroupA)
+        {
+            compoundStructureSnapshot = TrySerializeCompoundStructure(document, elementType);
+        }
+
+        // Serialize RoutingPreferences for Group B types
+        if (group == SystemFamilyGroup.GroupB)
+        {
+            routingPreferencesSnapshot = TrySerializeRoutingPreferences(document, elementType);
+        }
 
         return new SystemTypeInfo
         {
@@ -193,7 +292,88 @@ public class SystemTypeScannerService
             Group = group,
             ElementId = elementType.Id,
             HasStamp = stampData?.IsValid == true,
-            StampData = stampData
+            StampData = stampData,
+            CompoundStructureSnapshot = compoundStructureSnapshot,
+            RoutingPreferencesSnapshot = routingPreferencesSnapshot
+        };
+    }
+
+    /// <summary>
+    /// Tries to serialize CompoundStructure from a HostObjAttributes element.
+    /// Returns null if the element does not support CompoundStructure.
+    /// </summary>
+    private string? TrySerializeCompoundStructure(Document document, Element elementType)
+    {
+        if (!(elementType is HostObjAttributes hostAttributes))
+            return null;
+
+        try
+        {
+            var structure = hostAttributes.GetCompoundStructure();
+            if (structure == null)
+                return null;
+
+            return _compoundStructureSerializer.Serialize(structure, document);
+        }
+        catch
+        {
+            // Some types may not support CompoundStructure
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Tries to serialize RoutingPreferences from a PipeType or DuctType.
+    /// Returns null if the element does not support RoutingPreferences.
+    /// </summary>
+    private string? TrySerializeRoutingPreferences(Document document, Element elementType)
+    {
+        try
+        {
+            if (elementType is PipeType pipeType)
+            {
+                return _routingPreferencesSerializer.SerializeToJson(pipeType, document);
+            }
+
+            if (elementType is DuctType ductType)
+            {
+                return _routingPreferencesSerializer.SerializeToJson(ductType, document);
+            }
+        }
+        catch
+        {
+            // Some types may not support RoutingPreferences
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Creates SystemTypeInfo from MEPCurveType (PipeType or DuctType).
+    /// Includes RoutingPreferences serialization for Group B.
+    /// </summary>
+    private SystemTypeInfo? CreateSystemTypeInfoFromMepCurveType(
+        Document document,
+        MEPCurveType mepCurveType,
+        string systemFamily)
+    {
+        if (mepCurveType == null) return null;
+
+        var stampData = _esService.ReadStamp(mepCurveType);
+        var routingPreferencesSnapshot = TrySerializeRoutingPreferences(document, mepCurveType);
+        var category = mepCurveType.Category;
+
+        return new SystemTypeInfo
+        {
+            UniqueId = mepCurveType.UniqueId,
+            TypeName = mepCurveType.Name,
+            Category = category?.Name?.Replace("OST_", "") ?? systemFamily,
+            SystemFamily = systemFamily,
+            Group = SystemFamilyGroup.GroupB,
+            ElementId = mepCurveType.Id,
+            HasStamp = stampData?.IsValid == true,
+            StampData = stampData,
+            RoutingPreferencesSnapshot = routingPreferencesSnapshot
         };
     }
 
@@ -225,6 +405,9 @@ public class SystemTypeScannerService
             FloorType _ => "Floor",
             RoofType _ => "Roof",
             CeilingType _ => "Ceiling",
+            WallFoundationType _ => "Foundation",
+            PipeType _ => "Pipe",
+            DuctType _ => "Duct",
             _ => elementType.Category?.Name ?? "Unknown"
         };
     }

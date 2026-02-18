@@ -102,6 +102,20 @@
     </p-card>
   }
 
+  <!-- Routing Preferences (GroupB - Pipes, Ducts) -->
+  @if (isRoutingPreferences()) {
+    @if (routingPreferences(); as preferences) {
+      <app-routing-preferences-display [preferences]="preferences" />
+    } @else {
+      <p-card header="Routing Preferences" styleClass="shadow-sm">
+        <div class="flex flex-col items-center py-8">
+          <i class="pi pi-exclamation-triangle text-3xl text-yellow-500 mb-3"></i>
+          <p class="text-gray-500">Unable to parse routing preferences data</p>
+        </div>
+      </p-card>
+    }
+  }
+
   <!-- Parameters (GroupE) -->
   @if (isParameters()) {
     <p-card header="Parameters" styleClass="shadow-sm">
@@ -158,7 +172,7 @@
   }
 
   <!-- Other Groups (Fallback) -->
-  @if (!isCompoundStructure() && !isParameters()) {
+  @if (!isCompoundStructure() && !isRoutingPreferences() && !isParameters()) {
     <p-card header="JSON Data" styleClass="shadow-sm">
       @if (parsedJson(); as data) {
         <pre class="bg-gray-50 p-4 rounded-md overflow-x-auto text-sm text-gray-700 font-mono">{{ data | json }}</pre>

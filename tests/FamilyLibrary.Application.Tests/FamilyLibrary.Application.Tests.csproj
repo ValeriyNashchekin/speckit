@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\FamilyLibrary.Api\FamilyLibrary.Application\FamilyLibrary.Application.csproj" />
+    <ProjectReference Include="..\..\src\FamilyLibrary.Api\FamilyLibrary.Infrastructure\FamilyLibrary.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

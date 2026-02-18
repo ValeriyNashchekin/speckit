@@ -131,6 +131,8 @@ namespace FamilyLibrary.Infrastructure.Migrations
 
                     b.HasIndex("RoleId");
 
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("RoleId"), new[] { "CurrentVersion" });
+
                     b.HasIndex("RoleId", "FamilyName")
                         .IsUnique();
 

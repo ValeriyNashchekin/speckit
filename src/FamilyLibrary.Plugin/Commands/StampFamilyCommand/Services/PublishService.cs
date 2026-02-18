@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Autodesk.Revit.DB;
 using FamilyLibrary.Plugin.Commands.StampFamilyCommand.Models;
 using FamilyLibrary.Plugin.Core.Entities;
 using FamilyLibrary.Plugin.Core.Interfaces;
@@ -18,17 +19,23 @@ namespace FamilyLibrary.Plugin.Commands.StampFamilyCommand.Services;
 public class PublishService
 {
     private readonly IContentHashService _hashService;
+    private readonly SnapshotService _snapshotService;
     private readonly HttpClient _httpClient;
     private readonly string _apiBaseUrl;
     private readonly string _blobConnectionString;
 
-    public PublishService() : this(new ContentHashService())
+    public PublishService() : this(new ContentHashService(), new SnapshotService())
     {
     }
 
-    public PublishService(IContentHashService hashService)
+    public PublishService(IContentHashService hashService) : this(hashService, new SnapshotService())
+    {
+    }
+
+    public PublishService(IContentHashService hashService, SnapshotService snapshotService)
     {
         _hashService = hashService;
+        _snapshotService = snapshotService ?? throw new ArgumentNullException(nameof(snapshotService));
         _httpClient = new HttpClient();
         // MVP: Configuration should be injected
         _apiBaseUrl = "https://localhost:5001/api";
@@ -49,6 +56,30 @@ public class PublishService
         foreach (var item in items)
         {
             if (PublishSingleFamily(item))
+            {
+                item.Status = QueueItemStatus.Published;
+                publishedCount++;
+            }
+        }
+
+        return publishedCount;
+    }
+
+    /// <summary>
+    /// Publish a family with document context for snapshot creation.
+    /// </summary>
+    public int PublishFamilies(List<FamilyQueueItem> items, Document document)
+    {
+        if (items == null || items.Count == 0)
+            return 0;
+        if (document == null)
+            return PublishFamilies(items);
+
+        var publishedCount = 0;
+
+        foreach (var item in items)
+        {
+            if (PublishSingleFamilyWithSnapshot(item, document))
             {
                 item.Status = QueueItemStatus.Published;
                 publishedCount++;
@@ -89,6 +120,66 @@ public class PublishService
                 RoleName = item.StampData?.RoleName ?? item.FamilyName,
                 ContentHash = contentHash,
                 CatalogFilePath = blobUrl
+            };
+
+            var success = CallPublishApi(request);
+            if (!success)
+            {
+                item.Status = QueueItemStatus.Failed;
+                item.ErrorMessage = "API call failed";
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            item.Status = QueueItemStatus.Failed;
+            item.ErrorMessage = ex.Message;
+            return false;
+        }
+    }
+
+    private bool PublishSingleFamilyWithSnapshot(FamilyQueueItem item, Document document)
+    {
+        try
+        {
+            // Validate source file exists
+            if (string.IsNullOrEmpty(item.SourcePath) || !File.Exists(item.SourcePath))
+            {
+                item.Status = QueueItemStatus.Failed;
+                item.ErrorMessage = "Source file not found";
+                return false;
+            }
+
+            // Compute content hash
+            var contentHash = _hashService.ComputeHash(item.SourcePath!);
+            if (item.StampData != null)
+            {
+                item.StampData.ContentHash = contentHash;
+            }
+
+            // Create snapshot JSON
+            string? snapshotJson = null;
+            var element = document.GetElement(item.UniqueId);
+            if (element is Family family)
+            {
+                snapshotJson = _snapshotService.CreateSnapshotJson(family, document);
+            }
+
+            // Upload to blob storage (MVP: placeholder)
+            var blobUrl = UploadToBlobStorage(item.SourcePath!, contentHash);
+
+            // Call backend API
+            var request = new PublishRequest
+            {
+                FamilyUniqueId = item.UniqueId,
+                FamilyName = item.FamilyName,
+                RoleId = item.StampData?.RoleId ?? Guid.Empty,
+                RoleName = item.StampData?.RoleName ?? item.FamilyName,
+                ContentHash = contentHash,
+                CatalogFilePath = blobUrl,
+                SnapshotJson = snapshotJson
             };
 
             var success = CallPublishApi(request);
