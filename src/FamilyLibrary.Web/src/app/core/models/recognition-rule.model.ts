@@ -26,11 +26,13 @@ export interface RecognitionRule {
 
 export interface CreateRecognitionRuleRequest {
   roleId: string;
-  rootNode: RecognitionGroup;
+  rootNode: string;
+  formula: string;
 }
 
 export interface UpdateRecognitionRuleRequest {
-  rootNode: RecognitionGroup;
+  rootNode: string;
+  formula: string;
 }
 
 export function isRecognitionCondition(node: RecognitionNode): node is RecognitionCondition {

@@ -8,13 +8,8 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: '/dashboard',
+        redirectTo: '/library',
         pathMatch: 'full',
-      },
-      {
-        path: 'dashboard',
-        loadComponent: () =>
-          import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
       {
         path: 'roles',
@@ -68,10 +63,15 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/settings/settings.routes').then((m) => m.SETTINGS_ROUTES),
       },
+      {
+        path: 'plugin',
+        loadChildren: () =>
+          import('./features/plugin/plugin.routes').then((m) => m.PLUGIN_ROUTES),
+      },
     ],
   },
   {
     path: '**',
-    redirectTo: '/dashboard',
+    redirectTo: '/library',
   },
 ];

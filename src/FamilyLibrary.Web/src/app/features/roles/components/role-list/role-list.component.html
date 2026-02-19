@@ -1,52 +1,55 @@
-<div class="space-y-6">
-  <!-- Header -->
-  <div class="flex items-center justify-between">
+<div>
+  <div class="flex items-center justify-between pb-4 mb-1 border-b border-slate-100">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Family Roles</h1>
-      <p class="text-sm text-gray-500 mt-1">Manage functional roles for families</p>
+      <h1 class="text-[15px] font-semibold text-slate-900 leading-tight">Family Id</h1>
+      <p class="text-[12px] text-slate-400 mt-0.5">Manage family identification roles</p>
     </div>
     <div class="flex items-center gap-2">
+      <div class="relative">
+        <i class="pi pi-search absolute left-2.5 text-slate-400 pointer-events-none"
+           style="font-size:11px;top:50%;transform:translateY(-50%);"></i>
+        <input
+          pInputText
+          type="text"
+          [value]="searchTerm()"
+          (input)="onSearch($event)"
+          placeholder="Search..."
+          class="pl-7"
+          style="height:30px;font-size:12px;width:180px;"
+        />
+      </div>
+      @if (searchTerm()) {
+        <p-button
+          icon="pi pi-times"
+          [rounded]="true"
+          [text]="true"
+          size="small"
+          severity="secondary"
+          pTooltip="Clear"
+          (onClick)="clearSearch()"
+        />
+      }
       <p-button
         icon="pi pi-refresh"
         [rounded]="true"
         [text]="true"
+        size="small"
         severity="secondary"
         pTooltip="Refresh"
         [loading]="isLoading()"
         (onClick)="refreshRoles()"
       />
-      <p-button label="New Role" icon="pi pi-plus" severity="primary" (onClick)="createRole()" />
+      <p-button
+        label="New Family Id"
+        icon="pi pi-plus"
+        size="small"
+        severity="primary"
+        (onClick)="createRole()"
+      />
     </div>
   </div>
 
-  <!-- Search and Filters -->
-  <div class="flex items-center gap-4">
-    <span class="p-input-icon-left flex-1 max-w-md">
-      <i class="pi pi-search"></i>
-      <input
-        type="text"
-        pInputText
-        [value]="searchTerm()"
-        (input)="onSearch($event)"
-        placeholder="Search roles..."
-        class="w-full"
-      />
-    </span>
-    @if (searchTerm()) {
-      <p-button
-        icon="pi pi-times"
-        [rounded]="true"
-        [text]="true"
-        severity="secondary"
-        pTooltip="Clear search"
-        (onClick)="clearSearch()"
-      />
-    }
-  </div>
-
-  <!-- Table -->
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-    <p-table
+  <p-table
       [value]="roles()"
       [paginator]="true"
       [rows]="rows()"
@@ -69,48 +72,31 @@
     >
       <ng-template #header>
         <tr>
-          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 25%">Name</th>
-          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 12%">Type</th>
-          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 18%">Category</th>
-          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 30%">Description</th>
-          <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700" style="width: 15%">Actions</th>
+          <th style="width: 25%">Name</th>
+          <th style="width: 12%">Type</th>
+          <th style="width: 18%">Category</th>
+          <th style="width: 30%">Description</th>
+          <th class="text-right" style="width: 15%">Actions</th>
         </tr>
       </ng-template>
 
       <ng-template #body let-role>
-        <tr class="border-t border-gray-100">
-          <td class="px-4 py-3">
-            <span class="font-medium text-gray-900">{{ role.name }}</span>
+        <tr>
+          <td><span class="font-medium">{{ role.name }}</span></td>
+          <td>
+            <p-tag [value]="role.type" [severity]="getTagSeverity(role.type)" />
           </td>
-          <td class="px-4 py-3">
-            <p-tag
-              [value]="role.type"
-              [severity]="getTagSeverity(role.type)"
-            />
+          <td class="text-slate-400">{{ role.categoryId ?? '—' }}</td>
+          <td>
+            <span class="line-clamp-2 text-slate-500">{{ role.description ?? '—' }}</span>
           </td>
-          <td class="px-4 py-3 text-gray-600">{{ role.categoryId ?? '-' }}</td>
-          <td class="px-4 py-3 text-gray-600">
-            <span class="line-clamp-2">{{ role.description ?? '-' }}</span>
-          </td>
-          <td class="px-4 py-3">
-            <div class="flex items-center justify-end gap-2">
-              <p-button
-                icon="pi pi-pencil"
-                [rounded]="true"
-                [text]="true"
-                severity="secondary"
-                pTooltip="Edit"
-                (onClick)="editRole(role)"
-              />
-              <p-button
-                icon="pi pi-trash"
-                [rounded]="true"
-                [text]="true"
-                severity="danger"
-                pTooltip="Delete"
-                [loading]="isDeleting() === role.id"
-                (onClick)="deleteRole(role, $event)"
-              />
+          <td>
+            <div class="flex items-center justify-end gap-1">
+              <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" size="small"
+                severity="secondary" pTooltip="Edit" (onClick)="editRole(role)" />
+              <p-button icon="pi pi-trash" [rounded]="true" [text]="true" size="small"
+                severity="danger" pTooltip="Delete"
+                [loading]="isDeleting() === role.id" (onClick)="deleteRole(role, $event)" />
             </div>
           </td>
         </tr>
@@ -122,16 +108,16 @@
             <div class="flex flex-col items-center gap-3">
               <i class="pi pi-tags text-4xl text-gray-300"></i>
               <div>
-                <p class="text-gray-600 font-medium">No family roles found</p>
+                <p class="text-gray-600 font-medium">No family ids found</p>
                 @if (searchTerm()) {
                   <p class="text-sm text-gray-400 mt-1">Try adjusting your search criteria</p>
                 } @else {
-                  <p class="text-sm text-gray-400 mt-1">Create your first role to get started</p>
+                  <p class="text-sm text-gray-400 mt-1">Create your first family id to get started</p>
                 }
               </div>
               @if (!searchTerm()) {
                 <p-button
-                  label="Create First Role"
+                  label="Create First Family Id"
                   icon="pi pi-plus"
                   size="small"
                   (onClick)="createRole()"
@@ -166,8 +152,7 @@
           </tr>
         }
       </ng-template>
-    </p-table>
-  </div>
+  </p-table>
 </div>
 
 <!-- Confirm Dialog -->

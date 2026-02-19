@@ -10,20 +10,20 @@ using Mapster;
 namespace FamilyLibrary.Application.Services;
 
 /// <summary>
-/// Service for FamilyRole operations.
+/// Service for FamilyId operations.
 /// </summary>
-public class FamilyRoleService : IFamilyRoleService
+public class FamilyIdService : IFamilyIdService
 {
     private readonly IFamilyRoleRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public FamilyRoleService(IFamilyRoleRepository repository, IUnitOfWork unitOfWork)
+    public FamilyIdService(IFamilyRoleRepository repository, IUnitOfWork unitOfWork)
     {
         _repository = repository;
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<PagedResult<FamilyRoleDto>> GetAllAsync(
+    public async Task<PagedResult<FamilyIdDto>> GetAllAsync(
         int pageNumber = 1,
         int pageSize = 10,
         RoleType? type = null,
@@ -32,7 +32,6 @@ public class FamilyRoleService : IFamilyRoleService
     {
         var allRoles = await _repository.GetAllAsync(cancellationToken);
 
-        // Apply filters
         var filteredRoles = allRoles.AsEnumerable();
 
         if (type.HasValue)
@@ -48,31 +47,29 @@ public class FamilyRoleService : IFamilyRoleService
         var filteredList = filteredRoles.ToList();
         var totalCount = filteredList.Count;
 
-        // Apply pagination
         var pagedItems = filteredList
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToList();
 
-        var dtos = pagedItems.Adapt<List<FamilyRoleDto>>();
+        var dtos = pagedItems.Adapt<List<FamilyIdDto>>();
 
-        return new PagedResult<FamilyRoleDto>(dtos, totalCount, pageNumber, pageSize);
+        return new PagedResult<FamilyIdDto>(dtos, totalCount, pageNumber, pageSize);
     }
 
-    public async Task<FamilyRoleDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<FamilyIdDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var entity = await _repository.GetByIdAsync(id, cancellationToken)
             ?? throw new NotFoundException(nameof(FamilyRoleEntity), id);
 
-        return entity.Adapt<FamilyRoleDto>();
+        return entity.Adapt<FamilyIdDto>();
     }
 
-    public async Task<Guid> CreateAsync(CreateFamilyRoleDto dto, CancellationToken cancellationToken = default)
+    public async Task<Guid> CreateAsync(CreateFamilyIdDto dto, CancellationToken cancellationToken = default)
     {
-        // Check for duplicate name
         if (await _repository.NameExistsAsync(dto.Name, cancellationToken))
         {
-            throw new ValidationException(nameof(dto.Name), $"A family role with name '{dto.Name}' already exists.");
+            throw new ValidationException(nameof(dto.Name), $"A family id with name '{dto.Name}' already exists.");
         }
 
         var entity = new FamilyRoleEntity(dto.Name, dto.Type, dto.Description, dto.CategoryId);
@@ -82,14 +79,11 @@ public class FamilyRoleService : IFamilyRoleService
         return entity.Id;
     }
 
-    public async Task UpdateAsync(Guid id, UpdateFamilyRoleDto dto, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(Guid id, UpdateFamilyIdDto dto, CancellationToken cancellationToken = default)
     {
         var entity = await _repository.GetByIdAsync(id, cancellationToken)
             ?? throw new NotFoundException(nameof(FamilyRoleEntity), id);
 
-        // Note: We need to get a tracked entity for update
-        // Since GetByIdAsync uses AsNoTracking, we need to fetch without it
-        // The repository should handle this, but let's use the entity we have
         entity.Update(dto.Description, dto.CategoryId);
         await _repository.UpdateAsync(entity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -97,19 +91,17 @@ public class FamilyRoleService : IFamilyRoleService
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        // Check if entity exists
         var exists = await _repository.ExistsAsync(id, cancellationToken);
         if (!exists)
         {
             throw new NotFoundException(nameof(FamilyRoleEntity), id);
         }
 
-        // Check if role has associated families
         if (await _repository.HasFamiliesAsync(id, cancellationToken))
         {
             throw new BusinessRuleException(
-                "CannotDeleteFamilyRoleWithFamilies",
-                "Cannot delete family role because it has associated families.");
+                "CannotDeleteFamilyIdWithFamilies",
+                "Cannot delete family id because it has associated families.");
         }
 
         await _repository.DeleteAsync(id, cancellationToken);
@@ -117,7 +109,7 @@ public class FamilyRoleService : IFamilyRoleService
     }
 
     public async Task<BatchCreateResult> ImportAsync(
-        IReadOnlyList<CreateFamilyRoleDto> dtos,
+        IReadOnlyList<CreateFamilyIdDto> dtos,
         CancellationToken cancellationToken = default)
     {
         var createdIds = new List<Guid>();
@@ -125,7 +117,6 @@ public class FamilyRoleService : IFamilyRoleService
 
         foreach (var dto in dtos)
         {
-            // Skip duplicates
             if (await _repository.NameExistsAsync(dto.Name, cancellationToken))
             {
                 skippedNames.Add(dto.Name);
@@ -137,7 +128,6 @@ public class FamilyRoleService : IFamilyRoleService
             createdIds.Add(entity.Id);
         }
 
-        // Save all changes atomically at the end of batch operation
         if (createdIds.Count > 0)
         {
             await _unitOfWork.SaveChangesAsync(cancellationToken);

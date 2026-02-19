@@ -1,13 +1,8 @@
 @import "tailwindcss";
 @import "primeicons/primeicons.css";
 
-/* Global styles */
-:root {
-  --primary-color: #3b82f6;
-}
-
-* {
-  box-sizing: border-box;
+html {
+  font-size: 13px;
 }
 
 html,
@@ -15,127 +10,200 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #fff;
 }
 
-/* PrimeNG overrides for better Tailwind integration */
-.p-toolbar {
-  border: none !important;
-  border-radius: 0 !important;
-  padding: 0.75rem 1.5rem !important;
+* {
+  box-sizing: border-box;
 }
 
-.p-table .p-table-thead > tr > th {
-  background: #f9fafb !important;
-  border: none !important;
-  border-bottom: 1px solid #e5e7eb !important;
+/* ===================================================
+   SIDEBAR — PrimeNG design token overrides
+   =================================================== */
+aside {
+  --p-panelmenu-gap: 0px;
+  --p-panelmenu-transition-duration: 0.15s;
+
+  --p-panelmenu-panel-background: transparent;
+  --p-panelmenu-panel-border-color: transparent;
+  --p-panelmenu-panel-border-width: 0px;
+  --p-panelmenu-panel-color: #1e293b;
+  --p-panelmenu-panel-padding: 0px;
+  --p-panelmenu-panel-border-radius: 0px;
+  --p-panelmenu-panel-first-border-width: 0px;
+  --p-panelmenu-panel-first-top-border-radius: 0px;
+  --p-panelmenu-panel-last-border-width: 0px;
+  --p-panelmenu-panel-last-bottom-border-radius: 0px;
+
+  --p-panelmenu-item-color: #334155;
+  --p-panelmenu-item-focus-background: #eff6ff;
+  --p-panelmenu-item-focus-color: #2563eb;
+  --p-panelmenu-item-gap: 0.45rem;
+  --p-panelmenu-item-padding: 0.35rem 0.75rem;
+  --p-panelmenu-item-border-radius: 0.35rem;
+  --p-panelmenu-item-icon-color: #94a3b8;
+  --p-panelmenu-item-icon-focus-color: #3b82f6;
+
+  --p-panelmenu-submenu-indent: 0px;
+  --p-panelmenu-submenu-icon-color: transparent;
+  --p-panelmenu-submenu-icon-focus-color: transparent;
 }
 
-.p-table .p-table-tbody > tr {
-  transition: background-color 0.15s ease;
-}
-
-.p-table .p-table-tbody > tr > td {
-  border: none !important;
-  border-bottom: 1px solid #f3f4f6 !important;
-}
-
-/* Sidebar PanelMenu dark theme */
-.p-panelmenu {
+aside .p-panelmenu {
   background: transparent !important;
   border: none !important;
   padding: 0 0.5rem !important;
 }
 
-.p-panelmenu .p-panelmenu-panel {
+aside .p-panelmenu .p-panelmenu-panel {
   background: transparent !important;
   border: none !important;
-  margin-bottom: 0.25rem !important;
+  margin: 0 !important;
 }
 
-.p-panelmenu .p-panelmenu-header {
+aside .p-panelmenu .p-panelmenu-header-content {
   background: transparent !important;
   border: none !important;
-  border-radius: 0.5rem !important;
 }
 
-.p-panelmenu .p-panelmenu-header .p-panelmenu-header-content {
-  background: rgba(255, 255, 255, 0.05) !important;
+aside .p-panelmenu .p-panelmenu-header-link {
+  background: transparent !important;
   border: none !important;
-  border-radius: 0.5rem !important;
-  color: #e5e7eb !important;
-  padding: 0.75rem 1rem !important;
-  transition: background-color 0.15s ease !important;
+  padding: 0.75rem 0.25rem 0.2rem !important;
+  cursor: default !important;
 }
 
-.p-panelmenu .p-panelmenu-header .p-panelmenu-header-content:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
+aside .p-panelmenu .p-panelmenu-header-link:hover,
+aside .p-panelmenu .p-panelmenu-header-link:focus {
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
-.p-panelmenu .p-panelmenu-header .p-panelmenu-header-content .p-menuitem-icon {
-  color: #9ca3af !important;
-  margin-right: 0.75rem !important;
-}
-
-.p-panelmenu .p-panelmenu-header .p-panelmenu-header-content .p-menuitem-text {
-  color: #e5e7eb !important;
-  font-weight: 500 !important;
-}
-
-.p-panelmenu .p-panelmenu-header .p-panelmenu-header-content .p-submenu-icon {
-  color: #9ca3af !important;
-}
-
-/* PanelMenu expanded state - hide toggle icon since we always expand */
-.p-panelmenu .p-panelmenu-header .p-panelmenu-header-content .p-submenu-icon {
+aside .p-panelmenu .p-panelmenu-header-icon,
+aside .p-panelmenu .p-panelmenu-submenu-icon {
   display: none !important;
 }
 
-.p-panelmenu .p-panelmenu-content {
+aside .p-panelmenu .p-panelmenu-header-label {
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.09em !important;
+  text-transform: uppercase !important;
+  color: #94a3b8 !important;
+}
+
+aside .p-panelmenu .p-panelmenu-content {
   background: transparent !important;
   border: none !important;
-  padding: 0.25rem 0 0.5rem 0 !important;
+  padding: 0.1rem 0 0.3rem !important;
 }
 
-.p-panelmenu .p-menuitem {
-  margin: 0.125rem 0 !important;
+aside .p-panelmenu .p-panelmenu-root-list {
+  padding: 0 !important;
+  gap: 1px !important;
 }
 
-.p-panelmenu .p-menuitem .p-menuitem-content {
-  background: transparent !important;
+aside .p-panelmenu .p-panelmenu-item-label {
+  font-size: 0.875rem !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  color: #334155 !important;
+}
+
+aside .p-panelmenu .p-panelmenu-item-icon {
+  font-size: 0.8rem !important;
+  width: 0.9rem !important;
+  text-align: center !important;
+  flex-shrink: 0 !important;
+  color: #94a3b8 !important;
+}
+
+aside .p-panelmenu .p-panelmenu-item-link:hover .p-panelmenu-item-label,
+aside .p-panelmenu .p-panelmenu-item-link:hover .p-panelmenu-item-icon {
+  color: #1e293b !important;
+}
+
+aside .p-panelmenu .p-panelmenu-item.p-highlight .p-panelmenu-item-link {
+  background: #eff6ff !important;
+}
+
+aside .p-panelmenu .p-panelmenu-item.p-highlight .p-panelmenu-item-icon {
+  color: #3b82f6 !important;
+}
+
+aside .p-panelmenu .p-panelmenu-item.p-highlight .p-panelmenu-item-label {
+  font-weight: 500 !important;
+  color: #2563eb !important;
+}
+
+/* ===================================================
+   TABLES — flat, borderless wrapper, clean rows
+   =================================================== */
+
+.p-datatable .p-datatable-table-container {
+  border-radius: 0 !important;
   border: none !important;
-  border-radius: 0.375rem !important;
-  color: #d1d5db !important;
-  padding: 0.5rem 1rem 0.5rem 2.5rem !important;
-  transition: all 0.15s ease !important;
+  box-shadow: none !important;
 }
 
-.p-panelmenu .p-menuitem .p-menuitem-content:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
-  color: #fff !important;
+.p-datatable .p-datatable-thead > tr > th {
+  background: #f8fafc !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  padding: 0.5rem 1rem !important;
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  color: #64748b !important;
 }
 
-.p-panelmenu .p-menuitem .p-menuitem-content .p-menuitem-icon {
-  color: #9ca3af !important;
-  margin-right: 0.5rem !important;
-  font-size: 0.875rem !important;
+.p-datatable .p-datatable-tbody > tr > td {
+  padding: 0.5rem 1rem !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  font-size: 0.825rem !important;
+  color: #334155 !important;
 }
 
-.p-panelmenu .p-menuitem .p-menuitem-content .p-menuitem-text {
-  color: inherit !important;
-  font-size: 0.875rem !important;
+.p-datatable .p-datatable-tbody > tr:last-child > td {
+  border-bottom: none !important;
 }
 
-/* Active menu item */
-.p-panelmenu .p-menuitem.p-highlight > .p-menuitem-content {
-  background: #3b82f6 !important;
-  color: #fff !important;
+.p-datatable .p-datatable-tbody > tr.p-row-odd > td {
+  background: #fafbfc !important;
 }
 
-.p-panelmenu .p-menuitem.p-highlight > .p-menuitem-content .p-menuitem-icon {
-  color: #fff !important;
+.p-datatable .p-datatable-tbody > tr:hover > td {
+  background: #f0f7ff !important;
 }
 
-.p-panelmenu .p-menuitem.p-highlight > .p-menuitem-content .p-menuitem-text {
-  color: #fff !important;
+.p-datatable .p-paginator-bottom {
+  border-top: 1px solid #f1f5f9 !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 0.4rem 0.75rem !important;
+}
+
+/* ===================================================
+   GLOBAL PRIMENG TWEAKS
+   =================================================== */
+
+.p-button.p-button-sm,
+.p-button[size="small"] {
+  font-size: 0.8rem !important;
+  padding: 0.3rem 0.7rem !important;
+}
+
+.p-tag {
+  font-size: 0.7rem !important;
+  padding: 0.2rem 0.5rem !important;
 }

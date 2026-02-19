@@ -5,14 +5,14 @@ using FamilyLibrary.Domain.Enums;
 namespace FamilyLibrary.Application.Interfaces;
 
 /// <summary>
-/// Service interface for FamilyRole operations.
+/// Service interface for FamilyId operations.
 /// </summary>
-public interface IFamilyRoleService
+public interface IFamilyIdService
 {
     /// <summary>
-    /// Gets all family roles with pagination and optional filtering.
+    /// Gets all family ids with pagination and optional filtering.
     /// </summary>
-    Task<PagedResult<FamilyRoleDto>> GetAllAsync(
+    Task<PagedResult<FamilyIdDto>> GetAllAsync(
         int pageNumber = 1,
         int pageSize = 10,
         RoleType? type = null,
@@ -20,29 +20,29 @@ public interface IFamilyRoleService
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets a family role by ID.
+    /// Gets a family id by ID.
     /// </summary>
-    Task<FamilyRoleDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<FamilyIdDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Creates a new family role.
+    /// Creates a new family id.
     /// </summary>
-    Task<Guid> CreateAsync(CreateFamilyRoleDto dto, CancellationToken cancellationToken = default);
+    Task<Guid> CreateAsync(CreateFamilyIdDto dto, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Updates an existing family role.
+    /// Updates an existing family id.
     /// </summary>
-    Task UpdateAsync(Guid id, UpdateFamilyRoleDto dto, CancellationToken cancellationToken = default);
+    Task UpdateAsync(Guid id, UpdateFamilyIdDto dto, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Deletes a family role. Throws if role has associated families.
+    /// Deletes a family id. Throws if role has associated families.
     /// </summary>
     Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Imports multiple family roles, skipping duplicates.
+    /// Imports multiple family ids, skipping duplicates.
     /// </summary>
     Task<BatchCreateResult> ImportAsync(
-        IReadOnlyList<CreateFamilyRoleDto> dtos,
+        IReadOnlyList<CreateFamilyIdDto> dtos,
         CancellationToken cancellationToken = default);
 }

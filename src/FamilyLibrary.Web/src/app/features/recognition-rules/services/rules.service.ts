@@ -32,14 +32,11 @@ export interface TestResult {
 }
 
 export interface ConflictInfo {
-  conflictingRuleId: string;
-  conflictingRoleName: string;
-  conflictReason: string;
-}
-
-export interface ConflictCheckResult {
-  hasConflicts: boolean;
-  conflicts: ConflictInfo[];
+  ruleId1: string;
+  ruleId2: string;
+  roleName1: string;
+  roleName2: string;
+  description: string;
 }
 
 @Injectable({
@@ -94,34 +91,27 @@ export class RulesService {
     return this.apiService.delete<void>(`${this.endpoint}/${id}`);
   }
 
-  validateRule(rootNode: CreateRecognitionRuleRequest['rootNode']): Observable<ValidationResult> {
-    return this.apiService.post<ValidationResult>(`${this.endpoint}/validate`, {
-      rootNode,
+  validateRule(formula: string): Observable<boolean> {
+    return this.apiService.post<boolean>(`${this.endpoint}/validate`, {
+      formula,
     });
   }
 
-  testRule(id: string, familyName: string): Observable<TestResult> {
-    return this.apiService.post<TestResult>(`${this.endpoint}/test`, {
-      ruleId: id,
+  testRule(id: string, familyName: string): Observable<boolean> {
+    return this.apiService.post<boolean>(`${this.endpoint}/test`, {
+      id,
       familyName,
     });
   }
 
-  checkConflicts(
-    roleId: string,
-    rootNode: CreateRecognitionRuleRequest['rootNode'],
-    excludeRuleId?: string,
-  ): Observable<ConflictCheckResult> {
-    const payload: Record<string, unknown> = {
-      roleId,
-      rootNode,
-    };
+  checkConflicts(excludeRuleId?: string): Observable<ConflictInfo[]> {
+    const payload: Record<string, unknown> = {};
 
     if (excludeRuleId) {
-      payload['excludeRuleId'] = excludeRuleId;
+      payload['excludeId'] = excludeRuleId;
     }
 
-    return this.apiService.post<ConflictCheckResult>(
+    return this.apiService.post<ConflictInfo[]>(
       `${this.endpoint}/check-conflicts`,
       payload,
     );

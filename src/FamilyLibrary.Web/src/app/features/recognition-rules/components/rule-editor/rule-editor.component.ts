@@ -2,9 +2,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   inject,
   input,
+  linkedSignal,
   output,
   signal,
 } from '@angular/core';
@@ -18,11 +18,9 @@ import {
   CreateRecognitionRuleRequest,
   isRecognitionCondition,
   isRecognitionGroup,
-  LogicalOperator,
   RecognitionCondition,
   RecognitionGroup,
   RecognitionNode,
-  RecognitionOperator,
   RecognitionRule,
   UpdateRecognitionRuleRequest,
 } from '../../../../core/models/recognition-rule.model';
@@ -48,17 +46,37 @@ export class RuleEditorComponent {
   rule = input<RecognitionRule | null>(null);
   roles = input<Array<{ id: string; name: string }>>([]);
 
-  saved = output<CreateRecognitionRuleRequest | UpdateRecognitionRuleRequest>();
+  saved = output<void>();
   closed = output<void>();
 
-  protected readonly activeTab = signal<'visual' | 'formula'>('visual');
-  protected readonly selectedRoleId = signal<string | null>(null);
-  protected readonly formula = signal('');
-  protected readonly rootNode = signal<RecognitionGroup>({
-    type: 'group',
-    operator: 'And',
-    children: [],
+  protected readonly activeTab = linkedSignal<RecognitionRule | null, 'visual' | 'formula'>({
+    source: this.rule,
+    computation: () => 'visual',
   });
+
+  protected readonly selectedRoleId = linkedSignal<RecognitionRule | null, string | null>({
+    source: this.rule,
+    computation: rule => rule?.roleId ?? null,
+  });
+
+  protected readonly rootNode = linkedSignal<RecognitionRule | null, RecognitionGroup>({
+    source: this.rule,
+    computation: rule => {
+      if (rule?.rootNode) {
+        const parsed = typeof rule.rootNode === 'string'
+          ? JSON.parse(rule.rootNode as string)
+          : rule.rootNode;
+        return JSON.parse(JSON.stringify(parsed));
+      }
+      return { type: 'group', operator: 'And', children: [] };
+    },
+  });
+
+  protected readonly formula = linkedSignal<RecognitionRule | null, string>({
+    source: this.rule,
+    computation: rule => rule?.formula ?? '',
+  });
+
   protected readonly isSubmitting = signal(false);
   protected readonly isCheckingConflicts = signal(false);
   protected readonly conflicts = signal<ConflictInfo[]>([]);
@@ -71,34 +89,20 @@ export class RuleEditorComponent {
   protected readonly hasConflicts = computed(() => this.conflicts().length > 0);
 
   protected readonly roleOptions = computed(() => {
-    const rolesList = this.roles();
-    return rolesList.map(r => ({ label: r.name, value: r.id }));
+    return this.roles().map(r => ({ label: r.name, value: r.id }));
+  });
+
+  protected readonly canSave = computed(() => {
+    const roleId = this.selectedRoleId();
+    const root = this.rootNode();
+    return !!roleId && root.children.length > 0;
   });
 
   private readonly rulesService = inject(RulesService);
 
-  constructor() {
-    // Effect to sync rule input to form state (runs once when rule changes)
-    effect(() => {
-      const rule = this.rule();
-      if (rule) {
-        this.selectedRoleId.set(rule.roleId);
-        this.rootNode.set(JSON.parse(JSON.stringify(rule.rootNode)));
-        this.formula.set(rule.formula);
-      } else {
-        this.resetForm();
-      }
-    }, { allowSignalWrites: true });
-
-    // Note: Removed the problematic effect that was causing infinite loop.
-    // Formula parsing is now handled in onFormulaChange() which is event-driven.
-  }
-
   protected onRootNodeChange(newRoot: RecognitionGroup): void {
     this.rootNode.set(newRoot);
-    const newFormula = this.generateFormula(newRoot);
-    this.formula.set(newFormula);
-    this.checkForConflicts();
+    this.formula.set(this.nodeToFormula(newRoot));
   }
 
   protected onFormulaChange(value: string): void {
@@ -109,31 +113,21 @@ export class RuleEditorComponent {
         this.rootNode.set(parsed);
       }
     } catch {
-      // Invalid formula
+      // keep current rootNode on parse error
     }
-    this.checkForConflicts();
   }
 
   protected onRoleChange(roleId: string): void {
     this.selectedRoleId.set(roleId);
-    this.checkForConflicts();
   }
 
-  private checkForConflicts(): void {
-    const roleId = this.selectedRoleId();
-    const root = this.rootNode();
+  protected onCheckConflicts(): void {
     const excludeRuleId = this.rule()?.id;
-
-    if (!roleId || root.children.length === 0) {
-      this.conflicts.set([]);
-      return;
-    }
-
     this.isCheckingConflicts.set(true);
 
-    this.rulesService.checkConflicts(roleId, root, excludeRuleId).subscribe({
+    this.rulesService.checkConflicts(excludeRuleId).subscribe({
       next: result => {
-        this.conflicts.set(result.conflicts);
+        this.conflicts.set(result);
         this.isCheckingConflicts.set(false);
       },
       error: () => {
@@ -149,22 +143,40 @@ export class RuleEditorComponent {
 
     this.isSubmitting.set(true);
 
-    const rootNodeValue = this.rootNode();
+    const rootNodeJson = JSON.stringify(this.rootNode());
+    const formulaValue = this.formula();
+    const existingRule = this.rule();
 
-    if (this.isEditMode()) {
-      const updateRequest: UpdateRecognitionRuleRequest = {
-        rootNode: rootNodeValue,
+    if (this.isEditMode() && existingRule) {
+      const request: UpdateRecognitionRuleRequest = {
+        rootNode: rootNodeJson,
+        formula: formulaValue,
       };
-      this.saved.emit(updateRequest);
+      this.rulesService.updateRule(existingRule.id, request).subscribe({
+        next: () => {
+          this.isSubmitting.set(false);
+          this.saved.emit();
+        },
+        error: () => {
+          this.isSubmitting.set(false);
+        },
+      });
     } else {
-      const createRequest: CreateRecognitionRuleRequest = {
+      const request: CreateRecognitionRuleRequest = {
         roleId,
-        rootNode: rootNodeValue,
+        rootNode: rootNodeJson,
+        formula: formulaValue,
       };
-      this.saved.emit(createRequest);
+      this.rulesService.createRule(request).subscribe({
+        next: () => {
+          this.isSubmitting.set(false);
+          this.saved.emit();
+        },
+        error: () => {
+          this.isSubmitting.set(false);
+        },
+      });
     }
-
-    this.isSubmitting.set(false);
   }
 
   protected onCancel(): void {
@@ -175,165 +187,123 @@ export class RuleEditorComponent {
     this.closed.emit();
   }
 
-  private resetForm(): void {
-    this.selectedRoleId.set(null);
-    this.rootNode.set({
-      type: 'group',
-      operator: 'And',
-      children: [],
-    });
-    this.formula.set('');
-    this.conflicts.set([]);
-    this.activeTab.set('visual');
-  }
-
-  private generateFormula(node: RecognitionNode): string {
+  private nodeToFormula(node: RecognitionNode): string {
     if (isRecognitionCondition(node)) {
-      const op = node.operator === 'Contains' ? 'CONTAINS' : 'NOTCONTAINS';
-      return op + '("' + node.value + '")';
+      if (node.operator === 'NotContains') {
+        return `NOT ${node.value}`;
+      }
+      return node.value;
     }
 
     if (isRecognitionGroup(node)) {
-      const parts = node.children.map(child => this.generateFormula(child));
-      const op = node.operator === 'And' ? ' AND ' : ' OR ';
-      return '(' + parts.join(op) + ')';
+      if (node.children.length === 0) return '';
+      if (node.children.length === 1) return this.nodeToFormula(node.children[0]);
+
+      const separator = node.operator === 'And' ? ' AND ' : ' OR ';
+      const parts = node.children.map(child => {
+        const childFormula = this.nodeToFormula(child);
+        if (isRecognitionGroup(child) && child.children.length > 1) {
+          return `(${childFormula})`;
+        }
+        return childFormula;
+      });
+      return parts.join(separator);
     }
 
     return '';
   }
 
   private parseFormula(formula: string): RecognitionGroup | null {
-    if (!formula.trim()) {
-      return {
-        type: 'group',
-        operator: 'And',
-        children: [],
-      };
+    const trimmed = formula.trim();
+    if (!trimmed) {
+      return { type: 'group', operator: 'And', children: [] };
     }
 
-    try {
-      return this.parseExpression(formula.trim());
-    } catch {
-      return null;
+    const tokens = this.tokenize(trimmed);
+    if (tokens.length === 0) {
+      return { type: 'group', operator: 'And', children: [] };
     }
-  }
 
-  private parseExpression(expr: string): RecognitionGroup {
-    expr = expr.trim();
+    let pos = 0;
 
-    if (expr.startsWith('(') && expr.endsWith(')')) {
-      let depth = 0;
-      let allWrapped = true;
-      for (let i = 0; i < expr.length - 1; i++) {
-        if (expr[i] === '(') depth++;
-        if (expr[i] === ')') depth--;
-        if (depth === 0) {
-          allWrapped = false;
-          break;
-        }
+    const parseOr = (): RecognitionNode => {
+      const children: RecognitionNode[] = [parseAnd()];
+      while (pos < tokens.length && tokens[pos].toUpperCase() === 'OR') {
+        pos++;
+        children.push(parseAnd());
       }
-      if (allWrapped) {
-        expr = expr.slice(1, -1).trim();
-      }
-    }
-
-    let depth = 0;
-    const andIndices: number[] = [];
-    const orIndices: number[] = [];
-
-    for (let i = 0; i < expr.length; i++) {
-      if (expr[i] === '(') depth++;
-      if (expr[i] === ')') depth--;
-      
-      if (depth === 0) {
-        if (expr.substring(i, i + 5) === ' AND ') {
-          andIndices.push(i);
-        }
-        if (expr.substring(i, i + 4) === ' OR ') {
-          orIndices.push(i);
-        }
-      }
-    }
-
-    let operator: LogicalOperator = 'And';
-    let splitIndices: number[] = [];
-
-    if (orIndices.length > 0) {
-      operator = 'Or';
-      splitIndices = orIndices;
-    } else if (andIndices.length > 0) {
-      operator = 'And';
-      splitIndices = andIndices;
-    }
-
-    if (splitIndices.length === 0) {
-      if (expr.startsWith('CONTAINS(') || expr.startsWith('NOTCONTAINS(')) {
-        const condition = this.parseCondition(expr);
-        return {
-          type: 'group',
-          operator: 'And',
-          children: [condition],
-        };
-      }
-
-      // Cannot parse this expression - return empty group instead of infinite recursion
-      return {
-        type: 'group',
-        operator: 'And',
-        children: [],
-      };
-    }
-
-    const children: RecognitionNode[] = [];
-    let lastIndex = 0;
-
-    for (const index of [...splitIndices, expr.length]) {
-      const part = expr.substring(lastIndex, index).trim();
-      if (part) {
-        if (part.startsWith('CONTAINS(') || part.startsWith('NOTCONTAINS(')) {
-          children.push(this.parseCondition(part));
-        } else {
-          children.push(this.parseExpression(part));
-        }
-      }
-      lastIndex = index + (operator === 'And' ? 5 : 4);
-    }
-
-    return {
-      type: 'group',
-      operator,
-      children,
+      if (children.length === 1) return children[0];
+      return { type: 'group', operator: 'Or', children };
     };
-  }
-  private parseCondition(expr: string): RecognitionCondition {
-    const containsRegex = new RegExp('CONTAINS\\("(.+?)"\\)');
-    const notContainsRegex = new RegExp('NOTCONTAINS\\("(.+?)"\\)');
 
-    const containsMatch = expr.match(containsRegex);
-    const notContainsMatch = expr.match(notContainsRegex);
+    const parseAnd = (): RecognitionNode => {
+      const children: RecognitionNode[] = [parsePrimary()];
+      while (pos < tokens.length && tokens[pos].toUpperCase() === 'AND') {
+        pos++;
+        children.push(parsePrimary());
+      }
+      if (children.length === 1) return children[0];
+      return { type: 'group', operator: 'And', children };
+    };
 
-    if (containsMatch) {
-      return {
-        type: 'condition',
-        operator: 'Contains' as RecognitionOperator,
-        value: containsMatch[1],
-      };
+    const parsePrimary = (): RecognitionNode => {
+      if (pos >= tokens.length) {
+        return { type: 'condition', operator: 'Contains', value: '' } as RecognitionCondition;
+      }
+
+      const token = tokens[pos];
+
+      if (token === '(') {
+        pos++;
+        const node = parseOr();
+        if (pos < tokens.length && tokens[pos] === ')') {
+          pos++;
+        }
+        return node;
+      }
+
+      if (token.toUpperCase() === 'NOT') {
+        pos++;
+        if (pos < tokens.length && tokens[pos] !== '(' && tokens[pos].toUpperCase() !== 'AND' && tokens[pos].toUpperCase() !== 'OR') {
+          const value = tokens[pos];
+          pos++;
+          return { type: 'condition', operator: 'NotContains', value } as RecognitionCondition;
+        }
+        return { type: 'condition', operator: 'NotContains', value: '' } as RecognitionCondition;
+      }
+
+      pos++;
+      return { type: 'condition', operator: 'Contains', value: token } as RecognitionCondition;
+    };
+
+    const result = parseOr();
+
+    if (isRecognitionGroup(result)) {
+      return result;
     }
-
-    if (notContainsMatch) {
-      return {
-        type: 'condition',
-        operator: 'NotContains' as RecognitionOperator,
-        value: notContainsMatch[1],
-      };
-    }
-
-    throw new Error('Invalid condition: ' + expr);
+    return { type: 'group', operator: 'And', children: [result] };
   }
 
-  protected get canSave(): boolean {
-    const roleId = this.selectedRoleId();
-    const root = this.rootNode();
-    return !!roleId && root.children.length > 0;
+  private tokenize(formula: string): string[] {
+    const tokens: string[] = [];
+    let i = 0;
+    while (i < formula.length) {
+      while (i < formula.length && formula[i] === ' ') i++;
+      if (i >= formula.length) break;
+
+      if (formula[i] === '(' || formula[i] === ')') {
+        tokens.push(formula[i]);
+        i++;
+        continue;
+      }
+
+      let word = '';
+      while (i < formula.length && formula[i] !== ' ' && formula[i] !== '(' && formula[i] !== ')') {
+        word += formula[i];
+        i++;
+      }
+      if (word) tokens.push(word);
+    }
+    return tokens;
   }
 }

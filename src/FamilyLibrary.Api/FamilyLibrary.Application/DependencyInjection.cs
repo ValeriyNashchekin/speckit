@@ -26,7 +26,7 @@ public static class DependencyInjection
         services.AddFluentValidationAutoValidation();
 
         // Register Application services
-        services.AddScoped<IFamilyRoleService, FamilyRoleService>();
+        services.AddScoped<IFamilyIdService, FamilyIdService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<ITagService, TagService>();
         services.AddScoped<IRecognitionRuleService, RecognitionRuleService>();

@@ -5,13 +5,13 @@ using System.Text.RegularExpressions;
 namespace FamilyLibrary.Application.Validators;
 
 /// <summary>
-/// Validator for CreateFamilyRoleDto.
+/// Validator for CreateFamilyIdDto.
 /// </summary>
-public class CreateFamilyRoleDtoValidator : AbstractValidator<CreateFamilyRoleDto>
+public class CreateFamilyIdDtoValidator : AbstractValidator<CreateFamilyIdDto>
 {
     private static readonly Regex NameRegex = new(@"^[A-Za-z][A-Za-z0-9_]*$", RegexOptions.Compiled);
 
-    public CreateFamilyRoleDtoValidator()
+    public CreateFamilyIdDtoValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty()

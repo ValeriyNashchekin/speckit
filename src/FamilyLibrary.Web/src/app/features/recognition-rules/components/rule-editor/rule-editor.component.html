@@ -8,8 +8,8 @@
   [style]="{ width: '48rem' }"
   (onHide)="onHide()"
 >
+  @if (visible()) {
   <div class="space-y-4">
-    <!-- Role Selection -->
     <div class="flex flex-col gap-2">
       <label for="ruleRole" class="text-sm font-medium text-gray-700">
         Role <span class="text-red-500">*</span>
@@ -30,19 +30,17 @@
       }
     </div>
 
-    <!-- Conflict Warnings (T090) -->
     @if (hasConflicts()) {
       <div class="space-y-2">
-        @for (conflict of conflicts(); track conflict.conflictingRuleId) {
-          <p-message 
-            severity="warn" 
-            [text]="conflict.conflictReason + ' (Rule: ' + conflict.conflictingRoleName + ')'"
+        @for (conflict of conflicts(); track conflict.ruleId1) {
+          <p-message
+            severity="warn"
+            [text]="conflict.description + ' (' + conflict.roleName1 + ' vs ' + conflict.roleName2 + ')'"
           />
         }
       </div>
     }
 
-    <!-- Tabs -->
     <div class="border-b border-gray-200">
       <div class="flex gap-4">
         <button
@@ -72,7 +70,6 @@
       </div>
     </div>
 
-    <!-- Visual Tab -->
     @if (activeTab() === 'visual') {
       <app-rule-visual-builder
         [rootNode]="rootNode()"
@@ -80,7 +77,6 @@
       />
     }
 
-    <!-- Formula Tab -->
     @if (activeTab() === 'formula') {
       <div class="flex flex-col gap-2">
         <label for="formula" class="text-sm font-medium text-gray-700">Formula</label>
@@ -91,15 +87,14 @@
           (ngModelChange)="onFormulaChange($event)"
           rows="6"
           class="w-full font-mono text-sm"
-          placeholder="CONTAINS(&quot;pattern&quot;) AND NOTCONTAINS(&quot;exclude&quot;)"
+          placeholder="Table AND NOT Hidden"
         ></textarea>
         <small class="text-gray-500 text-xs">
-          Use CONTAINS("pattern") and NOTCONTAINS("pattern") with AND / OR operators
+          Use words for Contains, NOT word for Not Contains, AND / OR operators, () for grouping
         </small>
       </div>
     }
 
-    <!-- Current Formula Preview -->
     @if (formula()) {
       <div class="bg-gray-50 rounded p-3 border border-gray-200">
         <div class="text-xs font-medium text-gray-500 mb-1">Current Formula</div>
@@ -107,22 +102,34 @@
       </div>
     }
   </div>
+  }
 
   <ng-template #footer>
-    <div class="flex justify-end gap-2">
+    <div class="flex justify-between">
       <p-button
-        label="Cancel"
-        severity="secondary"
+        label="Check Conflicts"
+        icon="pi pi-exclamation-triangle"
+        severity="warn"
         [outlined]="true"
-        (onClick)="onCancel()"
+        [loading]="isCheckingConflicts()"
+        [disabled]="!canSave()"
+        (onClick)="onCheckConflicts()"
       />
-      <p-button
-        [label]="isEditMode() ? 'Update' : 'Create'"
-        severity="primary"
-        (onClick)="onSave()"
-        [disabled]="!canSave || isSubmitting() || hasConflicts()"
-        [loading]="isSubmitting()"
-      />
+      <div class="flex gap-2">
+        <p-button
+          label="Cancel"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="onCancel()"
+        />
+        <p-button
+          [label]="isEditMode() ? 'Update' : 'Create'"
+          severity="primary"
+          (onClick)="onSave()"
+          [disabled]="!canSave() || isSubmitting()"
+          [loading]="isSubmitting()"
+        />
+      </div>
     </div>
   </ng-template>
 </p-dialog>

@@ -1,56 +1,29 @@
-<div class="flex h-screen bg-gray-50">
-  <!-- Fixed Sidebar -->
-  <aside class="fixed left-0 top-0 h-screen w-64 bg-surface-900 text-white flex flex-col z-50">
-    <!-- Logo / Brand -->
-    <div class="flex items-center gap-3 px-6 h-16 border-b border-surface-700">
-      <i class="pi pi-box text-2xl text-primary-400"></i>
-      <span class="text-lg font-semibold">Family Library</span>
+<div class="flex h-screen bg-white">
+
+  <aside class="fixed left-0 top-0 h-screen w-48 bg-white border-r border-slate-100 flex flex-col z-50">
+
+    <div class="flex items-center gap-2 px-4 h-11 border-b border-slate-100 shrink-0">
+      <i class="pi pi-box text-blue-600" style="font-size: 15px;"></i>
+      <span class="font-semibold tracking-tight" style="font-size: 13px; color: #111827;">FreeAxez</span>
     </div>
 
-    <!-- Navigation with PanelMenu -->
-    <nav class="flex-1 overflow-y-auto py-4" role="navigation" aria-label="Main navigation">
-      <p-panelmenu
-        [model]="menuItems()"
-        [multiple]="true"
-        styleClass="w-full bg-transparent border-none"
-      />
+    <nav class="flex-1 overflow-y-auto py-2">
+      <p-panelmenu [model]="menuItems()" [multiple]="true" />
     </nav>
 
-    <!-- Footer -->
-    <div class="px-6 py-4 border-t border-surface-700">
-      <span class="text-xs text-surface-400">Family Library v0.3.0</span>
+    <div class="px-4 py-3 border-t border-slate-100 shrink-0">
+      <span style="font-size: 10px; color: #cbd5e1;">v0.3.0</span>
     </div>
+
   </aside>
 
-  <!-- Main Content Area -->
-  <div class="ml-64 flex-1 flex flex-col min-h-screen">
-    <!-- Header -->
-    <header class="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
-      <p-toolbar>
-        <ng-template #start>
-          <div class="flex items-center gap-4">
-            <span class="text-xl font-semibold text-gray-800">Family Library</span>
-          </div>
-        </ng-template>
-
-        <ng-template #end>
-          <div class="flex items-center gap-3">
-            <p-button icon="pi pi-bell" [rounded]="true" [text]="true" severity="secondary" aria-label="Notifications" />
-            <p-button icon="pi pi-question-circle" [rounded]="true" [text]="true" severity="secondary" aria-label="Help" />
-            <div class="w-px h-6 bg-gray-200"></div>
-            <p-button icon="pi pi-user" [label]="userRole() === 'admin' ? 'Admin' : userRole() === 'bim_manager' ? 'BIM Manager' : 'Designer'" [text]="true" severity="secondary" />
-          </div>
-        </ng-template>
-      </p-toolbar>
-    </header>
-
-    <!-- Page Content -->
-    <main class="flex-1 p-6 overflow-auto">
+  <div class="ml-48 flex-1 overflow-auto">
+    <main class="px-8 py-6 min-h-full">
       <router-outlet />
     </main>
   </div>
+
 </div>
 
-<!-- Global Components -->
 <p-confirmdialog />
 <p-toast />

@@ -3,9 +3,9 @@ using FamilyLibrary.Domain.Enums;
 namespace FamilyLibrary.Application.DTOs;
 
 /// <summary>
-/// DTO for FamilyRole entity.
+/// DTO for FamilyId entity.
 /// </summary>
-public record FamilyRoleDto
+public record FamilyIdDto
 {
     public Guid Id { get; init; }
     public required string Name { get; init; }
@@ -18,9 +18,9 @@ public record FamilyRoleDto
 }
 
 /// <summary>
-/// DTO for creating a new FamilyRole.
+/// DTO for creating a new FamilyId.
 /// </summary>
-public record CreateFamilyRoleDto
+public record CreateFamilyIdDto
 {
     public required string Name { get; init; }
     public RoleType Type { get; init; }
@@ -29,9 +29,9 @@ public record CreateFamilyRoleDto
 }
 
 /// <summary>
-/// DTO for updating a FamilyRole.
+/// DTO for updating a FamilyId.
 /// </summary>
-public record UpdateFamilyRoleDto
+public record UpdateFamilyIdDto
 {
     public string? Description { get; init; }
     public Guid? CategoryId { get; init; }

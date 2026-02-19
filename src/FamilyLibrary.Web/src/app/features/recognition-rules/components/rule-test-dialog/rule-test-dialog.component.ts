@@ -11,7 +11,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { TagModule } from 'primeng/tag';
-import { RulesService, TestResult } from '../../services/rules.service';
+import { RulesService } from '../../services/rules.service';
 
 @Component({
   selector: 'app-rule-test-dialog',
@@ -20,19 +20,15 @@ import { RulesService, TestResult } from '../../services/rules.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RuleTestDialogComponent {
-  // inputs
   visible = input<boolean>(false);
   ruleId = input<string | null>(null);
 
-  // outputs
   closed = output<void>();
 
-  // state
   protected readonly familyName = signal('');
   protected readonly isTesting = signal(false);
-  protected readonly testResult = signal<TestResult | null>(null);
+  protected readonly testResult = signal<boolean | null>(null);
 
-  // services
   private readonly rulesService = inject(RulesService);
 
   protected get canTest(): boolean {
@@ -55,10 +51,7 @@ export class RuleTestDialogComponent {
       },
       error: () => {
         this.isTesting.set(false);
-        this.testResult.set({
-          matches: false,
-          matchedConditions: [],
-        });
+        this.testResult.set(false);
       },
     });
   }

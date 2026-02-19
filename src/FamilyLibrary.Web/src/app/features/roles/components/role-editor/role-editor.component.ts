@@ -28,7 +28,7 @@ export class RoleEditorComponent {
 
   // state
   protected readonly isEditMode = computed(() => this.role() !== null);
-  protected readonly dialogTitle = computed(() => this.isEditMode() ? 'Edit Role' : 'New Role');
+  protected readonly dialogTitle = computed(() => this.isEditMode() ? 'Edit Family Id' : 'New Family Id');
 
   protected readonly roleForm: FormGroup;
   protected readonly isSubmitting = signal(false);

@@ -8,14 +8,14 @@ public static class MappingProfile
 {
     public static void ConfigureMappings()
     {
-        // FamilyRole mappings
-        TypeAdapterConfig<FamilyRoleEntity, FamilyRoleDto>
+        // FamilyId mappings
+        TypeAdapterConfig<FamilyRoleEntity, FamilyIdDto>
             .NewConfig()
             .Map(dest => dest.CategoryName, src => src.Category != null ? src.Category.Name : null)
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(dest => dest.UpdatedAt, src => src.UpdatedAt);
 
-        TypeAdapterConfig<CreateFamilyRoleDto, FamilyRoleEntity>
+        TypeAdapterConfig<CreateFamilyIdDto, FamilyRoleEntity>
             .NewConfig()
             .ConstructUsing(src => new FamilyRoleEntity(src.Name, src.Type, src.Description, src.CategoryId));
 

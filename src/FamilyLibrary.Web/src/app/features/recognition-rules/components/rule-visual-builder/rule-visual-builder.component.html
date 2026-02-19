@@ -20,7 +20,7 @@
           <div class="flex flex-col gap-2">
             <label class="text-xs font-medium text-gray-600">Operator</label>
             <p-select
-              [options]="operatorOptions()"
+              [options]="operatorOptions"
               optionLabel="label"
               optionValue="value"
               [ngModel]="selectedCondition()?.operator"
@@ -57,7 +57,7 @@
           <div class="flex flex-col gap-2">
             <label class="text-xs font-medium text-gray-600">Logical Operator</label>
             <p-select
-              [options]="logicalOperatorOptions()"
+              [options]="logicalOperatorOptions"
               optionLabel="label"
               optionValue="value"
               [ngModel]="selectedGroup()?.operator"
@@ -82,7 +82,7 @@
               (onClick)="addGroup()"
             />
           </div>
-          @if (selectedNodeKey() !== 'root-0') {
+          @if (selectedNodeKey() !== 'root') {
             <p-button
               label="Remove Group"
               icon="pi pi-trash"
@@ -116,7 +116,7 @@
       <button
         type="button"
         class="text-gray-400 hover:text-gray-600 p-0.5"
-        (click)="toggleNode(node.key); $event.stopPropagation()"
+        (click)="toggleNode(node.key, $event)"
       >
         <i [class]="node.expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" class="text-xs"></i>
       </button>

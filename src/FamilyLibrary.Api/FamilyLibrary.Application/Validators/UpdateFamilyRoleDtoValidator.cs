@@ -4,11 +4,11 @@ using FamilyLibrary.Application.DTOs;
 namespace FamilyLibrary.Application.Validators;
 
 /// <summary>
-/// Validator for UpdateFamilyRoleDto.
+/// Validator for UpdateFamilyIdDto.
 /// </summary>
-public class UpdateFamilyRoleDtoValidator : AbstractValidator<UpdateFamilyRoleDto>
+public class UpdateFamilyIdDtoValidator : AbstractValidator<UpdateFamilyIdDto>
 {
-    public UpdateFamilyRoleDtoValidator()
+    public UpdateFamilyIdDtoValidator()
     {
         RuleFor(x => x.Description)
             .MaximumLength(500)

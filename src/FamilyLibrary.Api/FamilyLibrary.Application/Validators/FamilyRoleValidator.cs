@@ -5,20 +5,17 @@ using FamilyLibrary.Domain.Interfaces;
 namespace FamilyLibrary.Application.Validators;
 
 /// <summary>
-/// Business-rule validator for CreateFamilyRoleDto.
-/// Validates business rules that require database access (e.g., CategoryId existence).
-/// This validator complements CreateFamilyRoleDtoValidator which handles structural validation.
+/// Business-rule validator for CreateFamilyIdDto.
 /// </summary>
-public class CreateFamilyRoleBusinessValidator : AbstractValidator<CreateFamilyRoleDto>
+public class CreateFamilyIdBusinessValidator : AbstractValidator<CreateFamilyIdDto>
 {
-    public CreateFamilyRoleBusinessValidator(ICategoryRepository categoryRepository)
+    public CreateFamilyIdBusinessValidator(ICategoryRepository categoryRepository)
     {
-        // Validate CategoryId exists when provided
         RuleFor(x => x.CategoryId)
             .MustAsync(async (categoryId, ct) =>
             {
                 if (categoryId is null || categoryId == Guid.Empty)
-                    return true; // Null/Empty is valid (optional field)
+                    return true;
 
                 return await categoryRepository.ExistsAsync(categoryId.Value, ct);
             })
@@ -28,20 +25,17 @@ public class CreateFamilyRoleBusinessValidator : AbstractValidator<CreateFamilyR
 }
 
 /// <summary>
-/// Business-rule validator for UpdateFamilyRoleDto.
-/// Validates business rules that require database access (e.g., CategoryId existence).
-/// This validator complements UpdateFamilyRoleDtoValidator which handles structural validation.
+/// Business-rule validator for UpdateFamilyIdDto.
 /// </summary>
-public class UpdateFamilyRoleBusinessValidator : AbstractValidator<UpdateFamilyRoleDto>
+public class UpdateFamilyIdBusinessValidator : AbstractValidator<UpdateFamilyIdDto>
 {
-    public UpdateFamilyRoleBusinessValidator(ICategoryRepository categoryRepository)
+    public UpdateFamilyIdBusinessValidator(ICategoryRepository categoryRepository)
     {
-        // Validate CategoryId exists when provided
         RuleFor(x => x.CategoryId)
             .MustAsync(async (categoryId, ct) =>
             {
                 if (categoryId is null || categoryId == Guid.Empty)
-                    return true; // Null/Empty is valid (optional field)
+                    return true;
 
                 return await categoryRepository.ExistsAsync(categoryId.Value, ct);
             })
